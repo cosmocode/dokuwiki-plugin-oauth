@@ -15,7 +15,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      * Load the needed libraries and initialize the named oAuth service
      *
      * @param string $servicename
-     * @return null|\OAuth\Plugin\AbstractAuthService
+     * @return null|\OAuth\Plugin\AbstractAdapter
      */
     public function loadService(&$servicename) {
         global $ID;
@@ -24,15 +24,15 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
         if(!$servicename) return null;
 
         require_once(__DIR__.'/phpoauthlib/src/OAuth/bootstrap.php');
-        require_once(__DIR__.'/classes/AbstractAuthService.php');
+        require_once(__DIR__.'/classes/AbstractAdapter.php');
         require_once(__DIR__.'/classes/oAuthHTTPClient.php');
 
-        $file = __DIR__.'/classes/'.$servicename.'AuthService.php';
+        $file = __DIR__.'/classes/'.$servicename.'Adapter.php';
         if(!file_exists($file)) return null;
         require_once($file);
-        $class = '\\OAuth\\Plugin\\'.$servicename.'AuthService';
+        $class = '\\OAuth\\Plugin\\'.$servicename.'Adapter';
 
-        /** @var \OAuth\Plugin\AbstractAuthService $service */
+        /** @var \OAuth\Plugin\AbstractAdapter $service */
         $service = new $class(wl($ID, array('oa' => $servicename), true, '&'));
         if(!$service->isInitialized()) {
             msg("Failed to initialize $service authentication service. Check credentials", -1);
@@ -49,10 +49,10 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      */
     public function listServices() {
         $services = array();
-        $files    = glob(__DIR__.'/classes/*AuthService.php');
+        $files    = glob(__DIR__.'/classes/*Adapter.php');
 
         foreach($files as $file) {
-            $file = basename($file, 'AuthService.php');
+            $file = basename($file, 'Adapter.php');
             if($file == 'Abstract') continue;
             $services[] = $file;
         }

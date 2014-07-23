@@ -8,7 +8,16 @@ use OAuth\Common\Service\AbstractService;
 use OAuth\Common\Storage\Session;
 use OAuth\ServiceFactory;
 
-abstract class AbstractAuthService {
+/**
+ * Class AbstractAdapter
+ *
+ * For each service that shall be used for logging into DokuWiki a subclass of this abstract
+ * class has to be created. It defines how to talk to the Service's API to retrieve user
+ * information
+ *
+ * @package OAuth\Plugin
+ */
+abstract class AbstractAdapter {
 
     /** @var \OAuth\Common\Service\AbstractService|\OAuth\OAuth2\Service\AbstractService|\OAuth\OAuth2\Service\AbstractService */
     protected $oAuth = null;
@@ -132,7 +141,7 @@ abstract class AbstractAuthService {
      * @return mixed
      */
     public function getServiceName() {
-        $name = preg_replace('/AuthService$/', '', get_called_class());
+        $name = preg_replace('/Adapter$/', '', get_called_class());
         $name = str_replace('OAuth\\Plugin\\', '', $name);
         return $name;
     }

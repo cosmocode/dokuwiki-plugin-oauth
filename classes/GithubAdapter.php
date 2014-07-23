@@ -4,12 +4,12 @@ namespace OAuth\Plugin;
 
 use OAuth\OAuth2\Service\GitHub;
 
-class GithubAuthService extends AbstractAuthService {
+class GithubAdapter extends AbstractAdapter {
 
     /**
      * Retrieve the user's data
      *
-     * The array needs to contain at least 'email', 'name', 'login' and optional 'grps'
+     * The array needs to contain at least 'user', 'email', 'name' and optional 'grps'
      *
      * @return array
      */
