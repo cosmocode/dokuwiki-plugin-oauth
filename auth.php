@@ -130,6 +130,23 @@ class auth_plugin_oauth extends auth_plugin_authplain {
     }
 
     /**
+     * Unset additional stuff in session on logout
+     */
+    public function logOff() {
+        parent::logOff();
+
+        if(isset($_SESSION[DOKU_COOKIE]['auth']['buid'])) {
+            unset($_SESSION[DOKU_COOKIE]['auth']['buid']);
+        }
+        if(isset($_SESSION[DOKU_COOKIE]['auth']['time'])) {
+            unset($_SESSION[DOKU_COOKIE]['auth']['time']);
+        }
+        if(isset($_SESSION[DOKU_COOKIE]['auth']['oauth'])) {
+            unset($_SESSION[DOKU_COOKIE]['auth']['oauth']);
+        }
+    }
+
+    /**
      * Find a user by his email address
      *
      * @param $mail
