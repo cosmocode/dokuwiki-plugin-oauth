@@ -1,5 +1,7 @@
 <?php
 
+namespace OAuth\Plugin;
+
 use OAuth\Common\Http\Client\ClientInterface;
 use OAuth\Common\Http\Exception\TokenResponseException;
 use OAuth\Common\Http\Uri\UriInterface;
@@ -30,7 +32,7 @@ class oAuthHTTPClient implements ClientInterface {
         array $extraHeaders = array(),
         $method = 'POST'
     ) {
-        $http = new DokuHTTPClient();
+        $http = new \DokuHTTPClient();
         $http->headers = array_merge($http->headers, $extraHeaders);
 
         $ok = $http->sendRequest($endpoint->getAbsoluteUri(), $requestBody, $method);

@@ -12,25 +12,57 @@ if(!defined('DOKU_INC')) die();
 class helper_plugin_oauth extends DokuWiki_Plugin {
 
     /**
-     * Return info about supported methods in this Helper Plugin
+     * Load the needed libraries and initialize the named oAuth service
      *
-     * @return array of public methods
+     * @param string $servicename
+     * @return null|\OAuth\Plugin\AbstractAuthService
      */
-    public function getMethods() {
-        return array(
-            array(
-                'name'   => 'getThreads',
-                'desc'   => 'returns pages with discussion sections, sorted by recent comments',
-                'params' => array(
-                    'namespace'         => 'string',
-                    'number (optional)' => 'integer'
-                ),
-                'return' => array('pages' => 'array')
-            ),
-            array(
-                // and more supported methods...
-            )
-        );
+    public function loadService($servicename) {
+        global $ID;
+
+        $servicename = preg_replace('/[^a-zA-Z_]+/', '', $servicename);
+        if(!$servicename) return null;
+
+        require_once(__DIR__.'/phpoauthlib/src/OAuth/bootstrap.php');
+        require_once(__DIR__.'/classes/AbstractAuthService.php');
+        require_once(__DIR__.'/classes/oAuthHTTPClient.php');
+
+        $file = __DIR__.'/classes/'.$servicename.'AuthService.php';
+        if(!file_exists($file)) return null;
+        require_once($file);
+        $class = '\\OAuth\\Plugin\\'.$servicename.'AuthService';
+
+        /** @var \OAuth\Plugin\AbstractAuthService $service */
+        $service = new $class(wl($ID, array('oa' => $servicename), true, '&'));
+        if(!$service->isInitialized()){
+            msg("Failed to initialize $service authentication service. Check credentials", -1);
+            return null;
+        }
+
+        return $service;
+    }
+
+
+    /**
+     * Return the configured key for the given service
+     *
+     * @param $service
+     * @return string
+     */
+    public function getKey($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-key');
+    }
+
+    /**
+     * Return the configured secret for the given service
+     *
+     * @param $service
+     * @return string
+     */
+    public function getSecret($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-secret');
     }
 
 }

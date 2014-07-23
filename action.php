@@ -18,8 +18,9 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
      * @return void
      */
     public function register(Doku_Event_Handler $controller) {
+        // FIXME handle only if auth plugin is set to be used
 
-       $controller->register_hook('nope', 'FIXME', $this, 'handle_nope');
+        $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'handle_start');
    
     }
 
@@ -32,7 +33,16 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
      * @return void
      */
 
-    public function handle_nope(Doku_Event &$event, $param) {
+    public function handle_start(Doku_Event &$event, $param) {
+        global $INPUT;
+        global $ID;
+
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+        $service = $hlp->loadService($INPUT->str('oauthlogin'));
+        if(is_null($service)) return;
+
+        $service->login();
     }
 
 }
