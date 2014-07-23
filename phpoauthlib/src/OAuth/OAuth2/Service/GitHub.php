@@ -166,6 +166,6 @@ class GitHub extends AbstractService
      */
     protected function getExtraApiHeaders()
     {
-        return array('Accept' => 'application/vnd.github.beta+json');
+        return array('Accept' => 'application/vnd.github.v3+json');
     }
 }
