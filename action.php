@@ -39,7 +39,8 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
 
         /** @var helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
-        $service = $hlp->loadService($INPUT->str('oauthlogin'));
+        $servicename = $INPUT->str('oauthlogin');
+        $service = $hlp->loadService($servicename);
         if(is_null($service)) return;
 
         $service->login();

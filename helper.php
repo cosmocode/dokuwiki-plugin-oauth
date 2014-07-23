@@ -17,7 +17,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      * @param string $servicename
      * @return null|\OAuth\Plugin\AbstractAuthService
      */
-    public function loadService($servicename) {
+    public function loadService(&$servicename) {
         global $ID;
 
         $servicename = preg_replace('/[^a-zA-Z_]+/', '', $servicename);

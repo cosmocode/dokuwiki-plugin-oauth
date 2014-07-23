@@ -20,46 +20,71 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
 
     function trustExternal($user, $pass, $sticky = false) {
-	    global $USERINFO, $ID, $INPUT;
+	    global $INPUT;
+        global $conf;
+        global $USERINFO;
 
-        // get form login info
-        if(!empty($user)){
-            return auth_login($user, $pass, $sticky);
-        }
+        $servicename = $INPUT->str('oa');
 
-        if($INPUT->has('oa')) {
-            /** @var helper_plugin_oauth $hlp */
-            $hlp = plugin_load('helper', 'oauth');
-            $service = $hlp->loadService($INPUT->str('oa'));
-            if(is_null($service)) return false;
+        // check session for existing oAuth login data
+        $session = $_SESSION[DOKU_COOKIE]['auth'];
+        if(!$servicename && isset($session['oauth'])) {
+            $servicename = $session['oauth'];
+            // check if session data is still considered valid
+            if( ($session['time'] >= time() - $conf['auth_security_timeout']) &&
+                ($session['buid'] == auth_browseruid())) {
 
-
-
-            if($service->checkToken()) {
-                $uinfo = $service->getUser();
-                $this->setUserSession($uinfo);
+                $_SERVER['REMOTE_USER'] = $session['user'];
+                $USERINFO               = $session['info'];
                 return true;
             }
         }
 
-        return false;
+        // either we're in oauth login or a previous log needs to be rechecked
+        if($servicename) {
+            /** @var helper_plugin_oauth $hlp */
+            $hlp = plugin_load('helper', 'oauth');
+            $service = $hlp->loadService($servicename);
+            if(is_null($service)) return false;
+
+            // get the token
+            if($service->checkToken()) {
+                $uinfo = $service->getUser();
+                $this->setUserSession($uinfo, $servicename);
+                return true;
+            }
+
+            return false; // something went wrong during oAuth login
+        }
+
+
+        // do the "normal" plain auth login via form
+        return auth_login($user, $pass, $sticky);
     }
 
-
-    protected function setUserSession($data) {
+    /**
+     * @param array $data
+     * @param string $service
+     */
+    protected function setUserSession($data, $service) {
         global $USERINFO;
+        global $conf;
 
-        // reopen session
-        session_start();
+        // set up groups
+        if(!is_array($data['grps'])) {
+            $data['grps'] = array();
+        }
+        $data['grps'][] = $conf['defaultgroup'];
+        $data['grps'][] = $this->cleanGroup($service);
 
         $USERINFO = $data;
         $_SERVER['REMOTE_USER'] = $data['user'];
         $_SESSION[DOKU_COOKIE]['auth']['user'] = $data['user'];
         $_SESSION[DOKU_COOKIE]['auth']['pass'] = $data['pass'];
         $_SESSION[DOKU_COOKIE]['auth']['info'] = $USERINFO;
-
-        // close session again
-        session_write_close();
+        $_SESSION[DOKU_COOKIE]['auth']['buid'] = auth_browseruid();
+        $_SESSION[DOKU_COOKIE]['auth']['time'] = time();
+        $_SESSION[DOKU_COOKIE]['auth']['oauth'] = $service;
     }
 
 }
