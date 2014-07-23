@@ -34,7 +34,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
 
         /** @var \OAuth\Plugin\AbstractAuthService $service */
         $service = new $class(wl($ID, array('oa' => $servicename), true, '&'));
-        if(!$service->isInitialized()){
+        if(!$service->isInitialized()) {
             msg("Failed to initialize $service authentication service. Check credentials", -1);
             return null;
         }
@@ -42,6 +42,23 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
         return $service;
     }
 
+    /**
+     * List available Services
+     *
+     * @return array
+     */
+    public function listServices() {
+        $services = array();
+        $files    = glob(__DIR__.'/classes/*AuthService.php');
+
+        foreach($files as $file) {
+            $file = basename($file, 'AuthService.php');
+            if($file == 'Abstract') continue;
+            $services[] = $file;
+        }
+
+        return $services;
+    }
 
     /**
      * Return the configured key for the given service
