@@ -6,3 +6,4 @@
  */
 
 $lang['emailduplicate'] = 'This email is already associated with another user.';
+$lang['loginwith']      = 'Login with other Services:';

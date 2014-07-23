@@ -22,21 +22,19 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         if($conf['authtype'] != 'oauth') return;
 
         $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'handle_start');
-   
+        $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handle_loginform');
     }
 
     /**
-     * [Custom event handler which performs action]
+     * Start an oAuth login
      *
      * @param Doku_Event $event  event object by reference
      * @param mixed      $param  [the parameters passed as fifth argument to register_hook() when this
      *                           handler was registered]
      * @return void
      */
-
     public function handle_start(Doku_Event &$event, $param) {
         global $INPUT;
-        global $ID;
 
         /** @var helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
@@ -47,6 +45,38 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $service->login();
     }
 
-}
+    /**
+     * Add the oAuth login links
+     *
+     * @param Doku_Event $event  event object by reference
+     * @param mixed      $param  [the parameters passed as fifth argument to register_hook() when this
+     *                           handler was registered]
+     * @return void
+     */
+    public function handle_loginform(Doku_Event &$event, $param) {
+        global $ID;
 
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+
+        $html = '';
+        foreach($hlp->listServices() as $service) {
+            if($hlp->getKey($service)) {
+                $html .= '<a href="'.wl($ID,array('oauthlogin'=>$service)).'" class="plugin_oauth_'.$service.'">';
+                $html .= $service;
+                $html .= '</a>';
+            }
+        }
+        if(!$html) return;
+
+        /** @var Doku_Form $form */
+        $form =& $event->data;
+        $pos = $form->findElementByType('closefieldset');
+
+        $form->insertElement(++$pos, form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth')));
+        $form->insertElement(++$pos, $html);
+        $form->insertElement(++$pos, form_closefieldset());
+    }
+
+}
 // vim:ts=4:sw=4:et:
