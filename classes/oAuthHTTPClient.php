@@ -31,12 +31,13 @@ class oAuthHTTPClient implements ClientInterface {
         $method = 'POST'
     ) {
         $http = new DokuHTTPClient();
+        $http->headers = array_merge($http->headers, $extraHeaders);
 
-        $response = $http->sendRequest($endpoint->getAbsoluteUri(), $requestBody, $method);
-        if(!$response){
+        $ok = $http->sendRequest($endpoint->getAbsoluteUri(), $requestBody, $method);
+        if(!$ok){
             throw new TokenResponseException($http->error);
         }
 
-        return $response;
+        return $http->resp_body;
     }
 }
