@@ -84,9 +84,9 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                             $count = 1;
                         }
                     }
-                    $user          = $user.$count;
-                    $uinfo['user'] = $user;
-                    $uinfo['grps'] = (array) $uinfo['grps'];
+                    $user            = $user.$count;
+                    $uinfo['user']   = $user;
+                    $uinfo['grps']   = (array) $uinfo['grps'];
                     $uinfo['grps'][] = $conf['defaultgroup'];
 
                     $this->createUser($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $uinfo['grps']);
