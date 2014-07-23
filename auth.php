@@ -51,6 +51,10 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             if($service->checkToken()) {
                 $uinfo = $service->getUser();
                 $this->setUserSession($uinfo, $servicename);
+
+
+
+
                 return true;
             }
 
@@ -85,6 +89,24 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         $_SESSION[DOKU_COOKIE]['auth']['buid'] = auth_browseruid();
         $_SESSION[DOKU_COOKIE]['auth']['time'] = time();
         $_SESSION[DOKU_COOKIE]['auth']['oauth'] = $service;
+    }
+
+    protected function getUserByEmail($mail) {
+        $mail = strtolower($mail);
+    }
+
+    public function createUser($user, $pwd, $name, $mail, $grps = null) {
+        $mail = strtolower($mail);
+
+        //FIXME check for duplicate mail
+        return parent::createUser($user, $pwd, $name, $mail, $grps);
+    }
+
+    public function modifyUser($user, $changes) {
+        $mail = strtolower($mail);
+
+        //FIXME check for duplicate mail
+        return parent::modifyUser($user, $changes);
     }
 
 }
