@@ -18,7 +18,8 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
      * @return void
      */
     public function register(Doku_Event_Handler $controller) {
-        // FIXME handle only if auth plugin is set to be used
+        global $conf;
+        if($conf['authtype'] != 'oauth') return;
 
         $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'handle_start');
    
