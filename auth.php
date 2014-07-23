@@ -11,16 +11,30 @@ if(!defined('DOKU_INC')) die();
 
 class auth_plugin_oauth extends auth_plugin_authplain {
 
+    /**
+     * Constructor
+     *
+     * Sets capabilities.
+     */
     public function __construct() {
         parent::__construct();
-
 
         $this->cando['external'] = true;
     }
 
-
+    /**
+     * Handle the login
+     *
+     * This either trusts the session data (if any), processes the second oAuth step or simply
+     * executes a normal plugin against local users.
+     *
+     * @param string $user
+     * @param string $pass
+     * @param bool   $sticky
+     * @return bool
+     */
     function trustExternal($user, $pass, $sticky = false) {
-	    global $INPUT;
+        global $INPUT;
         global $conf;
         global $USERINFO;
 
@@ -31,8 +45,9 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         if(!$servicename && isset($session['oauth'])) {
             $servicename = $session['oauth'];
             // check if session data is still considered valid
-            if( ($session['time'] >= time() - $conf['auth_security_timeout']) &&
-                ($session['buid'] == auth_browseruid())) {
+            if(($session['time'] >= time() - $conf['auth_security_timeout']) &&
+                ($session['buid'] == auth_browseruid())
+            ) {
 
                 $_SERVER['REMOTE_USER'] = $session['user'];
                 $USERINFO               = $session['info'];
@@ -43,31 +58,54 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         // either we're in oauth login or a previous log needs to be rechecked
         if($servicename) {
             /** @var helper_plugin_oauth $hlp */
-            $hlp = plugin_load('helper', 'oauth');
+            $hlp     = plugin_load('helper', 'oauth');
             $service = $hlp->loadService($servicename);
             if(is_null($service)) return false;
 
             // get the token
             if($service->checkToken()) {
                 $uinfo = $service->getUser();
+
+                // see if the user is known already
+                $user = $this->getUserByEmail($uinfo['mail']);
+                if($user) {
+                    $sinfo         = $this->getUserData($user);
+                    $uinfo['user'] = $user;
+                    $uinfo['name'] = $sinfo['name'];
+                    $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
+                } else {
+                    // new user, create him - making sure the login is unique by adding a number if needed
+                    $user  = $uinfo['user'];
+                    $count = '';
+                    while($this->getUserData($user.$count)) {
+                        if($count) {
+                            $count++;
+                        } else {
+                            $count = 1;
+                        }
+                    }
+                    $user          = $user.$count;
+                    $uinfo['user'] = $user;
+                    $uinfo['grps'] = (array) $uinfo['grps'];
+                    $uinfo['grps'][] = $conf['defaultgroup'];
+
+                    $this->createUser($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $uinfo['grps']);
+                }
+
+                // set user session
                 $this->setUserSession($uinfo, $servicename);
-
-
-
-
                 return true;
             }
 
             return false; // something went wrong during oAuth login
         }
 
-
         // do the "normal" plain auth login via form
         return auth_login($user, $pass, $sticky);
     }
 
     /**
-     * @param array $data
+     * @param array  $data
      * @param string $service
      */
     protected function setUserSession($data, $service) {
@@ -78,34 +116,68 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         if(!is_array($data['grps'])) {
             $data['grps'] = array();
         }
-        $data['grps'][] = $conf['defaultgroup'];
         $data['grps'][] = $this->cleanGroup($service);
+        $data['grps']   = array_unique($data['grps']);
 
-        $USERINFO = $data;
-        $_SERVER['REMOTE_USER'] = $data['user'];
-        $_SESSION[DOKU_COOKIE]['auth']['user'] = $data['user'];
-        $_SESSION[DOKU_COOKIE]['auth']['pass'] = $data['pass'];
-        $_SESSION[DOKU_COOKIE]['auth']['info'] = $USERINFO;
-        $_SESSION[DOKU_COOKIE]['auth']['buid'] = auth_browseruid();
-        $_SESSION[DOKU_COOKIE]['auth']['time'] = time();
+        $USERINFO                               = $data;
+        $_SERVER['REMOTE_USER']                 = $data['user'];
+        $_SESSION[DOKU_COOKIE]['auth']['user']  = $data['user'];
+        $_SESSION[DOKU_COOKIE]['auth']['pass']  = $data['pass'];
+        $_SESSION[DOKU_COOKIE]['auth']['info']  = $USERINFO;
+        $_SESSION[DOKU_COOKIE]['auth']['buid']  = auth_browseruid();
+        $_SESSION[DOKU_COOKIE]['auth']['time']  = time();
         $_SESSION[DOKU_COOKIE]['auth']['oauth'] = $service;
     }
 
+    /**
+     * Find a user by his email address
+     *
+     * @param $mail
+     * @return bool|string
+     */
     protected function getUserByEmail($mail) {
+        if($this->users === null) $this->_loadUserData();
         $mail = strtolower($mail);
+
+        foreach($this->users as $user => $uinfo) {
+            if(strtolower($uinfo['mail']) == $mail) return $user;
+        }
+
+        return false;
     }
 
+    /**
+     * Enhance function to check aainst duplicate emails
+     *
+     * @param string $user
+     * @param string $pwd
+     * @param string $name
+     * @param string $mail
+     * @param null   $grps
+     * @return bool|null|string
+     */
     public function createUser($user, $pwd, $name, $mail, $grps = null) {
-        $mail = strtolower($mail);
+        if($this->getUserByEmail($mail)) {
+            msg($this->getLang('emailduplicate'), -1);
+            return false;
+        }
 
-        //FIXME check for duplicate mail
         return parent::createUser($user, $pwd, $name, $mail, $grps);
     }
 
+    /**
+     * Enhance function to check aainst duplicate emails
+     *
+     * @param string $user
+     * @param array  $changes
+     * @return bool
+     */
     public function modifyUser($user, $changes) {
-        $mail = strtolower($mail);
+        if(isset($changes['mail']) && $this->getUserByEmail($changes['mail'])) {
+            msg($this->getLang('emailduplicate'), -1);
+            return false;
+        }
 
-        //FIXME check for duplicate mail
         return parent::modifyUser($user, $changes);
     }
 
