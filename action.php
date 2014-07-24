@@ -62,7 +62,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $html = '';
         foreach($hlp->listServices() as $service) {
             if($hlp->getKey($service)) {
-                $html .= '<a href="'.wl($ID,array('oauthlogin'=>$service)).'" class="plugin_oauth_'.$service.'">';
+                $html .= '<a href="'.wl($ID,array('oauthlogin'=>$service)).'" class="plugin_oauth_'.$service.'"> ';
                 $html .= $service;
                 $html .= '</a>';
             }

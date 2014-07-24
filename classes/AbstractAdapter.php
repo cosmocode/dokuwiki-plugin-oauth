@@ -151,10 +151,10 @@ abstract class AbstractAdapter {
      *
      * This should return the minimal scope needed for accessing the user's data
      *
-     * @return array|null
+     * @return array
      */
     public function getScope() {
-        return null;
+        return array();
     }
 
     /**

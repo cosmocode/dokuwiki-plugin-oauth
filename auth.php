@@ -66,6 +66,14 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             if($service->checkToken()) {
                 $uinfo = $service->getUser();
 
+                $uinfo['user'] = $this->cleanUser((string) $uinfo['user']);
+                if(!$uinfo['name']) $uinfo['name'] = $uinfo['user'];
+
+                if(!$uinfo['user'] || !$uinfo['mail']) {
+                    msg("$servicename did not provide the needed user info. Can't log you in", -1);
+                    return false;
+                }
+
                 // see if the user is known already
                 $user = $this->getUserByEmail($uinfo['mail']);
                 if($user) {
