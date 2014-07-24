@@ -21,10 +21,7 @@ class FacebookAdapter extends AbstractAdapter {
 
         $result = $JSON->decode($this->oAuth->request('/me'));
 
-        dbg($result);
-
-
-        $data['user'] = $result['name'];
+        $data['user'] = $result['username'];
         $data['name'] = $result['name'];
         $data['mail'] = $result['email'];
 

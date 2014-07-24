@@ -18,7 +18,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      * @return null|\OAuth\Plugin\AbstractAdapter
      */
     public function loadService(&$servicename) {
-        global $ID;
+        $id = getID(); // $ID isn't set in trustExternal, yet
 
         $servicename = preg_replace('/[^a-zA-Z_]+/', '', $servicename);
         if(!$servicename) return null;
@@ -33,7 +33,9 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
         $class = '\\OAuth\\Plugin\\'.$servicename.'Adapter';
 
         /** @var \OAuth\Plugin\AbstractAdapter $service */
-        $service = new $class(wl($ID, array('oa' => $servicename), true, '&'));
+        $rdurl = wl($id, array('oa' => $servicename), true, '&');
+        dbglog($rdurl);
+        $service = new $class($rdurl);
         if(!$service->isInitialized()) {
             msg("Failed to initialize $service authentication service. Check credentials", -1);
             return null;
