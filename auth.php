@@ -77,7 +77,12 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                 // see if the user is known already
                 $user = $this->getUserByEmail($uinfo['mail']);
                 if($user) {
-                    $sinfo         = $this->getUserData($user);
+                    $sinfo = $this->getUserData($user);
+                    // check if the user allowed access via this service
+                    if(!in_array($this->cleanGroup($servicename), $sinfo['grps'])) {
+                        msg(sprintf($this->getLang('authnotenabled'), $servicename), -1);
+                        return false;
+                    }
                     $uinfo['user'] = $user;
                     $uinfo['name'] = $sinfo['name'];
                     $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
@@ -96,7 +101,10 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                     $uinfo['user']   = $user;
                     $uinfo['grps']   = (array) $uinfo['grps'];
                     $uinfo['grps'][] = $conf['defaultgroup'];
+                    $uinfo['grps'][] = $this->cleanGroup($servicename); // add service as group
 
+                    //FIXME we should call trigger_user_mod?
+                    //FIXME we should send a notification
                     $this->createUser($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $uinfo['grps']);
                 }
 
@@ -198,12 +206,22 @@ class auth_plugin_oauth extends auth_plugin_authplain {
      * @return bool
      */
     public function modifyUser($user, $changes) {
-        if(isset($changes['mail']) && $this->getUserByEmail($changes['mail'])) {
-            msg($this->getLang('emailduplicate'), -1);
-            return false;
+        global $conf;
+
+        if(isset($changes['mail'])) {
+            $found = $this->getUserByEmail($changes['mail']);
+            if($found != $user) {
+                msg($this->getLang('emailduplicate'), -1);
+                return false;
+            }
         }
 
-        return parent::modifyUser($user, $changes);
+        $ok = parent::modifyUser($user, $changes);
+
+        // refresh session cache
+        touch($conf['cachedir'].'/sessionpurge');
+
+        return $ok;
     }
 
 }

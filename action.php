@@ -23,6 +23,8 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
 
         $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'handle_start');
         $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handle_loginform');
+        $controller->register_hook('HTML_UPDATEPROFILEFORM_OUTPUT', 'BEFORE', $this, 'handle_profileform');
+        $controller->register_hook('AUTH_USER_CHANGE', 'BEFORE', $this, 'handle_usermod');
     }
 
     /**
@@ -37,12 +39,101 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         global $INPUT;
 
         /** @var helper_plugin_oauth $hlp */
-        $hlp = plugin_load('helper', 'oauth');
+        $hlp         = plugin_load('helper', 'oauth');
         $servicename = $INPUT->str('oauthlogin');
-        $service = $hlp->loadService($servicename);
+        $service     = $hlp->loadService($servicename);
         if(is_null($service)) return;
 
         $service->login();
+    }
+
+    /**
+     * Save groups for all the services a user has enabled
+     *
+     * @param Doku_Event $event  event object by reference
+     * @param mixed      $param  [the parameters passed as fifth argument to register_hook() when this
+     *                           handler was registered]
+     * @return void
+     */
+    public function handle_usermod(Doku_Event &$event, $param) {
+        global $ACT;
+        global $USERINFO;
+        global $auth;
+        global $INPUT;
+
+        if($event->data['type'] != 'modify') return;
+        if($ACT != 'profile') return;
+
+        // we want to modify the user's groups
+        $groups = $USERINFO['grps']; //current groups
+        if(isset($event->data['params'][1]['grps'])) {
+            // something already defined new groups
+            $groups = $event->data['params'][1]['grps'];
+        }
+
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+
+        // get enabled and configured services
+        $enabled  = $INPUT->arr('oauth_group');
+        $services = $hlp->listServices();
+        $services = array_map(array($auth, 'cleanGroup'), $services);
+
+        // add all enabled services as group, remove all disabled services
+        foreach($services as $service) {
+            if(isset($enabled[$service])) {
+                $groups[] = $service;
+            } else {
+                $idx = array_search($service, $groups);
+                if($idx !== false) unset($groups[$idx]);
+            }
+        }
+        $groups = array_unique($groups);
+
+        // add new group array to event data
+        $event->data['params'][1]['grps'] = $groups;
+
+    }
+
+    /**
+     * Add service selection to user profile
+     *
+     * @param Doku_Event $event  event object by reference
+     * @param mixed      $param  [the parameters passed as fifth argument to register_hook() when this
+     *                           handler was registered]
+     * @return void
+     */
+    public function handle_profileform(Doku_Event &$event, $param) {
+        global $USERINFO;
+        /** @var auth_plugin_authplain $auth */
+        global $auth;
+
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+
+        /** @var Doku_Form $form */
+        $form =& $event->data;
+        $pos  = $form->findElementByAttribute('type', 'submit');
+
+        $services = $hlp->listServices();
+        if(!$services) return;
+
+        $form->insertElement($pos, form_closefieldset());
+        $form->insertElement(++$pos, form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth')));
+        foreach($services as $service) {
+            $group = $auth->cleanGroup($service);
+            $elem  = form_makeCheckboxField(
+                'oauth_group['.$group.']',
+                1, $service, '', 'simple',
+                array(
+                    'checked' => (in_array($group, $USERINFO['grps'])) ? 'checked' : ''
+                )
+            );
+
+            $form->insertElement(++$pos, $elem);
+        }
+        $form->insertElement(++$pos, form_closefieldset());
+        $form->insertElement(++$pos, form_openfieldset(array()));
     }
 
     /**
@@ -61,17 +152,15 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
 
         $html = '';
         foreach($hlp->listServices() as $service) {
-            if($hlp->getKey($service)) {
-                $html .= '<a href="'.wl($ID,array('oauthlogin'=>$service)).'" class="plugin_oauth_'.$service.'"> ';
-                $html .= $service;
-                $html .= '</a>';
-            }
+            $html .= '<a href="'.wl($ID, array('oauthlogin' => $service)).'" class="plugin_oauth_'.$service.'"> ';
+            $html .= $service;
+            $html .= '</a>';
         }
         if(!$html) return;
 
         /** @var Doku_Form $form */
         $form =& $event->data;
-        $pos = $form->findElementByType('closefieldset');
+        $pos  = $form->findElementByType('closefieldset');
 
         $form->insertElement(++$pos, form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth')));
         $form->insertElement(++$pos, $html);

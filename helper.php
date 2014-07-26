@@ -47,15 +47,17 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     /**
      * List available Services
      *
+     * @param bool $enabledonly list only enabled services
      * @return array
      */
-    public function listServices() {
+    public function listServices($enabledonly = true) {
         $services = array();
         $files    = glob(__DIR__.'/classes/*Adapter.php');
 
         foreach($files as $file) {
             $file = basename($file, 'Adapter.php');
             if($file == 'Abstract') continue;
+            if($enabledonly && !$this->getKey($file)) continue;
             $services[] = $file;
         }
 
