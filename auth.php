@@ -104,8 +104,15 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                     $uinfo['grps'][] = $this->cleanGroup($servicename); // add service as group
 
                     //FIXME we should call trigger_user_mod?
-                    //FIXME we should send a notification
-                    $this->createUser($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $uinfo['grps']);
+                    $ok = $this->createUser($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $uinfo['grps']);
+                    if(!$ok) {
+                        msg('something went wrong creating your user account. please try again later.', -1);
+                        return false;
+                    }
+
+                    // send notification about the new user
+                    $subscription = new Subscription();
+                    $subscription->send_register($user, $uinfo['name'], $uinfo['mail']);
                 }
 
                 // set user session
