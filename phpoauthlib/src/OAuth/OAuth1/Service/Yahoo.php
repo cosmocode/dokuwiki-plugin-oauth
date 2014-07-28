@@ -93,4 +93,9 @@ class Yahoo extends AbstractService
 
         return $token;
     }
+
+    protected function getExtraApiHeaders() {
+        return array('Accept' => 'application/json');
+    }
+
 }
