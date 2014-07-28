@@ -34,15 +34,20 @@ class auth_plugin_oauth extends auth_plugin_authplain {
      * @return bool
      */
     function trustExternal($user, $pass, $sticky = false) {
-        global $INPUT;
         global $conf;
         global $USERINFO;
 
-        $servicename = $INPUT->str('oa');
+        // are we in login progress?
+        if(isset($_SESSION[DOKU_COOKIE]['oauth-inprogress'])) {
+            $servicename = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'];
+            $page        = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'];
+
+            unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
+        }
 
         // check session for existing oAuth login data
         $session = $_SESSION[DOKU_COOKIE]['auth'];
-        if(!$servicename && isset($session['oauth'])) {
+        if(!isset($servicename) && isset($session['oauth'])) {
             $servicename = $session['oauth'];
             // check if session data is still considered valid
             if(($session['time'] >= time() - $conf['auth_security_timeout']) &&
@@ -56,7 +61,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         }
 
         // either we're in oauth login or a previous log needs to be rechecked
-        if($servicename) {
+        if(isset($servicename)) {
             /** @var helper_plugin_oauth $hlp */
             $hlp     = plugin_load('helper', 'oauth');
             $service = $hlp->loadService($servicename);

@@ -33,15 +33,17 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
         $class = '\\OAuth\\Plugin\\'.$servicename.'Adapter';
 
         /** @var \OAuth\Plugin\AbstractAdapter $service */
-        $rdurl = wl($id, array('oa' => $servicename), true, '&');
-        dbglog($rdurl);
-        $service = new $class($rdurl);
+        $service = new $class($this->redirectURI());
         if(!$service->isInitialized()) {
             msg("Failed to initialize $service authentication service. Check credentials", -1);
             return null;
         }
 
         return $service;
+    }
+
+    public function redirectURI() {
+        return DOKU_URL.DOKU_SCRIPT;
     }
 
     /**

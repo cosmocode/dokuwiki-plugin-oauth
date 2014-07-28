@@ -37,12 +37,19 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
      */
     public function handle_start(Doku_Event &$event, $param) {
         global $INPUT;
+        global $ID;
 
         /** @var helper_plugin_oauth $hlp */
         $hlp         = plugin_load('helper', 'oauth');
         $servicename = $INPUT->str('oauthlogin');
         $service     = $hlp->loadService($servicename);
         if(is_null($service)) return;
+
+        // remember service in session
+        session_start();
+        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
+        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id']      = $ID;
+        session_write_close();
 
         $service->login();
     }
@@ -152,9 +159,9 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
 
         $html = '';
         foreach($hlp->listServices() as $service) {
-            $html .= '<a href="'.wl($ID, array('oauthlogin' => $service)).'" class="plugin_oauth_'.$service.'"> ';
+            $html .= '<a href="'.wl($ID, array('oauthlogin' => $service)).'" class="plugin_oauth_'.$service.'">';
             $html .= $service;
-            $html .= '</a>';
+            $html .= '</a> ';
         }
         if(!$html) return;
 
