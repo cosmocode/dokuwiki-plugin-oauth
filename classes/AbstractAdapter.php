@@ -20,7 +20,7 @@ use OAuth\ServiceFactory;
 abstract class AbstractAdapter {
 
     /** @var \OAuth\Common\Service\AbstractService|\OAuth\OAuth2\Service\AbstractService|\OAuth\OAuth2\Service\AbstractService */
-    protected $oAuth = null;
+    public $oAuth = null;
     /** @var \helper_plugin_oauth */
     protected $hlp = null;
     /** @var \OAuth\Common\Storage\Session */
@@ -35,8 +35,8 @@ abstract class AbstractAdapter {
         $this->hlp = plugin_load('helper', 'oauth');
 
         $credentials = new Credentials(
-            $this->hlp->getKey($this->getServiceName()),
-            $this->hlp->getSecret($this->getServiceName()),
+            $this->hlp->getKey($this->getAdapterName()),
+            $this->hlp->getSecret($this->getAdapterName()),
             $url
         );
 
@@ -138,9 +138,20 @@ abstract class AbstractAdapter {
      *
      * By default extracts the name from the class name
      *
-     * @return mixed
+     * @return string
      */
     public function getServiceName() {
+        return $this->getAdapterName();
+    }
+
+    /**
+     * Retrun the name of this Adapter
+     *
+     * It specifies which configuration setting should be used
+     *
+     * @return string
+     */
+    public function getAdapterName() {
         $name = preg_replace('/Adapter$/', '', get_called_class());
         $name = str_replace('OAuth\\Plugin\\', '', $name);
         return $name;

@@ -95,14 +95,14 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                     // new user, create him - making sure the login is unique by adding a number if needed
                     $user  = $uinfo['user'];
                     $count = '';
-                    while($this->getUserData($user.$count)) {
+                    while($this->getUserData($user . $count)) {
                         if($count) {
                             $count++;
                         } else {
                             $count = 1;
                         }
                     }
-                    $user            = $user.$count;
+                    $user            = $user . $count;
                     $uinfo['user']   = $user;
                     $uinfo['grps']   = (array) $uinfo['grps'];
                     $uinfo['grps'][] = $conf['defaultgroup'];
@@ -231,7 +231,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         $ok = parent::modifyUser($user, $changes);
 
         // refresh session cache
-        touch($conf['cachedir'].'/sessionpurge');
+        touch($conf['cachedir'] . '/sessionpurge');
 
         return $ok;
     }

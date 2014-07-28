@@ -39,9 +39,20 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
             return null;
         }
 
+        // The generic service can be externally configured
+        if(is_a($service->oAuth, 'OAuth\\OAuth2\\Service\\Generic')) {
+            $service->oAuth->setAuthorizationEndpoint($this->getAuthEndpoint($servicename));
+            $service->oAuth->setAccessTokenEndpoint($this->getTokenEndpoint($servicename));
+        }
+
         return $service;
     }
 
+    /**
+     * The redirect URI used in all oAuth requests
+     *
+     * @return string
+     */
     public function redirectURI() {
         return DOKU_URL.DOKU_SCRIPT;
     }
@@ -88,6 +99,27 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
         return $this->getConf($service.'-secret');
     }
 
+    /**
+     * Return the configured Authentication Endpoint URL for the given service
+     *
+     * @param $service
+     * @return string
+     */
+    public function getAuthEndpoint($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-authurl');
+    }
+
+    /**
+     * Return the configured Access Token Endpoint URL for the given service
+     *
+     * @param $service
+     * @return string
+     */
+    public function getTokenEndpoint($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-tokenurl');
+    }
 }
 
 // vim:ts=4:sw=4:et:
