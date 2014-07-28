@@ -23,7 +23,7 @@ abstract class AbstractAdapter {
     public $oAuth = null;
     /** @var \helper_plugin_oauth */
     protected $hlp = null;
-    /** @var \OAuth\Common\Storage\Session */
+    /** @var \OAuth\Plugin\oAuthStorage */
     protected $storage = null;
 
     /**
@@ -40,7 +40,7 @@ abstract class AbstractAdapter {
             $url
         );
 
-        $this->storage = new Session(); //FIXME build our own
+        $this->storage = new oAuthStorage();
 
         $serviceFactory = new ServiceFactory();
         $serviceFactory->setHttpClient(new oAuthHTTPClient());

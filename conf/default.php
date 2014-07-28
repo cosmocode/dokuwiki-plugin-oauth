@@ -11,3 +11,7 @@ $conf['github-key']      = '';
 $conf['github-secret']   = '';
 $conf['google-key']      = '';
 $conf['google-secret']   = '';
+$conf['google-']         = '';
+$conf['google-secret']   = '';
+$conf['yahoo-key']       = '';
+$conf['yahoo-secret']    = '';
