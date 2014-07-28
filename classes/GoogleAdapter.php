@@ -18,7 +18,8 @@ class GoogleAdapter extends AbstractAdapter {
         $data = array();
 
         $result = $JSON->decode($this->oAuth->request('https://www.googleapis.com/oauth2/v1/userinfo'));
-        $data['user'] = $result['login'];
+
+        $data['user'] = $result['name'];
         $data['name'] = $result['name'];
         $data['mail'] = $result['email'];
 
