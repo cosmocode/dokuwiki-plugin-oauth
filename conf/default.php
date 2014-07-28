@@ -5,10 +5,9 @@
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 
-/** @var helper_plugin_oauth $helper */
-$helper = plugin_load('helper', 'oauth');
-foreach($helper->listServices(false) as $service) {
-    $service = strtolower($service);
-    $conf["$service-key"]    = '';
-    $conf["$service-secret"] = '';
-}
+$conf['facebook-key']    = '';
+$conf['facebook-secret'] = '';
+$conf['github-key']      = '';
+$conf['github-secret']   = '';
+$conf['google-key']      = '';
+$conf['google-secret']   = '';
