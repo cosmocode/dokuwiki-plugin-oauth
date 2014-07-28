@@ -21,6 +21,8 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         global $conf;
         if($conf['authtype'] != 'oauth') return;
 
+        $conf['profileconfirm'] = false; // password confirmation doesn't work with oauth only users
+
         $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'handle_start');
         $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handle_loginform');
         $controller->register_hook('HTML_UPDATEPROFILEFORM_OUTPUT', 'BEFORE', $this, 'handle_profileform');
