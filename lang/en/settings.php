@@ -5,6 +5,8 @@
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 
+
+$lang['info']            = 'Redirect URI to use when configuring the applications';
 $lang['facebook-key']    = 'The App ID of your registered <a href="https://developers.facebook.com/apps">Facebook application</a>';
 $lang['facebook-secret'] = 'The App Secret of your registered <a href="https://developers.facebook.com/apps">Facebook application</a>';
 $lang['github-key']      = 'The Client ID of your registered <a href="https://github.com/settings/applications">Github application</a>';
