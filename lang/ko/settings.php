@@ -6,7 +6,7 @@
  */
 
 
-$lang['info']            = '앱 설정시 입력할 페이지이동주소(Redirect URI)';
+$lang['info']            = '앱 설정시 입력할 이동주소(Redirect URI)';
 $lang['facebook-key']    = '등록한 <a href="https://developers.facebook.com/apps">페이스북 앱</a>의 App ID';
 $lang['facebook-secret'] = '등록한 <a href="https://developers.facebook.com/apps">페이스북 앱</a>의 App Secret ';
 $lang['github-key']      = '등록한 <a href="https://github.com/settings/applications">깃헙 앱</a>의 Client ID';
