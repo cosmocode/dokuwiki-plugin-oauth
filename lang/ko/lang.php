@@ -2,7 +2,7 @@
 /**
  * Korean language file for oauth plugin
  *
- * @author Andreas Gohr <andi@splitbrain.org>
+ * @author SC Yoo <dryoo@Live.com>
  */
 
 $lang['emailduplicate'] = '이 메일주소는 이미 다른 사용자와 연결되어 있습니다.';
