@@ -109,8 +109,8 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                     $groups_on_creation[] = $this->cleanGroup($servicename); // add service as group
                     $uinfo['grps'] = array_merge((array) $uinfo['grps'], $groups_on_creation);
 
-                    $ok = $this->triggerUserMod('create',[$user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'],
-                                                          $groups_on_creation]);
+                    $ok = $this->triggerUserMod('create',array($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'],
+                                                          $groups_on_creation));
                     if(!$ok) {
                         msg('something went wrong creating your user account. please try again later.', -1);
                         return false;
