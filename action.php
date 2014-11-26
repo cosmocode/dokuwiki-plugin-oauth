@@ -173,7 +173,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
             if(!$html) return;
 
         }else{
-            if (array_search($singleService, $enabledServices, true) === false) {
+            if (in_array($singleService, $enabledServices, true) === false) {
                 msg($this->getLang('wrongConfig'),-1);
                 return;
             }
