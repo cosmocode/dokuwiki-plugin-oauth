@@ -154,26 +154,48 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
      * @return void
      */
     public function handle_loginform(Doku_Event &$event, $param) {
-        global $ID;
+        global $conf;
 
         /** @var helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
+        $singleService = $conf['plugin']['oauth']['singleService'];
+        $enabledServices = $hlp->listServices();
+
 
         $html = '';
-        foreach($hlp->listServices() as $service) {
-            $html .= '<a href="'.wl($ID, array('oauthlogin' => $service)).'" class="plugin_oauth_'.$service.'">';
-            $html .= $service;
-            $html .= '</a> ';
-        }
-        if(!$html) return;
-
         /** @var Doku_Form $form */
         $form =& $event->data;
-        $pos  = $form->findElementByType('closefieldset');
 
-        $form->insertElement(++$pos, form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth')));
-        $form->insertElement(++$pos, $html);
-        $form->insertElement(++$pos, form_closefieldset());
+        if ($singleService == 'AllowAll') {
+
+            foreach($hlp->listServices() as $service) {
+                $html .= $this->service_html($service);
+            }
+            if(!$html) return;
+
+        }else{
+            if (array_search($singleService, $enabledServices, true) === false) {
+                msg($this->getLang('wrongConfig'),-1);
+                return;
+            }
+            $form->_content = array();
+            $html = $this->service_html($singleService);
+
+
+        }
+        $form->_content[] = form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth'));
+        $form->_content[] = $html;
+        $form->_content[] = form_closefieldset();
+    }
+
+    function service_html ($service){
+        global $ID;
+        $html = '';
+        $html .= '<a href="' . wl($ID, array('oauthlogin' => $service)) . '" class="plugin_oauth_' . $service . '">';
+        $html .= $service;
+        $html .= '</a> ';
+        return $html;
+
     }
 
 }
