@@ -161,10 +161,9 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $singleService = $conf['plugin']['oauth']['singleService'];
         $enabledServices = $hlp->listServices();
 
-
-        $html = '';
         /** @var Doku_Form $form */
         $form =& $event->data;
+        $html = '';
 
         if ($singleService == 'AllowAll') {
 
@@ -180,7 +179,6 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
             }
             $form->_content = array();
             $html = $this->service_html($singleService);
-
 
         }
         $form->_content[] = form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth'));
