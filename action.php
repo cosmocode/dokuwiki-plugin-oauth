@@ -158,7 +158,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
 
         /** @var helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
-        $singleService = $conf['plugin']['oauth']['singleService'];
+        $singleService = $this->getConf('singleService');
         $enabledServices = $hlp->listServices();
 
         /** @var Doku_Form $form */
