@@ -27,6 +27,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handle_loginform');
         $controller->register_hook('HTML_UPDATEPROFILEFORM_OUTPUT', 'BEFORE', $this, 'handle_profileform');
         $controller->register_hook('AUTH_USER_CHANGE', 'BEFORE', $this, 'handle_usermod');
+        $controller->register_hook('ACTION_ACT_PREPROCESS', 'BEFORE', $this, 'handle_dologin');
     }
 
     /**
@@ -194,6 +195,26 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $html .= '</a> ';
         return $html;
 
+    }
+
+    public function handle_dologin(Doku_Event &$event, $param) {
+        global $ID;
+
+        if($event->data != 'login') return true;
+
+        $singleService = $this->getConf('singleService');
+        if ($singleService == 'AllowAll') return true;
+
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+        $enabledServices = $hlp->listServices();
+        if (in_array($singleService, $enabledServices, true) === false) {
+            msg($this->getLang('wrongConfig'),-1);
+            return false;
+        }
+
+        $url = wl($ID, array('oauthlogin' => $singleService), true, '&');
+        send_redirect($url);
     }
 
 }
