@@ -198,12 +198,17 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
     }
 
     public function handle_dologin(Doku_Event &$event, $param) {
+        global $lang;
         global $ID;
-
-        if($event->data != 'login') return true;
 
         $singleService = $this->getConf('singleService');
         if ($singleService == 'AllowAll') return true;
+
+        $lang['btn_login'] = $this->getLang('loginButton') . $singleService;
+
+        if($event->data != 'login') return true;
+
+
 
         /** @var helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
