@@ -20,4 +20,4 @@ $lang['doorkeeper-secret']   = '(Example) The Secret of your registered Doorkeep
 $lang['doorkeeper-authurl']  = '(Example) The authorization endpoint URL of your Doorkeeper setup.';
 $lang['doorkeeper-tokenurl'] = '(Example) The access token endpoint URL of your Doorkeeper setup.';
 $lang['singleService']            = 'Login with single oAuth service only (disables local logins!)';
-$lang['singleService_o_AllowAll'] = 'Allow all services';
+$lang['singleService_o_'] = 'Allow all services';

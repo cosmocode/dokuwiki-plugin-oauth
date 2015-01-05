@@ -166,7 +166,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $form =& $event->data;
         $html = '';
 
-        if ($singleService == 'AllowAll') {
+        if ($singleService == '') {
 
             foreach($hlp->listServices() as $service) {
                 $html .= $this->service_html($service);
@@ -202,7 +202,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         global $ID;
 
         $singleService = $this->getConf('singleService');
-        if ($singleService == 'AllowAll') return true;
+        if ($singleService == '') return true;
 
         $lang['btn_login'] = $this->getLang('loginButton') . $singleService;
 

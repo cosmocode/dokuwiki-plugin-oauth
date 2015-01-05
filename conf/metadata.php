@@ -40,7 +40,7 @@ $meta['doorkeeper-authurl']  = array('string');
 $meta['doorkeeper-tokenurl'] = array('string');
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
-                                         'AllowAll',
+                                         '',
                                          'Google',
                                          'Facebook',
                                          'Github',
