@@ -1,7 +1,7 @@
 base   oauth
 author Andreas Gohr
 email  andi@splitbrain.org
-date   2014-07-22
+date   2014-12-18
 name   oauth plugin
 desc   Generic oAuth plugin to login via various services
 url    http://www.dokuwiki.org/plugin:oauth

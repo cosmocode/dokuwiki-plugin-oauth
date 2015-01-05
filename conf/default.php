@@ -17,3 +17,4 @@ $conf['doorkeeper-key']      = '';
 $conf['doorkeeper-secret']   = '';
 $conf['doorkeeper-authurl']  = 'https://doorkeeper-provider.herokuapp.com/oauth/authorize';
 $conf['doorkeeper-tokenurl'] = 'https://doorkeeper-provider.herokuapp.com/oauth/token';
+$conf['singleService']       = '';

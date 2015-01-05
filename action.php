@@ -27,6 +27,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handle_loginform');
         $controller->register_hook('HTML_UPDATEPROFILEFORM_OUTPUT', 'BEFORE', $this, 'handle_profileform');
         $controller->register_hook('AUTH_USER_CHANGE', 'BEFORE', $this, 'handle_usermod');
+        $controller->register_hook('ACTION_ACT_PREPROCESS', 'BEFORE', $this, 'handle_dologin');
     }
 
     /**
@@ -154,26 +155,71 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
      * @return void
      */
     public function handle_loginform(Doku_Event &$event, $param) {
-        global $ID;
+        global $conf;
 
         /** @var helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
-
-        $html = '';
-        foreach($hlp->listServices() as $service) {
-            $html .= '<a href="'.wl($ID, array('oauthlogin' => $service)).'" class="plugin_oauth_'.$service.'">';
-            $html .= $service;
-            $html .= '</a> ';
-        }
-        if(!$html) return;
+        $singleService = $this->getConf('singleService');
+        $enabledServices = $hlp->listServices();
 
         /** @var Doku_Form $form */
         $form =& $event->data;
-        $pos  = $form->findElementByType('closefieldset');
+        $html = '';
 
-        $form->insertElement(++$pos, form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth')));
-        $form->insertElement(++$pos, $html);
-        $form->insertElement(++$pos, form_closefieldset());
+        if ($singleService == '') {
+
+            foreach($hlp->listServices() as $service) {
+                $html .= $this->service_html($service);
+            }
+            if(!$html) return;
+
+        }else{
+            if (in_array($singleService, $enabledServices, true) === false) {
+                msg($this->getLang('wrongConfig'),-1);
+                return;
+            }
+            $form->_content = array();
+            $html = $this->service_html($singleService);
+
+        }
+        $form->_content[] = form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth'));
+        $form->_content[] = $html;
+        $form->_content[] = form_closefieldset();
+    }
+
+    function service_html ($service){
+        global $ID;
+        $html = '';
+        $html .= '<a href="' . wl($ID, array('oauthlogin' => $service)) . '" class="plugin_oauth_' . $service . '">';
+        $html .= $service;
+        $html .= '</a> ';
+        return $html;
+
+    }
+
+    public function handle_dologin(Doku_Event &$event, $param) {
+        global $lang;
+        global $ID;
+
+        $singleService = $this->getConf('singleService');
+        if ($singleService == '') return true;
+
+        $lang['btn_login'] = $this->getLang('loginButton') . $singleService;
+
+        if($event->data != 'login') return true;
+
+
+
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+        $enabledServices = $hlp->listServices();
+        if (in_array($singleService, $enabledServices, true) === false) {
+            msg($this->getLang('wrongConfig'),-1);
+            return false;
+        }
+
+        $url = wl($ID, array('oauthlogin' => $singleService), true, '&');
+        send_redirect($url);
     }
 
 }
