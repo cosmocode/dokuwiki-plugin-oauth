@@ -129,6 +129,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                 return true;
             }
 
+            unset($_SESSION[DOKU_COOKIE]['auth']);
             return false; // something went wrong during oAuth login
         }
 
