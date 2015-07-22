@@ -67,8 +67,9 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             $service = $hlp->loadService($servicename);
             if(is_null($service)) return false;
 
-            // get the token
             if($service->checkToken()) {
+
+
                 $uinfo = $service->getUser();
 
                 $uinfo['user'] = $this->cleanUser((string) $uinfo['user']);
@@ -123,18 +124,81 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
                 // set user session
                 $this->setUserSession($uinfo, $servicename);
+
+                $cookie = base64_encode($user).'|'.((int) $sticky).'|'.base64_encode('oauth').'|'.base64_encode($servicename);
+                $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
+                $time      = $sticky ? (time() + 60 * 60 * 24 * 365) : 0;
+                setcookie(DOKU_COOKIE,$cookie, $time, $cookieDir, '',($conf['securecookie'] && is_ssl()), true);
+
                 if(isset($page)) {
                     send_redirect(wl($page));
                 }
                 return true;
+            } else {
+                $this->relogin($servicename);
             }
 
             unset($_SESSION[DOKU_COOKIE]['auth']);
             return false; // something went wrong during oAuth login
+        } elseif (isset($_COOKIE[DOKU_COOKIE])) {
+            global $INPUT;
+            //try cookie
+            list($cookieuser, $cookiesticky, $auth, $servicename) = explode('|', $_COOKIE[DOKU_COOKIE]);
+            $cookieuser = base64_decode($cookieuser, true);
+            $auth = base64_decode($auth, true);
+            $servicename = base64_decode($servicename, true);
+            if ($auth === 'oauth') {
+                $this->relogin($servicename);
+            }
         }
 
         // do the "normal" plain auth login via form
         return auth_login($user, $pass, $sticky);
+    }
+
+    protected function relogin($servicename) {
+        global $INPUT;
+
+        /** @var helper_plugin_oauth $hlp */
+        $hlp     = plugin_load('helper', 'oauth');
+        $service     = $hlp->loadService($servicename);
+        if(is_null($service)) return false;
+
+        // remember service in session
+        session_start();
+        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
+        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id']      = $INPUT->str('id');
+
+        $str_vars = array('wikitext', 'prefix', 'suffix', 'summary', 'sectok', 'target', 'range', 'rev', 'at');
+        foreach ($str_vars as $input_var) {
+            if ($INPUT->str($input_var) !== '') {
+                $_SESSION[DOKU_COOKIE]['oauth-done'][$input_var] = $INPUT->str($input_var);
+            }
+
+            if ($INPUT->post->str($input_var) !== '') {
+                $_SESSION[DOKU_COOKIE]['oauth-done']['post'][$input_var] = $INPUT->post->str($input_var);
+            }
+
+            if ($INPUT->get->str($input_var) !== '') {
+                $_SESSION[DOKU_COOKIE]['oauth-done']['get'][$input_var] = $INPUT->get->str($input_var);
+            }
+        }
+
+        if (is_array($INPUT->post->param('do'))) {
+            $doPost = key($INPUT->post->arr('do'));
+        } else {
+            $doPost = $INPUT->post->str('do');
+        }
+        $doGet = $INPUT->get->str('do');
+        if (!empty($doPost)) {
+            $_SESSION[DOKU_COOKIE]['oauth-done']['do'] = $doPost;
+        } elseif (!empty($doGet)) {
+            $_SESSION[DOKU_COOKIE]['oauth-done']['do'] = $doGet;
+        }
+
+        session_write_close();
+
+        $service->login();
     }
 
     /**
