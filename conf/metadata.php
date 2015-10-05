@@ -38,7 +38,7 @@ $meta['doorkeeper-key']      = array('string');
 $meta['doorkeeper-secret']   = array('string');
 $meta['doorkeeper-authurl']  = array('string');
 $meta['doorkeeper-tokenurl'] = array('string');
-$meta['mailRestriction']     = array('string');
+$meta['mailRestriction']     = array('string','_pattern' => '!^@.*|^$!');
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
                                          '',
