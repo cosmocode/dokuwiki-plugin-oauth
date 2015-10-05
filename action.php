@@ -202,8 +202,8 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $form =& $event->data;
         $html = '';
 
-        if ($this->getConf('google-hosted-domain') !== '') {
-            $html .= sprintf($this->getLang('eMailRestricted'),$this->getConf('google-hosted-domain'));
+        if ($this->getConf('mailRestriction') !== '') {
+            $html .= sprintf($this->getLang('eMailRestricted'),$this->getConf('mailRestriction'));
         }
 
         if ($singleService == '') {

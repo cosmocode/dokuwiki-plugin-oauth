@@ -35,18 +35,4 @@ class GoogleAdapter extends AbstractAdapter {
         return array(Google::SCOPE_USERINFO_EMAIL, Google::SCOPE_USERINFO_PROFILE);
     }
 
-    public function checkToken() {
-        $tokenCheck = parent::checkToken();
-        $hostedDomain = $this->hlp->getConf("google-hosted-domain");
-        if ($tokenCheck && $hostedDomain !== '') {
-            $userData = $this->getUser();
-            if (substr($userData['mail'], -strlen($hostedDomain)) === $hostedDomain) {
-                return true;
-            }
-            msg(sprintf($this->hlp->getLang("rejectedEMail"),$hostedDomain),-1);
-            send_redirect(wl('', array('do' => 'login'),false,'&'));
-        }
-        return $tokenCheck;
-    }
-
 }

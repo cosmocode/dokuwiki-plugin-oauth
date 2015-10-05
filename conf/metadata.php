@@ -32,13 +32,13 @@ $meta['github-key']          = array('string');
 $meta['github-secret']       = array('string');
 $meta['google-key']          = array('string');
 $meta['google-secret']       = array('string');
-$meta['google-hosted-domain']= array('string');
 $meta['yahoo-key']           = array('string');
 $meta['yahoo-secret']        = array('string');
 $meta['doorkeeper-key']      = array('string');
 $meta['doorkeeper-secret']   = array('string');
 $meta['doorkeeper-authurl']  = array('string');
 $meta['doorkeeper-tokenurl'] = array('string');
+$meta['mailRestriction']     = array('string');
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
                                          '',

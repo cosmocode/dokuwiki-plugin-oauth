@@ -127,7 +127,23 @@ abstract class AbstractAdapter {
                 return false;
             }
         }
+        if ($this->hlp->getConf("mailRestriction") !== '') {
+            return $this->checkMail();
+        }
         return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function checkMail() {
+        $hostedDomain = $this->hlp->getConf("mailRestriction");
+        $userData = $this->getUser();
+        if (substr($userData['mail'], -strlen($hostedDomain)) === $hostedDomain) {
+            return true;
+        }
+        msg(sprintf($this->hlp->getLang("rejectedEMail"),$hostedDomain),-1);
+        send_redirect(wl('', array('do' => 'login',),false,'&'));
     }
 
     /**
