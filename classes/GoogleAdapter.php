@@ -26,14 +26,6 @@ class GoogleAdapter extends AbstractAdapter {
         return $data;
     }
 
-    public function getAuthorizationUri() {
-        $param = array();
-        if ($this->hlp->getConf("google-hosted-domain") !== "") {
-            $param = array("hd" => $this->hlp->getConf("google-hosted-domain"),);
-        }
-        return $this->oAuth->getAuthorizationUri($param);
-    }
-
     /**
      * Access to user and his email addresses
      *
@@ -51,7 +43,8 @@ class GoogleAdapter extends AbstractAdapter {
             if (substr($userData['mail'], -strlen($hostedDomain)) === $hostedDomain) {
                 return true;
             }
-            return false;
+            msg(sprintf($this->hlp->getLang("rejectedEMail"),$hostedDomain),-1);
+            send_redirect(wl('', array('do' => 'login'),false,'&'));
         }
         return $tokenCheck;
     }
