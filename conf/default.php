@@ -11,6 +11,7 @@ $conf['github-key']          = '';
 $conf['github-secret']       = '';
 $conf['google-key']          = '';
 $conf['google-secret']       = '';
+$conf['google-hosted-domain']= '';
 $conf['yahoo-key']           = '';
 $conf['yahoo-secret']        = '';
 $conf['doorkeeper-key']      = '';

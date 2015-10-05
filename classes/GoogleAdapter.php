@@ -26,6 +26,14 @@ class GoogleAdapter extends AbstractAdapter {
         return $data;
     }
 
+    public function getAuthorizationUri() {
+        $param = array();
+        if ($this->hlp->getConf("google-hosted-domain") !== "") {
+            $param = array("hd" => $this->hlp->getConf("google-hosted-domain"),);
+        }
+        return $this->oAuth->getAuthorizationUri($param);
+    }
+
     /**
      * Access to user and his email addresses
      *
@@ -33,6 +41,19 @@ class GoogleAdapter extends AbstractAdapter {
      */
     public function getScope() {
         return array(Google::SCOPE_USERINFO_EMAIL, Google::SCOPE_USERINFO_PROFILE);
+    }
+
+    public function checkToken() {
+        $tokenCheck = parent::checkToken();
+        $hostedDomain = $this->hlp->getConf("google-hosted-domain");
+        if ($tokenCheck && $hostedDomain !== '') {
+            $userData = $this->getUser();
+            if (substr($userData['mail'], -strlen($hostedDomain)) === $hostedDomain) {
+                return true;
+            }
+            return false;
+        }
+        return $tokenCheck;
     }
 
 }

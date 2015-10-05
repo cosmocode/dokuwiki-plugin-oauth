@@ -72,8 +72,11 @@ abstract class AbstractAdapter {
      */
     public function login() {
         if(is_a($this->oAuth, 'OAuth\OAuth2\Service\AbstractService')) { /* oAuth2 handling */
-
-            $url = $this->oAuth->getAuthorizationUri();
+            if (method_exists($this, 'getAuthorizationUri')) {
+                $url = $this->getAuthorizationUri();
+            } else {
+                $url = $this->oAuth->getAuthorizationUri();
+            }
         } else { /* oAuth1 handling */
 
             // extra request needed for oauth1 to request a request token :-)
