@@ -26,6 +26,7 @@ class setting_plugin_oauth extends setting {
 }
 
 $meta['info']                = array('plugin_oauth');
+$meta['custom-redirectURI']  = array('string','_caution' => 'warning');
 $meta['facebook-key']        = array('string');
 $meta['facebook-secret']     = array('string');
 $meta['github-key']          = array('string');
@@ -38,7 +39,7 @@ $meta['doorkeeper-key']      = array('string');
 $meta['doorkeeper-secret']   = array('string');
 $meta['doorkeeper-authurl']  = array('string');
 $meta['doorkeeper-tokenurl'] = array('string');
-$meta['mailRestriction']     = array('string');
+$meta['mailRestriction']     = array('string','_pattern' => '!^@.*|^$!');
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
                                          '',
