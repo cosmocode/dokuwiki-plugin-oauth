@@ -5,6 +5,7 @@
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 
+$conf['custom-redirectURI']  = '';
 $conf['facebook-key']        = '';
 $conf['facebook-secret']     = '';
 $conf['github-key']          = '';

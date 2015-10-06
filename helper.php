@@ -55,7 +55,11 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      * @return string
      */
     public function redirectURI() {
-        return DOKU_URL.DOKU_SCRIPT;
+        if ($this->getConf('custom-redirectURI') !== '') {
+            return $this->getConf('custom-redirectURI');
+        } else {
+            return DOKU_URL . DOKU_SCRIPT;
+        }
     }
 
     /**
