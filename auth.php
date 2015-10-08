@@ -92,7 +92,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                     $uinfo['user'] = $user;
                     $uinfo['name'] = $sinfo['name'];
                     $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
-                } else {
+                } elseif (strpos($conf['disableactions'],'register') === False) {
                     // new user, create him - making sure the login is unique by adding a number if needed
                     $user  = $uinfo['user'];
                     $count = '';
@@ -120,6 +120,9 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                     // send notification about the new user
                     $subscription = new Subscription();
                     $subscription->send_register($user, $uinfo['name'], $uinfo['mail']);
+                } else {
+                    msg('Self-Registration is currently disabled. Please ask your DokuWiki administrator to create your account manually.', -1);
+                    return false;
                 }
 
                 // set user session
