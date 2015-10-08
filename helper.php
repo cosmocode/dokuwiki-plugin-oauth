@@ -127,23 +127,12 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     }
 
     /**
-     * @param bool $string if true returns a nice string for output, otherwise returns array of strings
-     *
-     * @return array|string
+     * @return array
      */
-    public function getValidDomains($string = false) {
+    public function getValidDomains() {
         $validDomains = explode(',', trim($this->getConf('mailRestriction'), ','));
-        if ($string) {
-            $domainListing = $validDomains[0];
-            array_shift($validDomains);
-            while (count($validDomains) > 0) {
-                $domainListing .= ", " . $validDomains[0];
-                array_shift($validDomains);
-            }
-            return $domainListing;
-        } else {
-            return $validDomains;
-        }
+        $validDomains = array_map('trim', $validDomains);
+        return $validDomains;
     }
 
     /**

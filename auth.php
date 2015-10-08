@@ -92,7 +92,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                     $uinfo['user'] = $user;
                     $uinfo['name'] = $sinfo['name'];
                     $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
-                } elseif (strpos($conf['disableactions'],'register') === False) {
+                } elseif (actionOK('register')) {
                     // new user, create him - making sure the login is unique by adding a number if needed
                     $user  = $uinfo['user'];
                     $count = '';
