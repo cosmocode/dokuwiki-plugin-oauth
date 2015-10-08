@@ -202,8 +202,11 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $form =& $event->data;
         $html = '';
 
-        if ($this->getConf('mailRestriction') !== '') {
-            $html .= sprintf($this->getLang('eMailRestricted'),$this->getConf('mailRestriction'));
+        $validDomains = $hlp->getValidDomains();
+
+        if ($validDomains[0] !== '') {
+            $domainListing = $hlp->getValidDomains(true);
+            $html .= sprintf($this->getLang('eMailRestricted'), $domainListing);
         }
 
         if ($singleService == '') {

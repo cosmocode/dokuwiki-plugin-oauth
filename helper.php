@@ -125,6 +125,42 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
         $service = strtolower($service);
         return $this->getConf($service.'-tokenurl');
     }
+
+    /**
+     * @param bool $string if true returns a nice string for output, otherwise returns array of strings
+     *
+     * @return array|string
+     */
+    public function getValidDomains($string = false) {
+        $validDomains = explode(',', trim($this->getConf('mailRestriction'), ','));
+        if ($string) {
+            $domainListing = $validDomains[0];
+            array_shift($validDomains);
+            while (count($validDomains) > 0) {
+                $domainListing .= ", " . $validDomains[0];
+                array_shift($validDomains);
+            }
+            return $domainListing;
+        } else {
+            return $validDomains;
+        }
+    }
+
+    /**
+     * @param string $mail
+     *
+     * @return bool
+     */
+    public function checkMail($mail) {
+        $hostedDomains = $this->getValidDomains();
+
+        foreach ($hostedDomains as $validDomain) {
+            if(substr($mail, -strlen($validDomain)) === $validDomain) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 // vim:ts=4:sw=4:et:

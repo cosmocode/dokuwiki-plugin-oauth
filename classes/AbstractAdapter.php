@@ -127,24 +127,19 @@ abstract class AbstractAdapter {
                 return false;
             }
         }
-        if ($this->hlp->getConf("mailRestriction") !== '') {
-            return $this->checkMail();
+
+        $validDomains = $this->hlp->getValidDomains();
+        if ($validDomains[0] !== '') {
+            $userData = $this->getUser();
+            if (!$this->hlp->checkMail($userData['mail'])) {
+                msg(sprintf($this->hlp->getLang("rejectedEMail"),$this->hlp->getValidDomains(true)),-1);
+                send_redirect(wl('', array('do' => 'login',),false,'&'));
+            }
         }
         return true;
     }
 
-    /**
-     * @return bool
-     */
-    public function checkMail() {
-        $hostedDomain = $this->hlp->getConf("mailRestriction");
-        $userData = $this->getUser();
-        if (substr($userData['mail'], -strlen($hostedDomain)) === $hostedDomain) {
-            return true;
-        }
-        msg(sprintf($this->hlp->getLang("rejectedEMail"),$hostedDomain),-1);
-        send_redirect(wl('', array('do' => 'login',),false,'&'));
-    }
+
 
     /**
      * Return the name of the oAuth service class to use
