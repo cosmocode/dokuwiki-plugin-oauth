@@ -129,7 +129,7 @@ abstract class AbstractAdapter {
         }
 
         $validDomains = $this->hlp->getValidDomains();
-        if ($validDomains[0] !== '') {
+        if (count($validDomains) > 0) {
             $userData = $this->getUser();
             if (!$this->hlp->checkMail($userData['mail'])) {
                 msg(sprintf($this->hlp->getLang("rejectedEMail"),join(', ', $validDomains)),-1);

@@ -204,7 +204,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
 
         $validDomains = $hlp->getValidDomains();
 
-        if ($validDomains[0] !== '') {
+        if (count($validDomains) > 0) {
             $html .= sprintf($this->getLang('eMailRestricted'), join(', ', $validDomains));
         }
 

@@ -130,6 +130,9 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      * @return array
      */
     public function getValidDomains() {
+        if ($this->getConf('mailRestriction') === '') {
+            return array();
+        }
         $validDomains = explode(',', trim($this->getConf('mailRestriction'), ','));
         $validDomains = array_map('trim', $validDomains);
         return $validDomains;
