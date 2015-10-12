@@ -46,12 +46,16 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         if (isset($_SESSION[DOKU_COOKIE]['oauth-done']['do']) || !empty($_SESSION[DOKU_COOKIE]['oauth-done']['rev'])){
             global $ACT, $TEXT, $PRE, $SUF, $SUM;
             $ACT = $_SESSION[DOKU_COOKIE]['oauth-done']['do'];
-            if (isset($_SESSION[DOKU_COOKIE]['oauth-done']['wikitext'])) {
+            if (!empty($_SESSION[DOKU_COOKIE]['oauth-done']['wikitext'])) {
                 $TEXT = cleanText($_SESSION[DOKU_COOKIE]['oauth-done']['wikitext']);
                 $PRE = cleanText(substr($_SESSION[DOKU_COOKIE]['oauth-done']['prefix'], 0, -1));
                 $SUF = cleanText($_SESSION[DOKU_COOKIE]['oauth-done']['suffix']);
                 $SUM = $_SESSION[DOKU_COOKIE]['oauth-done']['summary'];
                 $INPUT->post->set('sectok', $_SESSION[DOKU_COOKIE]['oauth-done']['sectok']);
+            }
+            if ($ACT === 'save' && empty($TEXT))
+            {
+                $ACT = 'show';
             }
 
             // resetting INPUT, ->post and ->get
@@ -202,8 +206,10 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $form =& $event->data;
         $html = '';
 
-        if ($this->getConf('mailRestriction') !== '') {
-            $html .= sprintf($this->getLang('eMailRestricted'),$this->getConf('mailRestriction'));
+        $validDomains = $hlp->getValidDomains();
+
+        if (count($validDomains) > 0) {
+            $html .= sprintf($this->getLang('eMailRestricted'), join(', ', $validDomains));
         }
 
         if ($singleService == '') {
