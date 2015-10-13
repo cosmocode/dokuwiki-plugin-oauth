@@ -90,35 +90,13 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                     $uinfo['name'] = $sinfo['name'];
                     $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
                 } elseif (actionOK('register')) {
-                    // new user, create him - making sure the login is unique by adding a number if needed
-                    $user  = $uinfo['user'];
-                    $count = '';
-                    while($this->getUserData($user . $count)) {
-                        if($count) {
-                            $count++;
-                        } else {
-                            $count = 1;
-                        }
-                    }
-                    $user            = $user . $count;
-                    $uinfo['user']   = $user;
-                    $groups_on_creation = array();
-                    $groups_on_creation[] = $conf['defaultgroup'];
-                    $groups_on_creation[] = $this->cleanGroup($servicename); // add service as group
-                    $uinfo['grps'] = array_merge((array) $uinfo['grps'], $groups_on_creation);
-
-                    $ok = $this->triggerUserMod('create',array($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'],
-                                                          $groups_on_creation));
-                    if(!$ok) {
+                    $ok = $this->addUser($uinfo, $servicename);
+                    if (!$ok) {
                         msg('something went wrong creating your user account. please try again later.', -1);
                         return false;
                     }
-
-                    // send notification about the new user
-                    $subscription = new Subscription();
-                    $subscription->send_register($user, $uinfo['name'], $uinfo['mail']);
                 } else {
-                    msg('Self-Registration is currently disabled. Please ask your DokuWiki administrator to create your account manually.', -1);
+                    msg($this->getLang('addUser not possible'), -1);
                     return false;
                 }
 
@@ -267,7 +245,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
     }
 
     /**
-     * Enhance function to check aainst duplicate emails
+     * Enhance function to check against duplicate emails
      *
      * @param string $user
      * @param string $pwd
@@ -309,6 +287,46 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         touch($conf['cachedir'] . '/sessionpurge');
 
         return $ok;
+    }
+
+    /**
+     * new user, create him - making sure the login is unique by adding a number if needed
+     *
+     * @param $uinfo
+     * @param $servicename
+     *
+     * @return bool
+     */
+    protected function addUser($uinfo, $servicename) {
+        global $conf;
+        $user = $uinfo['user'];
+        $count = '';
+        while($this->getUserData($user . $count)) {
+            if($count) {
+                $count++;
+            } else {
+                $count = 1;
+            }
+        }
+        $user = $user . $count;
+        $uinfo['user'] = $user;
+        $groups_on_creation = array();
+        $groups_on_creation[] = $conf['defaultgroup'];
+        $groups_on_creation[] = $this->cleanGroup($servicename); // add service as group
+        $uinfo['grps'] = array_merge((array) $uinfo['grps'], $groups_on_creation);
+
+        $ok = $this->triggerUserMod(
+            'create',
+            array($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $groups_on_creation,)
+        );
+        if(!$ok) {
+            return false;
+        }
+
+        // send notification about the new user
+        $subscription = new Subscription();
+        $subscription->send_register($user, $uinfo['name'], $uinfo['mail']);
+        return true;
     }
 
 }
