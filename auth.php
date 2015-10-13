@@ -50,10 +50,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         if(!isset($servicename) && isset($session['oauth'])) {
             $servicename = $session['oauth'];
             // check if session data is still considered valid
-            if(($session['time'] >= time() - $conf['auth_security_timeout']) &&
-                ($session['buid'] == auth_browseruid())
-            ) {
-
+            if ($this->isSessionValid($session)) {
                 $_SERVER['REMOTE_USER'] = $session['user'];
                 $USERINFO               = $session['info'];
                 return true;
@@ -157,6 +154,25 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
         // do the "normal" plain auth login via form
         return auth_login($user, $pass, $sticky);
+    }
+
+    /**
+     * @param array $session cookie auth session
+     *
+     * @return bool
+     */
+    protected function isSessionValid ($session) {
+        /** @var helper_plugin_oauth $hlp */
+        $hlp     = plugin_load('helper', 'oauth');
+        if ($hlp->validBrowserID($session)) {
+            if (!$hlp->isSessionTimedOut($session)) {
+                return true;
+            } elseif (!($hlp->isGETRequest() && $hlp->isDokuPHP())) {
+                // only force a recheck on a timed-out session during a GET request on the main script doku.php
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function relogin($servicename) {
