@@ -61,21 +61,13 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         if(isset($servicename)) {
             /** @var helper_plugin_oauth $hlp */
             $hlp     = plugin_load('helper', 'oauth');
+
+            /** @var OAuth\Plugin\AbstractAdapter $service */
             $service = $hlp->loadService($servicename);
             if(is_null($service)) return false;
 
             if($service->checkToken()) {
-                $uinfo = $service->getUser();
-                $ok = $this->processUser($uinfo, $servicename);
-                if (!$ok) {
-                    return false;
-                }
-                $this->setUserSession($uinfo, $servicename);
-                $this->setUserCookie($user, $sticky, $servicename);
-                if(isset($page)) {
-                    send_redirect(wl($page));
-                }
-                return true;
+                return $this->processLogin($sticky, $service, $servicename, $page);
             } else {
                 $this->relogin($servicename);
             }
@@ -345,6 +337,28 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
         $time      = $sticky ? (time() + 60 * 60 * 24 * 365) : 0;
         setcookie(DOKU_COOKIE,$cookie, $time, $cookieDir, '',($conf['securecookie'] && is_ssl()), true);
+    }
+
+    /**
+     * @param                              $sticky
+     * @param OAuth\Plugin\AbstractAdapter $service
+     * @param string                       $servicename
+     * @param string                       $page
+     *
+     * @return bool
+     */
+    protected function processLogin($sticky, $service, $servicename, $page) {
+        $uinfo = $service->getUser();
+        $ok = $this->processUser($uinfo, $servicename);
+        if(!$ok) {
+            return false;
+        }
+        $this->setUserSession($uinfo, $servicename);
+        $this->setUserCookie($uinfo['user'], $sticky, $servicename);
+        if(isset($page)) {
+            send_redirect(wl($page));
+        }
+        return true;
     }
 
 }
