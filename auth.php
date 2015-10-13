@@ -188,20 +188,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
         $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id']      = $INPUT->str('id');
 
-        $str_vars = array('wikitext', 'prefix', 'suffix', 'summary', 'sectok', 'target', 'range', 'rev', 'at');
-        foreach ($str_vars as $input_var) {
-            if ($INPUT->str($input_var) !== '') {
-                $_SESSION[DOKU_COOKIE]['oauth-done'][$input_var] = $INPUT->str($input_var);
-            }
-
-            if ($INPUT->post->str($input_var) !== '') {
-                $_SESSION[DOKU_COOKIE]['oauth-done']['post'][$input_var] = $INPUT->post->str($input_var);
-            }
-
-            if ($INPUT->get->str($input_var) !== '') {
-                $_SESSION[DOKU_COOKIE]['oauth-done']['get'][$input_var] = $INPUT->get->str($input_var);
-            }
-        }
+        $_SESSION[DOKU_COOKIE]['oauth-done']['$_REQUEST'] = $_REQUEST;
 
         if (is_array($INPUT->post->param('do'))) {
             $doPost = key($INPUT->post->arr('do'));
