@@ -65,49 +65,13 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             if(is_null($service)) return false;
 
             if($service->checkToken()) {
-
-
                 $uinfo = $service->getUser();
-
-                $uinfo['user'] = $this->cleanUser((string) $uinfo['user']);
-                if(!$uinfo['name']) $uinfo['name'] = $uinfo['user'];
-
-                if(!$uinfo['user'] || !$uinfo['mail']) {
-                    msg("$servicename did not provide the needed user info. Can't log you in", -1);
+                $ok = $this->processUser($uinfo, $servicename);
+                if (!$ok) {
                     return false;
                 }
-
-                // see if the user is known already
-                $user = $this->getUserByEmail($uinfo['mail']);
-                if($user) {
-                    $sinfo = $this->getUserData($user);
-                    // check if the user allowed access via this service
-                    if(!in_array($this->cleanGroup($servicename), $sinfo['grps'])) {
-                        msg(sprintf($this->getLang('authnotenabled'), $servicename), -1);
-                        return false;
-                    }
-                    $uinfo['user'] = $user;
-                    $uinfo['name'] = $sinfo['name'];
-                    $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
-                } elseif (actionOK('register')) {
-                    $ok = $this->addUser($uinfo, $servicename);
-                    if (!$ok) {
-                        msg('something went wrong creating your user account. please try again later.', -1);
-                        return false;
-                    }
-                } else {
-                    msg($this->getLang('addUser not possible'), -1);
-                    return false;
-                }
-
-                // set user session
                 $this->setUserSession($uinfo, $servicename);
-
-                $cookie = base64_encode($user).'|'.((int) $sticky).'|'.base64_encode('oauth').'|'.base64_encode($servicename);
-                $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
-                $time      = $sticky ? (time() + 60 * 60 * 24 * 365) : 0;
-                setcookie(DOKU_COOKIE,$cookie, $time, $cookieDir, '',($conf['securecookie'] && is_ssl()), true);
-
+                $this->setUserCookie($user, $sticky, $servicename);
                 if(isset($page)) {
                     send_redirect(wl($page));
                 }
@@ -292,12 +256,12 @@ class auth_plugin_oauth extends auth_plugin_authplain {
     /**
      * new user, create him - making sure the login is unique by adding a number if needed
      *
-     * @param $uinfo
-     * @param $servicename
+     * @param array $uinfo user info received from the oAuth service
+     * @param string $servicename
      *
      * @return bool
      */
-    protected function addUser($uinfo, $servicename) {
+    protected function addUser(&$uinfo, $servicename) {
         global $conf;
         $user = $uinfo['user'];
         $count = '';
@@ -327,6 +291,60 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         $subscription = new Subscription();
         $subscription->send_register($user, $uinfo['name'], $uinfo['mail']);
         return true;
+    }
+
+    /**
+     * process the user and update the $uinfo array
+     *
+     * @param $uinfo
+     * @param $servicename
+     *
+     * @return bool
+     */
+    protected function processUser(&$uinfo, $servicename) {
+        $uinfo['user'] = $this->cleanUser((string) $uinfo['user']);
+        if(!$uinfo['name']) $uinfo['name'] = $uinfo['user'];
+
+        if(!$uinfo['user'] || !$uinfo['mail']) {
+            msg("$servicename did not provide the needed user info. Can't log you in", -1);
+            return false;
+        }
+
+        // see if the user is known already
+        $user = $this->getUserByEmail($uinfo['mail']);
+        if($user) {
+            $sinfo = $this->getUserData($user);
+            // check if the user allowed access via this service
+            if(!in_array($this->cleanGroup($servicename), $sinfo['grps'])) {
+                msg(sprintf($this->getLang('authnotenabled'), $servicename), -1);
+                return false;
+            }
+            $uinfo['user'] = $user;
+            $uinfo['name'] = $sinfo['name'];
+            $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
+        } elseif(actionOK('register')) {
+            $ok = $this->addUser($uinfo, $servicename);
+            if(!$ok) {
+                msg('something went wrong creating your user account. please try again later.', -1);
+                return false;
+            }
+        } else {
+            msg($this->getLang('addUser not possible'), -1);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param string $user
+     * @param string $sticky
+     * @param string $servicename
+     */
+    private function setUserCookie($user, $sticky, $servicename) {
+        $cookie = base64_encode($user).'|'.((int) $sticky).'|'.base64_encode('oauth').'|'.base64_encode($servicename);
+        $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
+        $time      = $sticky ? (time() + 60 * 60 * 24 * 365) : 0;
+        setcookie(DOKU_COOKIE,$cookie, $time, $cookieDir, '',($conf['securecookie'] && is_ssl()), true);
     }
 
 }
