@@ -34,20 +34,11 @@ class auth_plugin_oauth extends auth_plugin_authplain {
      * @return bool
      */
     function trustExternal($user, $pass, $sticky = false) {
-        global $conf;
         global $USERINFO;
-
-        // are we in login progress?
-        if(isset($_SESSION[DOKU_COOKIE]['oauth-inprogress'])) {
-            $servicename = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'];
-            $page        = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'];
-
-            unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
-        }
 
         // check session for existing oAuth login data
         $session = $_SESSION[DOKU_COOKIE]['auth'];
-        if(!isset($servicename) && isset($session['oauth'])) {
+        if(isset($session['oauth'])) {
             $servicename = $session['oauth'];
             // check if session data is still considered valid
             if ($this->isSessionValid($session)) {
@@ -57,6 +48,16 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             }
         }
 
+        $existingLoginProcess = false;
+        // are we in login progress?
+        if(isset($_SESSION[DOKU_COOKIE]['oauth-inprogress'])) {
+            $servicename = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'];
+            $page        = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'];
+
+            unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
+            $existingLoginProcess = true;
+        }
+
         // either we're in oauth login or a previous log needs to be rechecked
         if(isset($servicename)) {
             /** @var helper_plugin_oauth $hlp */
@@ -64,15 +65,30 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
             /** @var OAuth\Plugin\AbstractAdapter $service */
             $service = $hlp->loadService($servicename);
-            if(is_null($service)) return false;
-
-            if($service->checkToken()) {
-                return $this->processLogin($sticky, $service, $servicename, $page);
-            } else {
-                $this->relogin($servicename);
+            if(is_null($service)) {
+                $this->cleanLogout();
+                return false;
             }
 
-            unset($_SESSION[DOKU_COOKIE]['auth']);
+            if($service->checkToken()) {
+                $ok = $this->processLogin($sticky, $service, $servicename, $page);
+                if (!$ok) {
+                    $this->cleanLogout();
+                    return false;
+                }
+                return true;
+            } else {
+                if ($existingLoginProcess) {
+                    msg($this->getLang('oauth login failed'),0);
+                    $this->cleanLogout();
+                    return false;
+                } else {
+                    // first time here
+                    $this->relogin($servicename);
+                }
+            }
+
+            $this->cleanLogout();
             return false; // something went wrong during oAuth login
         } elseif (isset($_COOKIE[DOKU_COOKIE])) {
             global $INPUT;
@@ -88,6 +104,12 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
         // do the "normal" plain auth login via form
         return auth_login($user, $pass, $sticky);
+    }
+
+    private function cleanLogout() {
+        unset($_SESSION[DOKU_COOKIE]['oauth-done']);
+        unset($_SESSION[DOKU_COOKIE]['auth']);
+        $this->setUserCookie('',true,'',-60);
     }
 
     /**
@@ -329,13 +351,14 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
     /**
      * @param string $user
-     * @param string $sticky
+     * @param bool   $sticky
      * @param string $servicename
+     * @param int    $validityPeriodInSeconds optional, per default 1 Year
      */
-    private function setUserCookie($user, $sticky, $servicename) {
+    private function setUserCookie($user, $sticky, $servicename, $validityPeriodInSeconds = 31536000) {
         $cookie = base64_encode($user).'|'.((int) $sticky).'|'.base64_encode('oauth').'|'.base64_encode($servicename);
         $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
-        $time      = $sticky ? (time() + 60 * 60 * 24 * 365) : 0;
+        $time      = $sticky ? (time() + $validityPeriodInSeconds) : 0;
         setcookie(DOKU_COOKIE,$cookie, $time, $cookieDir, '',($conf['securecookie'] && is_ssl()), true);
     }
 

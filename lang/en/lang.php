@@ -13,3 +13,4 @@ $lang['loginButton'] = 'Login with ';//... i.e. Google (on SingleAuth)
 $lang['rejectedEMail'] = 'Invalid eMail-Account used. Only email accounts from the following domain(s) are allowed: %s!';
 $lang['eMailRestricted'] = '<p id="oauth_email_restricted">Only email accounts from the following domain(s) are allowed: %s</p>';
 $lang['addUser not possible'] = 'Self-Registration is currently disabled or conf/users.auth.php is not writable. Please ask your DokuWiki administrator to create your account manually.';
+$lang['oauth login failed'] = 'Your (re)login has failed.';
