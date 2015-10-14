@@ -322,23 +322,19 @@ class auth_plugin_oauth extends auth_plugin_authplain {
     public function logOff() {
         parent::logOff();
 
-        if(isset($_SESSION[DOKU_COOKIE]['auth']['buid'])) {
-            unset($_SESSION[DOKU_COOKIE]['auth']['buid']);
-        }
-        if(isset($_SESSION[DOKU_COOKIE]['auth']['time'])) {
-            unset($_SESSION[DOKU_COOKIE]['auth']['time']);
-        }
-        if(isset($_SESSION[DOKU_COOKIE]['auth']['oauth'])) {
-            unset($_SESSION[DOKU_COOKIE]['auth']['oauth']);
-        }
+        $this->cleanLogout();
     }
 
     /**
      * unset auth cookies and session information
      */
     private function cleanLogout() {
-        unset($_SESSION[DOKU_COOKIE]['oauth-done']);
-        unset($_SESSION[DOKU_COOKIE]['auth']);
+        if(isset($_SESSION[DOKU_COOKIE]['oauth-done'])) {
+            unset($_SESSION[DOKU_COOKIE]['oauth-done']);
+        }
+        if(isset($_SESSION[DOKU_COOKIE]['auth'])) {
+            unset($_SESSION[DOKU_COOKIE]['auth']);
+        }
         $this->setUserCookie('',true,'',-60);
     }
 
