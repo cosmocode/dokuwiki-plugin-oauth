@@ -153,6 +153,44 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
         }
         return false;
     }
+
+    /**
+     * @param array $session cookie auth session
+     *
+     * @return bool
+     */
+    public function validBrowserID ($session) {
+        return $session['buid'] == auth_browseruid();
+    }
+
+    /**
+     * @param array $session cookie auth session
+     *
+     * @return bool
+     */
+    public function isSessionTimedOut ($session) {
+        global $conf;
+        return $session['time'] < time() - $conf['auth_security_timeout'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGETRequest () {
+        global $INPUT;
+        $result = $INPUT->server->str('REQUEST_METHOD') === 'GET';
+        return $result;
+    }
+
+    /**
+     * check if we are handling a request to doku.php. Only doku.php defines $updateVersion
+     *
+     * @return bool
+     */
+    public function isDokuPHP() {
+        global $updateVersion;
+        return isset($updateVersion);
+    }
 }
 
 // vim:ts=4:sw=4:et:

@@ -31,7 +31,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
     }
 
     /**
-     * Start an oAuth login
+     * Start an oAuth login or restore  environment after successful login
      *
      * @param Doku_Event $event  event object by reference
      * @param mixed      $param  [the parameters passed as fifth argument to register_hook() when this
@@ -39,49 +39,18 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
      * @return void
      */
     public function handle_start(Doku_Event &$event, $param) {
-        global $INPUT, $RANGE, $DATE_AT, $REV;
-        global $ID;
-        global $_SESSION;
 
         if (isset($_SESSION[DOKU_COOKIE]['oauth-done']['do']) || !empty($_SESSION[DOKU_COOKIE]['oauth-done']['rev'])){
-            global $ACT, $TEXT, $PRE, $SUF, $SUM;
-            $ACT = $_SESSION[DOKU_COOKIE]['oauth-done']['do'];
-            if (!empty($_SESSION[DOKU_COOKIE]['oauth-done']['wikitext'])) {
-                $TEXT = cleanText($_SESSION[DOKU_COOKIE]['oauth-done']['wikitext']);
-                $PRE = cleanText(substr($_SESSION[DOKU_COOKIE]['oauth-done']['prefix'], 0, -1));
-                $SUF = cleanText($_SESSION[DOKU_COOKIE]['oauth-done']['suffix']);
-                $SUM = $_SESSION[DOKU_COOKIE]['oauth-done']['summary'];
-                $INPUT->post->set('sectok', $_SESSION[DOKU_COOKIE]['oauth-done']['sectok']);
-            }
-            if ($ACT === 'save' && empty($TEXT))
-            {
-                $ACT = 'show';
-            }
-
-            // resetting INPUT, ->post and ->get
-            foreach ($_SESSION[DOKU_COOKIE]['oauth-done'] as $key => $value) {
-                if ($key === 'post' || $key === 'get') continue;
-                $INPUT->set($key, $value);
-                if ($key === 'range') {
-                    $RANGE = $value;
-                }
-            }
-            foreach ($_SESSION[DOKU_COOKIE]['oauth-done']['post'] as $key => $value) {
-                $INPUT->post->set($key, $value);
-            }
-            foreach ($_SESSION[DOKU_COOKIE]['oauth-done']['get'] as $key => $value) {
-                $INPUT->get->set($key, $value);
-                if ($key === 'at') {
-                    $DATE_AT = $value;
-                }
-                if ($key === 'rev') {
-                    $REV = $value;
-                }
-            }
-
-            unset($_SESSION[DOKU_COOKIE]['oauth-done']);
+            $this->restoreSessionEnvironment();
             return;
         }
+
+        $this->startOAuthLogin();
+    }
+
+    private function startOAuthLogin() {
+        global $INPUT, $ID;
+
         /** @var helper_plugin_oauth $hlp */
         $hlp         = plugin_load('helper', 'oauth');
         $servicename = $INPUT->str('oauthlogin');
@@ -95,6 +64,24 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         session_write_close();
 
         $service->login();
+    }
+
+    private function restoreSessionEnvironment() {
+        global $INPUT, $ACT, $TEXT, $PRE, $SUF, $SUM, $RANGE, $DATE_AT, $REV;
+        $ACT = $_SESSION[DOKU_COOKIE]['oauth-done']['do'];
+        $_REQUEST = $_SESSION[DOKU_COOKIE]['oauth-done']['$_REQUEST'];
+
+        $REV   = $INPUT->int('rev');
+        $DATE_AT = $INPUT->str('at');
+        $RANGE = $INPUT->str('range');
+        if($INPUT->post->has('wikitext')) {
+            $TEXT = cleanText($INPUT->post->str('wikitext'));
+        }
+        $PRE = cleanText(substr($INPUT->post->str('prefix'), 0, -1));
+        $SUF = cleanText($INPUT->post->str('suffix'));
+        $SUM = $INPUT->post->str('summary');
+
+        unset($_SESSION[DOKU_COOKIE]['oauth-done']);
     }
 
     /**
