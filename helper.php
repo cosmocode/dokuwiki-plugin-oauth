@@ -36,14 +36,19 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
         /** @var \OAuth\Plugin\AbstractAdapter $service */
         $service = new $class($this->redirectURI());
         if(!$service->isInitialized()) {
-            msg("Failed to initialize $service authentication service. Check credentials", -1);
+            msg("Failed to initialize $servicename authentication service. Check credentials", -1);
             return null;
         }
 
         // The generic service can be externally configured
-        if(is_a($service->oAuth, 'OAuth\\OAuth2\\Service\\Generic')) {
+        $is_generic_oauth1 = is_a($service->oAuth, 'OAuth\\OAuth1\\Service\\Generic1');
+        $is_generic_oauth2 = is_a($service->oAuth, 'OAuth\\OAuth2\\Service\\Generic');
+        if($is_generic_oauth1 || $is_generic_oauth2) {
             $service->oAuth->setAuthorizationEndpoint($this->getAuthEndpoint($servicename));
             $service->oAuth->setAccessTokenEndpoint($this->getTokenEndpoint($servicename));
+            if ($is_generic_oauth1) {
+                $service->oAuth->setRequestTokenEndpoint($this->getRequestTokenEndpoint($servicename));
+            }
         }
 
         return $service;
@@ -113,6 +118,17 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     public function getAuthEndpoint($service) {
         $service = strtolower($service);
         return $this->getConf($service.'-authurl');
+    }
+
+    /**
+     * Return the configured Request Token Endpoint URL for the given service
+     *
+     * @param $service
+     * @return string
+     */
+    public function getRequestTokenEndpoint($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-requesttokenurl');
     }
 
     /**

@@ -48,3 +48,8 @@ $meta['singleService']       = array('multichoice',
                                          'Github',
                                          'Yahoo',
                                          'Doorkeeper',));
+$meta['yahoogeneric-key']             = array('string');
+$meta['yahoogeneric-secret']          = array('string');
+$meta['yahoogeneric-authurl']         = array('string');
+$meta['yahoogeneric-tokenurl']        = array('string');
+$meta['yahoogeneric-requesttokenurl'] = array('string');

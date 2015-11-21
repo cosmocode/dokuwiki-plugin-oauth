@@ -358,7 +358,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
     }
 
     /**
-     * Enhance function to check aainst duplicate emails
+     * Enhance function to check against duplicate emails
      *
      * @param string $user
      * @param array  $changes
