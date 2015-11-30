@@ -23,6 +23,7 @@ $conf['custom-secret']       = '';
 $conf['custom-authurl']      = '';
 $conf['custom-tokenurl']     = '';
 $conf['custom-meurl']        = '';
+$conf['custom-scope']        = '';
 $conf['custom-mapping']      = 'user=user name=name email=email';
 $conf['mailRestriction']     = '';
 $conf['singleService']       = '';

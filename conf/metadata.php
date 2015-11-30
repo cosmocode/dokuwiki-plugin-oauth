@@ -45,6 +45,7 @@ $meta['custom-authurl']      = array('string');
 $meta['custom-tokenurl']     = array('string');
 $meta['custom-meurl']        = array('string');
 $meta['custom-mapping']      = array('string');
+$meta['custom-scope']        = array('string');
 $meta['mailRestriction']     = array('string','_pattern' => '!^(@[^,@]+(\.[^,@]+)+(,|$))*$!'); // https://regex101.com/r/mG4aL5/3
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(

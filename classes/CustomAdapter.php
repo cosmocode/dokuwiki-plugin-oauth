@@ -10,6 +10,10 @@ class Custom extends Generic
     {
         return true;
     }
+  protected function getAuthorizationMethod()
+    {
+        return static::AUTHORIZATION_METHOD_HEADER_BEARER;
+    }
 }
 
 namespace OAuth\Plugin;
@@ -41,13 +45,12 @@ class CustomAdapter extends AbstractAdapter {
         $data = array();
 
         /** var OAuth\OAuth2\Service\Generic $this->oAuth */
-        $result = $JSON->decode($this->oAuth->request($conf['custom-meurl']));
 
-        // foreach(explode(" ", $conf['custom-mapping']) as $map) {
-        //   $smap = explode("=", $map, 1);
-        //   $data[$smap[0]] = $result[$smap[1]];
-        // }
-        // print($data);
+        $result = $JSON->decode($this->oAuth->request($this->hlp->conf['custom-meurl']));
+        foreach(explode(" ", $this->hlp->conf['custom-mapping']) as $map) {
+           $smap = explode("=", $map, 2);
+           $data[$smap[0]] = $result[$smap[1]];
+        }
 
         return $data;
     }
@@ -59,6 +62,7 @@ class CustomAdapter extends AbstractAdapter {
      * @return string
      */
     public function getServiceName() {
+        // the custom class we defined
         return 'Custom';
     }
 
@@ -70,7 +74,7 @@ class CustomAdapter extends AbstractAdapter {
      * @return array
      */
     public function getScope() {
-        return ['read'];
+        return explode(",", $this->hlp->conf['custom-scope']);
     }
 
 }
