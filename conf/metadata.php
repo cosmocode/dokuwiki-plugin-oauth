@@ -56,3 +56,4 @@ $meta['singleService']       = array('multichoice',
                                          'Yahoo',
                                          'Doorkeeper',
                                          'Custom'));
+$meta['register-login']     = array('onoff');

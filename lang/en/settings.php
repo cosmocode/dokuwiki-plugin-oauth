@@ -28,5 +28,6 @@ $lang['custom-tokenurl']     = '(Custom) The access token endpoint URL of your D
 $lang['custom-meurl']        = '(Custom) Url returning json for user data.';
 $lang['custom-mapping']      = '(Custom) Mapping of return json keys to internal keys.';
 $lang['custom-scope']        = '(Custom) Comma seperated list of scopes to request.';
+$lang['register-login']      = 'Allows user to register through oauth login.';
 $lang['singleService']       = 'Login with single oAuth service only (disables local logins!)';
 $lang['singleService_o_'] = 'Allow all services';

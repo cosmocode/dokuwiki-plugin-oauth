@@ -27,3 +27,4 @@ $conf['custom-scope']        = '';
 $conf['custom-mapping']      = 'user=user name=name email=email';
 $conf['mailRestriction']     = '';
 $conf['singleService']       = '';
+$conf['register-login']      = false;
