@@ -5,6 +5,9 @@
  * @author Andreas Gohr <andi@splitbrain.org>
  */
 
+$conf['auth0-key']           = '';
+$conf['auth0-secret']        = '';
+$conf['auth0-domain']        = '';
 $conf['custom-redirectURI']  = '';
 $conf['facebook-key']        = '';
 $conf['facebook-secret']     = '';
