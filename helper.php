@@ -20,7 +20,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     public function loadService(&$servicename) {
         $id = getID(); // $ID isn't set in trustExternal, yet
 
-        $servicename = preg_replace('/[^a-zA-Z_]+/', '', $servicename);
+        $servicename = preg_replace('/[^a-zA-Z0-9_]+/', '', $servicename);
         if(!$servicename) return null;
 
         require_once(__DIR__.'/phpoauthlib/src/OAuth/bootstrap.php');

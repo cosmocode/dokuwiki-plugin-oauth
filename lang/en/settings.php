@@ -8,6 +8,9 @@
 
 $lang['info']            = 'Redirect URI to use when configuring the applications';
 $lang['custom-redirectURI'] = 'Use the following custom redirect URI';
+$lang['auth0-key']       = 'The Client ID of your registered <a href="https://manage.auth0.com/#/applications">Auth0 application</a>';
+$lang['auth0-secret']    = 'The Client Secret of your registered <a href="https://manage.auth0.com/#/applications">Auth0 application</a>';
+$lang['auth0-domain']    = 'The Domain of your registered <a href="https://manage.auth0.com/#/applications">Auth0 account</a>';
 $lang['facebook-key']    = 'The App ID of your registered <a href="https://developers.facebook.com/apps">Facebook application</a>';
 $lang['facebook-secret'] = 'The App Secret of your registered <a href="https://developers.facebook.com/apps">Facebook application</a>';
 $lang['github-key']      = 'The Client ID of your registered <a href="https://github.com/settings/applications">Github application</a>';

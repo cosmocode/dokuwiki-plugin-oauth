@@ -26,6 +26,9 @@ class setting_plugin_oauth extends setting {
 }
 
 $meta['info']                = array('plugin_oauth');
+$meta['auth0-key']           = array('string');
+$meta['auth0-secret']        = array('string');
+$meta['auth0-domain']        = array('string');
 $meta['custom-redirectURI']  = array('string','_caution' => 'warning');
 $meta['facebook-key']        = array('string');
 $meta['facebook-secret']     = array('string');
@@ -43,6 +46,7 @@ $meta['mailRestriction']     = array('string','_pattern' => '!^(@[^,@]+(\.[^,@]+
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
                                          '',
+                                         'Auth0',
                                          'Google',
                                          'Facebook',
                                          'Github',
