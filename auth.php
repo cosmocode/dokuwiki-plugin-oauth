@@ -53,6 +53,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         if(isset($_SESSION[DOKU_COOKIE]['oauth-inprogress'])) {
             $servicename = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'];
             $page        = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'];
+            $params      = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'];
 
             unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
             $existingLoginProcess = true;
@@ -71,7 +72,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             }
 
             if($service->checkToken()) {
-                $ok = $this->processLogin($sticky, $service, $servicename, $page);
+                $ok = $this->processLogin($sticky, $service, $servicename, $page, $params);
                 if (!$ok) {
                     $this->cleanLogout();
                     return false;
@@ -137,6 +138,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         session_start();
         $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
         $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id']      = $INPUT->str('id');
+        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params']  = $_GET;
 
         $_SESSION[DOKU_COOKIE]['oauth-done']['$_REQUEST'] = $_REQUEST;
 
@@ -162,10 +164,11 @@ class auth_plugin_oauth extends auth_plugin_authplain {
      * @param OAuth\Plugin\AbstractAdapter $service
      * @param string                       $servicename
      * @param string                       $page
+     * @param array                        $params
      *
      * @return bool
      */
-    protected function processLogin($sticky, $service, $servicename, $page) {
+    protected function processLogin($sticky, $service, $servicename, $page, $params = array()) {
         $uinfo = $service->getUser();
         $ok = $this->processUser($uinfo, $servicename);
         if(!$ok) {
@@ -174,7 +177,8 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         $this->setUserSession($uinfo, $servicename);
         $this->setUserCookie($uinfo['user'], $sticky, $servicename);
         if(isset($page)) {
-            send_redirect(wl($page));
+            if(!empty($params['id'])) unset($params['id']);
+            send_redirect(wl($page, $params, false, '&'));
         }
         return true;
     }
