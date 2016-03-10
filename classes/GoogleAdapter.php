@@ -35,4 +35,14 @@ class GoogleAdapter extends AbstractAdapter {
         return array(Google::SCOPE_USERINFO_EMAIL, Google::SCOPE_USERINFO_PROFILE);
     }
 
+    public function login() {
+        $login_hint = '';
+        if(!empty($_SESSION[DOKU_COOKIE]['auth']['info']['mail'])) {
+            $usermail = $_SESSION[DOKU_COOKIE]['auth']['info']['mail'];
+            $login_hint = "&login_hint=$usermail";
+        }
+        $url = $this->oAuth->getAuthorizationUri() . $login_hint;
+        send_redirect($url);
+    }
+
 }
