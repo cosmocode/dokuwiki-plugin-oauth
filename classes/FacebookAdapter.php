@@ -44,4 +44,9 @@ class FacebookAdapter extends AbstractAdapter {
         return array(Facebook::SCOPE_EMAIL);
     }
 
+    public function login() {
+        $url = $this->oAuth->getAuthorizationUri() . '&fields=name,email';
+        send_redirect($url);
+    }
+
 }
