@@ -127,6 +127,17 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     }
 
     /**
+     * Return the configured User Info Endpoint URL for the given service
+     *
+     * @param $service
+     * @return string
+     */
+    public function getUserInfoEndpoint($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-userinfourl');
+    }
+
+    /**
      * @return array
      */
     public function getValidDomains() {

@@ -17,6 +17,11 @@ $lang['github-key']      = 'The Client ID of your registered <a href="https://gi
 $lang['github-secret']   = 'The Client Secret of your registered <a href="https://github.com/settings/applications">Github application</a>';
 $lang['google-key']      = 'The Client ID of your registered <a href="https://console.developers.google.com/project">Google Project</a> (see Credentials Screen)';
 $lang['google-secret']   = 'The Client Secret of your registered <a href="https://console.developers.google.com/project">Google Project</a> (see Credentials Screen)';
+$lang['keycloak-key']      = 'The resource id of your Keycloak application.';
+$lang['keycloak-secret']   = 'The Secret of your Keycloak Application.';
+$lang['keycloak-authurl']  = 'The authorization endpoint URL of your Keycloak setup.';
+$lang['keycloak-tokenurl'] = 'The access token endpoint URL of your Keycloak setup.';
+$lang['keycloak-userinfourl'] = 'The userinfo endpoint URL of your Keycloak setup.';
 $lang['mailRestriction']   = "Limit authentification to users from this domain (optional, must start with an <code>@</code>)";
 $lang['yahoo-key']       = 'The Consumer Key of your registered <a href="https://developer.apps.yahoo.com/dashboard/createKey.html">Yahoo Application</a>';
 $lang['yahoo-secret']    = 'The Consumer Secret of your registered <a href="https://developer.apps.yahoo.com/dashboard/createKey.html">Yahoo Application</a>';

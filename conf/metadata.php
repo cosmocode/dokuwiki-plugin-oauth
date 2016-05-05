@@ -36,6 +36,11 @@ $meta['github-key']          = array('string');
 $meta['github-secret']       = array('string');
 $meta['google-key']          = array('string');
 $meta['google-secret']       = array('string');
+$meta['keycloak-key']        = array('string');
+$meta['keycloak-secret']     = array('string');
+$meta['keycloak-authurl']    = array('string');
+$meta['keycloak-tokenurl']   = array('string');
+$meta['keycloak-userinfourl'] = array('string');
 $meta['yahoo-key']           = array('string');
 $meta['yahoo-secret']        = array('string');
 $meta['doorkeeper-key']      = array('string');
@@ -51,4 +56,5 @@ $meta['singleService']       = array('multichoice',
                                          'Facebook',
                                          'Github',
                                          'Yahoo',
-                                         'Doorkeeper',));
+                                         'Doorkeeper',
+                                         'Keycloak'));
