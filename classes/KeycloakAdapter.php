@@ -27,10 +27,14 @@ class KeycloakAdapter extends AbstractAdapter {
         /** var OAuth\OAuth2\Service\Generic $this->oAuth */
         $result = $JSON->decode($this->oAuth->request($this->hlp->getUserInfoEndpoint('Keycloak')));
 
-        //dbg($result);
         $data['user'] = $result['preferred_username'];
         $data['name'] = $result['name'];
         $data['mail'] = $result['email'];
+        if( !empty($result['groups']) )
+        {
+            $data['grps'] = $result['groups'];
+        }
+        $data['grps'] = $result['groups'];
 
         return $data;
     }
