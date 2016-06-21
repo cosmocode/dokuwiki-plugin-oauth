@@ -36,7 +36,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             return;
         }
         global $INPUT;
-        $url = $farmer->getAnimalURL($animal) . 'doku.php?' . $INPUT->server->str('QUERY_STRING');
+        $url = $farmer->getAnimalURL($animal) . '/doku.php?' . $INPUT->server->str('QUERY_STRING');
         send_redirect($url);
     }
 
