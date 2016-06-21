@@ -36,12 +36,19 @@ class GoogleAdapter extends AbstractAdapter {
     }
 
     public function login() {
-        $login_hint = '';
+        $parameters = array();
         if(!empty($_SESSION[DOKU_COOKIE]['auth']['info']['mail'])) {
             $usermail = $_SESSION[DOKU_COOKIE]['auth']['info']['mail'];
-            $login_hint = "&login_hint=$usermail";
+            $parameters['login_hint'] = $usermail;
         }
-        $url = $this->oAuth->getAuthorizationUri() . $login_hint;
+
+        /** @var \helper_plugin_farmer $farmer */
+        $farmer = plugin_load('helper', 'farmer', false, true);
+        if ($farmer && $animal = $farmer->getAnimal()) {
+            $parameters['state'] = urlencode(base64_encode(json_encode(array('animal'=>$animal,'state'=> md5(rand())))));
+            $this->storage->storeAuthorizationState('Google', $parameters['state']);
+        }
+        $url = $this->oAuth->getAuthorizationUri($parameters);
         send_redirect($url);
     }
 
