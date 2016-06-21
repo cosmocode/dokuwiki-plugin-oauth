@@ -37,7 +37,8 @@ class oAuthHTTPClient implements ClientInterface {
 
         $ok = $http->sendRequest($endpoint->getAbsoluteUri(), $requestBody, $method);
         if(!$ok){
-            throw new TokenResponseException($http->error);
+            $msg = "An error occured during the request to the oauth provider:\n";
+            throw new TokenResponseException($msg . $http->error);
         }
 
         return $http->resp_body;

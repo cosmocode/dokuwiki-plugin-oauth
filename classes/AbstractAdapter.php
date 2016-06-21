@@ -96,7 +96,7 @@ abstract class AbstractAdapter {
      * @return bool
      */
     public function checkToken() {
-        global $INPUT;
+        global $INPUT, $conf;
 
         if(is_a($this->oAuth, 'OAuth\OAuth2\Service\AbstractService')) { /* oAuth2 handling */
 
@@ -107,6 +107,7 @@ abstract class AbstractAdapter {
                 $this->oAuth->requestAccessToken($INPUT->get->str('code'), $state);
             } catch (TokenResponseException $e) {
                 msg($e->getMessage(), -1);
+                if($conf['allowdebug']) msg('<pre>'.hsc($e->getTraceAsString()).'</pre>', -1);
                 return false;
             }
         } else { /* oAuth1 handling */

@@ -22,6 +22,24 @@ class auth_plugin_oauth extends auth_plugin_authplain {
         $this->cando['external'] = true;
     }
 
+    private function handleState($state) {
+        /** @var \helper_plugin_farmer $farmer */
+        $farmer = plugin_load('helper', 'farmer', false, true);
+        $data = json_decode(base64_decode(urldecode($state)));
+        if (empty($data->animal) || $farmer->getAnimal() == $data->animal) {
+            return;
+        }
+        $animal = $data->animal;
+        $allAnimals = $farmer->getAllAnimals();
+        if (!in_array($animal, $allAnimals)) {
+            msg('Animal ' . $animal . ' does not exist!');
+            return;
+        }
+        global $INPUT;
+        $url = $farmer->getAnimalURL($animal) . 'doku.php?' . $INPUT->server->str('QUERY_STRING');
+        send_redirect($url);
+    }
+
     /**
      * Handle the login
      *
@@ -34,7 +52,11 @@ class auth_plugin_oauth extends auth_plugin_authplain {
      * @return bool
      */
     function trustExternal($user, $pass, $sticky = false) {
-        global $USERINFO;
+        global $USERINFO, $INPUT;
+
+        if ($INPUT->has('state') && plugin_load('helper', 'farmer', false, true)) {
+            $this->handleState($INPUT->str('state'));
+        }
 
         // check session for existing oAuth login data
         $session = $_SESSION[DOKU_COOKIE]['auth'];
