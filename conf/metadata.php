@@ -36,6 +36,8 @@ $meta['github-key']          = array('string');
 $meta['github-secret']       = array('string');
 $meta['google-key']          = array('string');
 $meta['google-secret']       = array('string');
+$meta['dataporten-key']      = array('string');
+$meta['dataporten-secret']   = array('string');
 $meta['keycloak-key']        = array('string');
 $meta['keycloak-secret']     = array('string');
 $meta['keycloak-authurl']    = array('string');
@@ -53,6 +55,7 @@ $meta['singleService']       = array('multichoice',
                                          '',
                                          'Auth0',
                                          'Google',
+                                         'Dataporten',
                                          'Facebook',
                                          'Github',
                                          'Yahoo',
