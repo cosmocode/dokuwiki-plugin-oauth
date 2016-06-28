@@ -9,24 +9,6 @@ use OAuth\Common\Http\Uri\Uri;
 
 class Dataporten extends AbstractService
 {
-    /**
-     * Defined scopes - More scopes are listed here:
-     * https://developers.google.com/oauthplayground/
-     *
-     * Make a pull request if you need more scopes.
-     */
-
-    // Basic
-    const SCOPE_EMAIL                       = 'email';
-    const SCOPE_PROFILE                     = 'profile';
-
-    public function setAccessType($accessType)
-    {
-        if (!in_array($accessType, array('online', 'offline'), true)) {
-            throw new InvalidAccessTypeException('Invalid accessType, expected either online or offline');
-        }
-        $this->accessType = $accessType;
-    }
 
     /**
      * {@inheritdoc}
