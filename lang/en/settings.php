@@ -17,6 +17,8 @@ $lang['github-key']      = 'The Client ID of your registered <a href="https://gi
 $lang['github-secret']   = 'The Client Secret of your registered <a href="https://github.com/settings/applications">Github application</a>';
 $lang['google-key']      = 'The Client ID of your registered <a href="https://console.developers.google.com/project">Google Project</a> (see Credentials Screen)';
 $lang['google-secret']   = 'The Client Secret of your registered <a href="https://console.developers.google.com/project">Google Project</a> (see Credentials Screen)';
+$lang['dataporten-key']  = 'The Client ID of your registered <a href="https://dashboard.dataporten.no">Dataporten application</a>';
+$lang['dataporten-secret'] = 'The Client Secret of your registered <a href="https://dashboard.dataporten.no">Dataporten application</a>';
 $lang['keycloak-key']      = 'The resource id of your Keycloak application.';
 $lang['keycloak-secret']   = 'The Secret of your Keycloak Application.';
 $lang['keycloak-authurl']  = 'The authorization endpoint URL of your Keycloak setup.';
