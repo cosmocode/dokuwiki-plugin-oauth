@@ -18,38 +18,13 @@ class DataportenAdapter extends AbstractAdapter {
         $data = array();
 
         $result = $JSON->decode($this->oAuth->request('https://auth.dataporten.no/userinfo'));
-
-        print_r($result);
-
+        $result_grous = $JSON->decode($this->oAuth->request('https://groups-api.dataporten.no/groups/me/groups'));
+        
         $data['user'] = $result['user']['userid'];
         $data['name'] = $result['user']['name'];
         $data['mail'] = $result['user']['email'];
 
         return $data;
     }
-
-    /**
-     * Access to user and his email addresses
-     *
-     * @return array
-     */
-    //public function getScope() {
-    //    return array(Dataporten::SCOPE_USERINFO_EMAIL, Dataporten::SCOPE_USERINFO_PROFILE);
-    //}
-
-    /*public function login() {
-        $parameters = array(
-            'grant_type' => 'code');
-        //if(!empty($_SESSION[DOKU_COOKIE]['auth']['info']['mail'])) {
-        //    $usermail = $_SESSION[DOKU_COOKIE]['auth']['info']['mail'];
-        //    $parameters['login_hint'] = $usermail;
-        //}
-
-        /** @var \helper_plugin_farmer $farmer 
-        //$farmer = plugin_load('helper', 'farmer', false, true);
-       
-        $url = $this->oAuth->getAuthorizationUri($parameters);
-        send_redirect($url);
-    }*/
 
 }
