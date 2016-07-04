@@ -18,11 +18,17 @@ class DataportenAdapter extends AbstractAdapter {
         $data = array();
 
         $result = $JSON->decode($this->oAuth->request('https://auth.dataporten.no/userinfo'));
-        $result_grous = $JSON->decode($this->oAuth->request('https://groups-api.dataporten.no/groups/me/groups'));
+        $groups = $JSON->decode($this->oAuth->request('https://groups-api.dataporten.no/groups/me/groups'));
+
+        $user_groups = array();
+        foreach($groups as $key) {
+          array_push($user_groups, $key["id"]);
+        }
         
         $data['user'] = $result['user']['userid'];
         $data['name'] = $result['user']['name'];
         $data['mail'] = $result['user']['email'];
+        $data['grps'] = $user_groups;
 
         return $data;
     }
