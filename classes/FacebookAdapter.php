@@ -19,7 +19,7 @@ class FacebookAdapter extends AbstractAdapter {
         $JSON = new \JSON(JSON_LOOSE_TYPE);
         $data = array();
 
-        $result = $JSON->decode($this->oAuth->request('/me'));
+        $result = $JSON->decode($this->oAuth->request('/me?fields=name,email'));
 
         if( !empty($result['username']) )
         {
