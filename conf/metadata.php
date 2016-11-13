@@ -29,6 +29,7 @@ $meta['info']                = array('plugin_oauth');
 $meta['auth0-key']           = array('string');
 $meta['auth0-secret']        = array('string');
 $meta['auth0-domain']        = array('string');
+$meta['override-newreg']     = array('onoff');
 $meta['custom-redirectURI']  = array('string','_caution' => 'warning');
 $meta['facebook-key']        = array('string');
 $meta['facebook-secret']     = array('string');

@@ -9,6 +9,7 @@ $conf['auth0-key']           = '';
 $conf['auth0-secret']        = '';
 $conf['auth0-domain']        = '';
 $conf['custom-redirectURI']  = '';
+$conf['override-newreg']     = false;
 $conf['facebook-key']        = '';
 $conf['facebook-secret']     = '';
 $conf['github-key']          = '';
