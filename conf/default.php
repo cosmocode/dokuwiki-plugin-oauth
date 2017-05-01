@@ -28,5 +28,7 @@ $conf['doorkeeper-key']      = '';
 $conf['doorkeeper-secret']   = '';
 $conf['doorkeeper-authurl']  = 'https://doorkeeper-provider.herokuapp.com/oauth/authorize';
 $conf['doorkeeper-tokenurl'] = 'https://doorkeeper-provider.herokuapp.com/oauth/token';
+$conf['wildapricot-tokenurl']   = 'https://oauth.wildapricot.org/aukh/token';
+$conf['wildapricot-userinfourl'] = 'https://api.wildapricot.org/v2/Accounts/{your org account id}/Contacts/me';
 $conf['mailRestriction']     = '';
 $conf['singleService']       = '';
