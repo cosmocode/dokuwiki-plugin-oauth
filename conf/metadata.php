@@ -54,6 +54,7 @@ $meta['wildapricot-secret']   = array('string');
 $meta['wildapricot-authurl']  = array('string');
 $meta['wildapricot-tokenurl'] = array('string');
 $meta['wildapricot-userinfourl'] = array('string');
+$meta['allowselfregistration'] = array('onoff');
 $meta['mailRestriction']     = array('string','_pattern' => '!^(@[^,@]+(\.[^,@]+)+(,|$))*$!'); // https://regex101.com/r/mG4aL5/3
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
