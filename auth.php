@@ -234,13 +234,16 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             $uinfo['user'] = $user;
             $uinfo['name'] = $sinfo['name'];
             $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
-        } else {
+        } elseif (actionOK('register') || $this->getConf('allowselfregistration')) {
             $ok = $this->addUser($uinfo, $servicename);
             if(!$ok) {
                 msg('something went wrong creating your user account. please try again later.', -1);
                 return false;
             }
-        return true;
+        } else {
+            msg($this->getLang('addUser not possible'), -1);
+            return false;
+        }
     }
 
     /**
