@@ -36,6 +36,6 @@ $lang['wildapricot-secret']   = 'The Authentication Token created when you autho
 $lang['wildapricot-authurl']  = 'The authorization endpoint URL of your Wild Apricot instance.';
 $lang['wildapricot-tokenurl'] = 'The access token endpoint URL of your Wild Aprocit instance.';
 $lang['wildapricot-userinfourl'] = 'The userinfo endpoint URL of your Wild Apricot instance.';
-$lang['singleService']            = 'Login with single oAuth service only (disables local logins!)';
 $lang['allowselfregistration'] = 'Allow plugin to use oAuth credentials to create an account if it does not exist, regardless of whether users are otherwise allowed to self-register for accounts.';
+$lang['singleService']            = 'Login with single oAuth service only (disables local logins!)';
 $lang['singleService_o_'] = 'Allow all services';
