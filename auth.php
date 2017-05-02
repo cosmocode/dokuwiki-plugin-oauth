@@ -244,6 +244,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             msg($this->getLang('addUser not possible'), -1);
             return false;
         }
+        return true;
     }
 
     /**
