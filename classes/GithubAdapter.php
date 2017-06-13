@@ -38,7 +38,7 @@ class GithubAdapter extends AbstractAdapter {
      * @return array
      */
     public function getScope() {
-        return array(GitHub::SCOPE_USER, GitHub::SCOPE_USER_EMAIL);
+        return array(GitHub::SCOPE_USER_EMAIL);
     }
 
 }
