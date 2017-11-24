@@ -43,8 +43,8 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
 
         // The generic service can be externally configured
         if(is_a($service->oAuth, 'OAuth\\OAuth2\\Service\\Generic')) {
-            $service->oAuth->setAuthorizationEndpoint($this->getAuthEndpoint($servicename));
-            $service->oAuth->setAccessTokenEndpoint($this->getTokenEndpoint($servicename));
+            $service->oAuth->setAuthorizationEndpoint($service->getAuthEndpoint());
+            $service->oAuth->setAccessTokenEndpoint($service->getTokenEndpoint());
         }
 
         return $service;

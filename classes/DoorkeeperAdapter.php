@@ -15,7 +15,7 @@ namespace OAuth\Plugin;
  * @link https://github.com/doorkeeper-gem/doorkeeper
  * @package OAuth\Plugin
  */
-class DoorkeeperAdapter extends AbstractAdapter {
+class DoorkeeperAdapter extends AbstractGenericAdapter {
 
     /**
      * Retrieve the user's data
@@ -38,14 +38,11 @@ class DoorkeeperAdapter extends AbstractAdapter {
         return $data;
     }
 
-    /**
-     * We make use of the "Generic" oAuth 2 Service as defined in
-     * phpoauthlib/src/OAuth/OAuth2/Service/Generic.php
-     *
-     * @return string
-     */
-    public function getServiceName() {
-        return 'Generic';
+    public function getAuthEndpoint() {
+      return $this->hlp->getAuthEndpoint($this->getAdapterName());
     }
 
+    public function getTokenEndpoint() {
+       return $this->hlp->getTokenEndpoint($this->getAdapterName());
+    }
 }
