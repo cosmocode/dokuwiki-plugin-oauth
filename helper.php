@@ -111,6 +111,17 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      * @param $service
      * @return string
      */
+    public function getUrl($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-url');
+    }
+
+    /**
+     * Return the configured Authentication Endpoint URL for the given service
+     *
+     * @param $service
+     * @return string
+     */
     public function getAuthEndpoint($service) {
         $service = strtolower($service);
         return $this->getConf($service.'-authurl');

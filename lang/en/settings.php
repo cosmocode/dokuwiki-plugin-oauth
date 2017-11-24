@@ -27,6 +27,9 @@ $lang['keycloak-userinfourl'] = 'The userinfo endpoint URL of your Keycloak setu
 $lang['mailRestriction']   = "Limit authentification to users from this domain (optional, must start with an <code>@</code>)";
 $lang['yahoo-key']       = 'The Consumer Key of your registered <a href="https://developer.apps.yahoo.com/dashboard/createKey.html">Yahoo Application</a>';
 $lang['yahoo-secret']    = 'The Consumer Secret of your registered <a href="https://developer.apps.yahoo.com/dashboard/createKey.html">Yahoo Application</a>';
+$lang['gitlab-key']    = "The Application ID provided by your GitLab installation";
+$lang['gitlab-secret'] = "The Secret provided by your GitLab installation";
+$lang['gitlab-url']    = 'The URL to your Gitlab installation';
 $lang['doorkeeper-key']      = '(Example) The Application ID of your registered Doorkeeper Application.';
 $lang['doorkeeper-secret']   = '(Example) The Secret of your registered Doorkeeper Application.';
 $lang['doorkeeper-authurl']  = '(Example) The authorization endpoint URL of your Doorkeeper setup.';
