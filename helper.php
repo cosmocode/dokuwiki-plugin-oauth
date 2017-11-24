@@ -25,6 +25,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
 
         require_once(__DIR__.'/phpoauthlib/src/OAuth/bootstrap.php');
         require_once(__DIR__.'/classes/AbstractAdapter.php');
+        require_once(__DIR__.'/classes/AbstractGenericAdapter.php');
         require_once(__DIR__.'/classes/oAuthHTTPClient.php');
         require_once(__DIR__.'/classes/oAuthStorage.php');
 
