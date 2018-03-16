@@ -29,6 +29,10 @@ $meta['info']                = array('plugin_oauth');
 $meta['auth0-key']           = array('string');
 $meta['auth0-secret']        = array('string');
 $meta['auth0-domain']        = array('string');
+$meta['azure-tenant']        = array('string');
+$meta['azure-key']           = array('string');
+$meta['azure-secret']        = array('string');
+$meta['azure-groupmapping']  = array('');
 $meta['custom-redirectURI']  = array('string','_caution' => 'warning');
 $meta['facebook-key']        = array('string');
 $meta['facebook-secret']     = array('string');
@@ -54,6 +58,7 @@ $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
                                          '',
                                          'Auth0',
+	                                 'Azure',
                                          'Google',
                                          'Dataporten',
                                          'Facebook',
