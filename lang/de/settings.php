@@ -21,3 +21,4 @@ $lang['dataporten-secret']     = 'Client Geheimhcode Ihrer <a href="https://dash
 $lang['mailRestriction']       = 'Beschränke Anmeldung auf Benutzerprofile dieser Domäne (optional, muss mit <code>@</code> beginnen)';
 $lang['singleService']         = 'Nur einen oAuth Service zulassen (lokale Anmeldung wird deaktiviert!)';
 $lang['singleService_o_']      = 'Alle Services zulassen';
+$lang['register-on-auth']      = 'Authentifizierte Benutzer registrieren, auch wenn Selbstregistrierung in der Hauptkonfiguration nicht erlaubt ist.';

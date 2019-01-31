@@ -30,3 +30,4 @@ $conf['doorkeeper-authurl']  = 'https://doorkeeper-provider.herokuapp.com/oauth/
 $conf['doorkeeper-tokenurl'] = 'https://doorkeeper-provider.herokuapp.com/oauth/token';
 $conf['mailRestriction']     = '';
 $conf['singleService']       = '';
+$conf['register-on-auth']    = 0;
