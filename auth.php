@@ -234,7 +234,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
             $uinfo['user'] = $user;
             $uinfo['name'] = $sinfo['name'];
             $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
-        } elseif(actionOK('register')) {
+        } elseif(actionOK('register') || $this->getConf('register-on-auth')) {
             $ok = $this->addUser($uinfo, $servicename);
             if(!$ok) {
                 msg('something went wrong creating your user account. please try again later.', -1);

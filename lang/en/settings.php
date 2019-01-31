@@ -33,3 +33,4 @@ $lang['doorkeeper-authurl']  = '(Example) The authorization endpoint URL of your
 $lang['doorkeeper-tokenurl'] = '(Example) The access token endpoint URL of your Doorkeeper setup.';
 $lang['singleService']            = 'Login with single oAuth service only (disables local logins!)';
 $lang['singleService_o_'] = 'Allow all services';
+$lang['register-on-auth'] = 'Register authenticated users even if self-registration is disabled in main configuration';
