@@ -161,7 +161,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
             $group = $auth->cleanGroup($service);
             $elem  = form_makeCheckboxField(
                 'oauth_group['.$group.']',
-                1, $service, '', 'simple',
+                1, $this->service_login_text($hlp, $service), '', 'simple',
                 array(
                     'checked' => (in_array($group, $USERINFO['grps'])) ? 'checked' : ''
                 )
