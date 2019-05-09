@@ -31,6 +31,12 @@ $lang['doorkeeper-key']      = '(Example) The Application ID of your registered 
 $lang['doorkeeper-secret']   = '(Example) The Secret of your registered Doorkeeper Application.';
 $lang['doorkeeper-authurl']  = '(Example) The authorization endpoint URL of your Doorkeeper setup.';
 $lang['doorkeeper-tokenurl'] = '(Example) The access token endpoint URL of your Doorkeeper setup.';
+$lang['generic-oauth-key']        = 'The Application/Client id of your Oauth application.';
+$lang['generic-secret']      = 'The Client Secret of your Oauth Application.';
+$lang['generic-authurl']     = 'The authorization endpoint URL of your Oauth setup.';
+$lang['generic-tokenurl']    = 'The access token endpoint URL of your Oauth setup.';
+$lang['generic-userinfourl'] = 'The endpoint URL for obtaining user info in JSON.';
+$lang['generic-fieldmap']    = 'Field names containing the user\' username, name email and groups. E.g. mail=emailinserver';
 $lang['singleService']            = 'Login with single oAuth service only (disables local logins!)';
 $lang['singleService_o_'] = 'Allow all services';
 $lang['register-on-auth'] = 'Register authenticated users even if self-registration is disabled in main configuration';

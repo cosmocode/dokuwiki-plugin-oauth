@@ -49,6 +49,12 @@ $meta['doorkeeper-key']      = array('string');
 $meta['doorkeeper-secret']   = array('string');
 $meta['doorkeeper-authurl']  = array('string');
 $meta['doorkeeper-tokenurl'] = array('string');
+$meta['generic-fieldmap']    = array('string');
+$meta['generic-key']        = array('string');
+$meta['generic-secret']     = array('string');
+$meta['generic-authurl']    = array('string');
+$meta['generic-tokenurl']   = array('string');
+$meta['generic-userinfourl'] = array('string');
 $meta['mailRestriction']     = array('string','_pattern' => '!^(@[^,@]+(\.[^,@]+)+(,|$))*$!'); // https://regex101.com/r/mG4aL5/3
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
@@ -60,5 +66,6 @@ $meta['singleService']       = array('multichoice',
                                          'Github',
                                          'Yahoo',
                                          'Doorkeeper',
+                                         'Generic',
                                          'Keycloak'));
 $meta['register-on-auth']    = array('onoff','_caution' => 'security');
