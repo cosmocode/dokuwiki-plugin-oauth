@@ -37,6 +37,8 @@ $lang['generic-authurl']     = 'The authorization endpoint URL of your Oauth set
 $lang['generic-tokenurl']    = 'The access token endpoint URL of your Oauth setup.';
 $lang['generic-userinfourl'] = 'The endpoint URL for obtaining user info in JSON.';
 $lang['generic-fieldmap']    = 'Field names containing the user\' username, name email and groups. E.g. mail=emailinserver';
+$lang['generic-logintext']   = 'Text to display in the generic oauth login button';
+$lang['generic-logourl']     = 'URL for an image to display in the generic oauth login button';
 $lang['singleService']            = 'Login with single oAuth service only (disables local logins!)';
 $lang['singleService_o_'] = 'Allow all services';
 $lang['register-on-auth'] = 'Register authenticated users even if self-registration is disabled in main configuration';

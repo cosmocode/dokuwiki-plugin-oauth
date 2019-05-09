@@ -55,6 +55,8 @@ $meta['generic-secret']     = array('string');
 $meta['generic-authurl']    = array('string');
 $meta['generic-tokenurl']   = array('string');
 $meta['generic-userinfourl'] = array('string');
+$meta['generic-logintext']   = array('string');
+$meta['generic-logourl']     = array('string');
 $meta['mailRestriction']     = array('string','_pattern' => '!^(@[^,@]+(\.[^,@]+)+(,|$))*$!'); // https://regex101.com/r/mG4aL5/3
 $meta['singleService']       = array('multichoice',
                                      '_choices' => array(

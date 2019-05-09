@@ -34,6 +34,8 @@ $conf['generic-authurl']     = 'https://example.com/oauth/userdialog';
 $conf['generic-tokenurl']    = 'https://example.com/oauth/access_token';
 $conf['generic-userinfourl'] = 'https://example.com/oauth/user';
 $conf['generic-fieldmap']    = 'user=username name=name mail=email grps=groups';
+$conf['generic-logintext']        = 'My Oauth';
+$conf['generic-logourl']     = '';
 $conf['mailRestriction']     = '';
 $conf['singleService']       = '';
 $conf['register-on-auth']    = 0;

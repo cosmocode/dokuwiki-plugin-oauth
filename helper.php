@@ -138,6 +138,29 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     }
 
     /**
+     * Return the configured Login Text for the given service
+     *
+     * @param $service
+     * @return string
+     */
+    public function getLoginText($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-logintext');
+    }
+
+
+    /**
+     * Return the configured Logo URL for the given service
+     *
+     * @param $service
+     * @return string
+     */
+    public function getLogoURL($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-logourl');
+    }
+
+    /**
      * @return array
      */
     public function getValidDomains() {

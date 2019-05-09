@@ -202,7 +202,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         if ($singleService == '') {
 
             foreach($hlp->listServices() as $service) {
-                $html .= $this->service_html($service);
+                $html .= $this->service_html($hlp, $service);
             }
             if(!$html) return;
 
@@ -212,7 +212,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
                 return;
             }
             $form->_content = array();
-            $html = $this->service_html($singleService);
+            $html = $this->service_html($hlp, $singleService);
 
         }
         $form->_content[] = form_openfieldset(array('_legend' => $this->getLang('loginwith'), 'class' => 'plugin_oauth'));
@@ -220,11 +220,23 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $form->_content[] = form_closefieldset();
     }
 
-    function service_html ($service){
+    function service_login_text ($hlp, $service) {
+        if($loginText = $hlp->getLoginText($service)) {
+            return $loginText;
+        }
+        return $service;
+    }
+
+    function service_html ($hlp, $service){
         global $ID;
+        $style = '';
+        if($logoUrl = $hlp->getLogoUrl($service)) {
+            $style .= 'background-image: url(' . htmlspecialchars($logoUrl) . ');';
+        }
         $html = '';
-        $html .= '<a href="' . wl($ID, array('oauthlogin' => $service)) . '" class="plugin_oauth_' . $service . '">';
-        $html .= $service;
+        $html .= '<a href="' . wl($ID, array('oauthlogin' => $service));
+        $html .= '" class="plugin_oauth_' . $service . '" style="' . $style . '">';
+        $html .= $this->service_login_text($hlp, $service);
         $html .= '</a> ';
         return $html;
 
@@ -237,14 +249,15 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
         $singleService = $this->getConf('singleService');
         if ($singleService == '') return true;
 
-        $lang['btn_login'] = $this->getLang('loginButton') . $singleService;
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+
+        $lang['btn_login'] = $this->getLang('loginButton') . $this->service_login_text($hlp, $singleService);
 
         if($event->data != 'login') return true;
 
 
 
-        /** @var helper_plugin_oauth $hlp */
-        $hlp = plugin_load('helper', 'oauth');
         $enabledServices = $hlp->listServices();
         if (in_array($singleService, $enabledServices, true) === false) {
             msg($this->getLang('wrongConfig'),-1);
