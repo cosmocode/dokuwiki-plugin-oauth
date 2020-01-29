@@ -20,17 +20,17 @@ class FusionAuthAdapter extends AbstractAdapter {
         $response = $this->oAuth->request('/oauth2/userinfo');
         $result = $JSON->decode($response);
 	
-        if( !empty($result['username']) )
+        if( !empty($result['preferred_username']) )
         {
-            $data['user'] = $result['username'];
+            $data['user'] = $result['preferred_username'];
         }
         else
         {
-            $data['user'] = isset($result['name']) ? $result['name'] : $result['email'];
+            $data['user'] = isset($result['preferred_username']) ? $result['preferred_username'] : $result['email'];
         }
-        $data['name'] = isset($result['name']) ? $result['name'] : $result['email'];
+        $data['name'] = isset($result['preferred_username']) ? $result['preferred_username'] : $result['email'];
         $data['mail'] = $result['email'];
-	//error_log(json_encode($data));
+	
         return $data;
     }
 
