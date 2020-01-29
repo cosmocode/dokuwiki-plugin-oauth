@@ -8,6 +8,9 @@
 $conf['auth0-key']           = '';
 $conf['auth0-secret']        = '';
 $conf['auth0-domain']        = '';
+$conf['fusionauth-key']      = '';
+$conf['fusionauth-secret']   = '';
+$conf['fusionauth-domain']   = '';
 $conf['custom-redirectURI']  = '';
 $conf['facebook-key']        = '';
 $conf['facebook-secret']     = '';

@@ -29,6 +29,9 @@ $meta['info']                = array('plugin_oauth');
 $meta['auth0-key']           = array('string');
 $meta['auth0-secret']        = array('string');
 $meta['auth0-domain']        = array('string');
+$meta['fusionauth-key']           = array('string');
+$meta['fusionauth-secret']        = array('string');
+$meta['fusionauth-domain']        = array('string');
 $meta['custom-redirectURI']  = array('string','_caution' => 'warning');
 $meta['facebook-key']        = array('string');
 $meta['facebook-secret']     = array('string');
@@ -54,6 +57,7 @@ $meta['singleService']       = array('multichoice',
                                      '_choices' => array(
                                          '',
                                          'Auth0',
+                                         'FusionAuth',
                                          'Google',
                                          'Dataporten',
                                          'Facebook',
