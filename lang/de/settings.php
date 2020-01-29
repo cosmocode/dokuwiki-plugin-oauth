@@ -10,6 +10,9 @@ $lang['custom-redirectURI']    = 'Folgende benutzerdefinierte Weiterleitungs-URI
 $lang['auth0-key']             = 'Client ID Ihrer <a href="https://manage.auth0.com/#/applications">Auth0 Applikation</a>';
 $lang['auth0-secret']          = 'Client Geheimcode Ihrer <a href="https://manage.auth0.com/#/applications">Auth0 Applikation</a>';
 $lang['auth0-domain']          = 'Domäne Ihrer <a href="https://manage.auth0.com/#/applications">Auth0 Applikation</a>';
+$lang['fusionauth-key']        = 'Client ID Ihrer <a href="https://fusionauth.io/docs/v1/tech/users/applications">FusionAuth Applikation</a>';
+$lang['fusionauth-secret']     = 'Client Geheimcode Ihrer <a href="https://fusionauth.io/docs/v1/tech/users/applications">FusionAuth Applikation</a>';
+$lang['fusionauth-domain']     = 'Domäne Ihrer <a href="https://fusionauth.io/docs">FusionAuth Applikation</a>';
 $lang['facebook-key']          = 'App-ID Ihrer <a href="https://developers.facebook.com/apps">Facebook-App</a>';
 $lang['facebook-secret']       = 'App-Geheimcode Ihrer <a href="https://developers.facebook.com/apps">Facebook-App</a>';
 $lang['github-key']            = 'Client ID Ihrer <a href="https://github.com/settings/applications">Github Applikation</a>';

@@ -27,7 +27,7 @@ class FusionAuth extends AbstractService
         parent::__construct($credentials, $httpClient, $storage, $scopes, $baseApiUri);
 
         $hlp = plugin_load('helper', 'oauth');
-        $this->domain = $hlp->getConf('auth0-domain');
+        $this->domain = $hlp->getConf('fusionauth-domain');
 
         if (null === $baseApiUri) {
             $this->baseApiUri = new Uri("https://{$this->domain}/");
