@@ -275,7 +275,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
         $ok = $this->triggerUserMod(
             'create',
-            array($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $groups_on_creation,)
+            array($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $uinfo['grps'],)
         );
         if(!$ok) {
             return false;
