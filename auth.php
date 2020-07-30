@@ -401,7 +401,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
         if(isset($changes['mail'])) {
             $found = $this->getUserByEmail($changes['mail']);
-            if($found != $user) {
+            if($found && $found != $user) {
                 msg($this->getLang('emailduplicate'), -1);
                 return false;
             }
