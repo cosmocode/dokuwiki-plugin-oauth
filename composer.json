@@ -1,0 +1,9 @@
+{
+    "name": "cosmocode/dokuwiki-plugin-oauth",
+    "description": "OAuth Plugin for DokuWiki",
+    "type": "project",
+    "license": "GPL2",
+    "require": {
+        "lusitanian/oauth": "^0.8.11"
+    }
+}

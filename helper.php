@@ -7,43 +7,32 @@
  */
 
 // must be run within Dokuwiki
-if(!defined('DOKU_INC')) die();
+use dokuwiki\Extension\Event;
+use dokuwiki\plugin\oauth\Service;
 
-class helper_plugin_oauth extends DokuWiki_Plugin {
+require_once(__DIR__ . '/vendor/autoload.php');
+
+/**
+ * Basic helper methods for the oauth flow
+ */
+class helper_plugin_oauth extends DokuWiki_Plugin
+{
 
     /**
      * Load the needed libraries and initialize the named oAuth service
      *
      * @param string $servicename
-     * @return null|\OAuth\Plugin\AbstractAdapter
+     * @return null|Service
      */
-    public function loadService(&$servicename) {
-        $id = getID(); // $ID isn't set in trustExternal, yet
+    public function loadService($servicename)
+    {
+        $services = $this->listServices(true);
+        if (!isset($services[$servicename])) return null;
+        $service = $services[$servicename];
 
-        $servicename = preg_replace('/[^a-zA-Z0-9_]+/', '', $servicename);
-        if(!$servicename) return null;
-
-        require_once(__DIR__.'/phpoauthlib/src/OAuth/bootstrap.php');
-        require_once(__DIR__.'/classes/AbstractAdapter.php');
-        require_once(__DIR__.'/classes/oAuthHTTPClient.php');
-        require_once(__DIR__.'/classes/oAuthStorage.php');
-
-        $file = __DIR__.'/classes/'.$servicename.'Adapter.php';
-        if(!file_exists($file)) return null;
-        require_once($file);
-        $class = '\\OAuth\\Plugin\\'.$servicename.'Adapter';
-
-        /** @var \OAuth\Plugin\AbstractAdapter $service */
-        $service = new $class($this->redirectURI());
-        if(!$service->isInitialized()) {
-            msg("Failed to initialize $service authentication service. Check credentials", -1);
+        if (!$service->getOAuthService()) {
+            msg(hsc("Failed to initialize $servicename authentication service. Check credentials"), -1);
             return null;
-        }
-
-        // The generic service can be externally configured
-        if(is_a($service->oAuth, 'OAuth\\OAuth2\\Service\\Generic')) {
-            $service->oAuth->setAuthorizationEndpoint($this->getAuthEndpoint($servicename));
-            $service->oAuth->setAccessTokenEndpoint($this->getTokenEndpoint($servicename));
         }
 
         return $service;
@@ -54,7 +43,8 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      *
      * @return string
      */
-    public function redirectURI() {
+    public function redirectURI()
+    {
         if ($this->getConf('custom-redirectURI') !== '') {
             return $this->getConf('custom-redirectURI');
         } else {
@@ -65,82 +55,33 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     /**
      * List available Services
      *
-     * @param bool $enabledonly list only enabled services
-     * @return array
+     * @param bool $enabledonly list only services that have been configured
+     * @triggers PLUGIN_OAUTH_BACKEND_REGISTER
+     * @return Service[] list of service objects
      */
-    public function listServices($enabledonly = true) {
-        $services = array();
-        $files    = glob(__DIR__.'/classes/*Adapter.php');
+    public function listServices($enabledonly = true)
+    {
+        $services = [];
+        $event = new Event('PLUGIN_OAUTH_BACKEND_REGISTER', $services);
+        $event->advise_before(false);
+        $event->advise_after();
 
-        foreach($files as $file) {
-            $file = basename($file, 'Adapter.php');
-            if($file == 'Abstract') continue;
-            if($enabledonly && !$this->getKey($file)) continue;
-            $services[] = $file;
+        // filter out unconfigured services
+        if ($enabledonly) {
+            $services = array_filter($services, function ($service) {
+                /** @var Service $service */
+                return (bool)$service->getKey();
+            });
         }
 
         return $services;
     }
 
     /**
-     * Return the configured key for the given service
-     *
-     * @param $service
-     * @return string
-     */
-    public function getKey($service) {
-        $service = strtolower($service);
-        return $this->getConf($service.'-key');
-    }
-
-    /**
-     * Return the configured secret for the given service
-     *
-     * @param $service
-     * @return string
-     */
-    public function getSecret($service) {
-        $service = strtolower($service);
-        return $this->getConf($service.'-secret');
-    }
-
-    /**
-     * Return the configured Authentication Endpoint URL for the given service
-     *
-     * @param $service
-     * @return string
-     */
-    public function getAuthEndpoint($service) {
-        $service = strtolower($service);
-        return $this->getConf($service.'-authurl');
-    }
-
-    /**
-     * Return the configured Access Token Endpoint URL for the given service
-     *
-     * @param $service
-     * @return string
-     */
-    public function getTokenEndpoint($service) {
-        $service = strtolower($service);
-        return $this->getConf($service.'-tokenurl');
-    }
-
-    /**
-     * Return the configured User Info Endpoint URL for the given service
-     *
-     * @param $service
-     * @return string
-     */
-    public function getUserInfoEndpoint($service) {
-        $service = strtolower($service);
-        return $this->getConf($service.'-userinfourl');
-    }
-
-    /**
      * @return array
      */
-    public function getValidDomains() {
+    public function getValidDomains()
+    {
         if ($this->getConf('mailRestriction') === '') {
             return array();
         }
@@ -154,11 +95,12 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      *
      * @return bool
      */
-    public function checkMail($mail) {
+    public function checkMail($mail)
+    {
         $hostedDomains = $this->getValidDomains();
 
         foreach ($hostedDomains as $validDomain) {
-            if(substr($mail, -strlen($validDomain)) === $validDomain) {
+            if (substr($mail, -strlen($validDomain)) === $validDomain) {
                 return true;
             }
         }
@@ -170,7 +112,8 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      *
      * @return bool
      */
-    public function validBrowserID ($session) {
+    public function validBrowserID($session)
+    {
         return $session['buid'] == auth_browseruid();
     }
 
@@ -179,7 +122,8 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      *
      * @return bool
      */
-    public function isSessionTimedOut ($session) {
+    public function isSessionTimedOut($session)
+    {
         global $conf;
         return $session['time'] < time() - $conf['auth_security_timeout'];
     }
@@ -187,10 +131,10 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     /**
      * @return bool
      */
-    public function isGETRequest () {
+    public function isGETRequest()
+    {
         global $INPUT;
-        $result = $INPUT->server->str('REQUEST_METHOD') === 'GET';
-        return $result;
+        return $INPUT->server->str('REQUEST_METHOD') === 'GET';
     }
 
     /**
@@ -198,7 +142,8 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
      *
      * @return bool
      */
-    public function isDokuPHP() {
+    public function isDokuPHP()
+    {
         global $updateVersion;
         return isset($updateVersion);
     }
