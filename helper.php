@@ -147,6 +147,21 @@ class helper_plugin_oauth extends DokuWiki_Plugin
         global $updateVersion;
         return isset($updateVersion);
     }
+
+    /**
+     * Display an exception to the user
+     *
+     * @param Exception $e
+     * @param string $prefix - user friendly explanation if available
+     */
+    public function showException(\Exception $e, $prefix = '')
+    {
+        global $conf;
+        msg('OAuth: ' . $prefix . ' ' . hsc($e->getMessage()), -1);
+        if ($conf['allowdebug']) {
+            msg('<pre>' . hsc($e->getTraceAsString()) . '</pre>', -1);
+        }
+    }
 }
 
 // vim:ts=4:sw=4:et:

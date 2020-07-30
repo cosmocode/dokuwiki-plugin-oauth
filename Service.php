@@ -4,6 +4,7 @@ namespace dokuwiki\plugin\oauth;
 
 use dokuwiki\Extension\ActionPlugin;
 use OAuth\Common\Consumer\Credentials;
+use OAuth\Common\Exception\Exception;
 use OAuth\Common\Http\Exception\TokenResponseException;
 use OAuth\Common\Storage\Exception\TokenNotFoundException;
 use OAuth\OAuth1\Service\AbstractService as Abstract1Service;
@@ -155,6 +156,19 @@ abstract class Service extends ActionPlugin
     // region overridable methods
 
     /**
+     * Retrieve the user's data via API
+     *
+     * The returned array needs to contain at least 'email', 'name', 'user', 'grps'
+     *
+     * Use the request() method of the oauth object to talk to the API
+     *
+     * @return array
+     * @throws Exception
+     * @see getOAuthService()
+     */
+    abstract public function getUser();
+
+    /**
      * Return the scope to request
      *
      * This should return the minimal scope needed for accessing the user's data
@@ -209,11 +223,14 @@ abstract class Service extends ActionPlugin
     /**
      * Return the SVG of the logo for this service
      *
-     * @link https://github.com/edent/SuperTinyIcons
+     * Defaults to a logo.svg in the plugin directory
+     *
      * @return string
      */
     public function getSvgLogo()
     {
+        $logo = DOKU_PLUGIN . $this->getPluginName() . '/logo.svg';
+        if (file_exists($logo)) return inlineSVG($logo);
         return '';
     }
 
