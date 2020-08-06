@@ -150,6 +150,23 @@ abstract class Service extends ActionPlugin
         return true;
     }
 
+    /**
+     * Return the Service Login Button
+     *
+     * @return string
+     */
+    public function loginButton()
+    {
+        global $ID;
+
+        $attr = buildAttributes([
+            'href' => wl($ID, array('oauthlogin' => $this->getServiceID())),
+            'class' => 'plugin_oauth_' . $this->getServiceID(),
+            'style' => 'background-color: ' . $this->getColor(),
+        ]);
+
+        return '<a ' . $attr . '>' . $this->getSvgLogo() . '<span>' . $this->getServiceLabel() . '</span></a> ';
+    }
 
     // endregion
 

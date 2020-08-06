@@ -225,7 +225,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
         }
 
         foreach ($this->hlp->listServices() as $service) {
-            $html .= $this->serviceHTML($service);
+            $html .= $service->loginButton();
         }
         if (!$html) return;
 
@@ -235,26 +235,6 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
         ));
         $form->_content[] = $html;
         $form->_content[] = form_closefieldset();
-    }
-
-    /**
-     * Print the Service Login Button
-     *
-     * @fixme move to service?
-     * @fixme make use of color and logo
-     *
-     * @param Service $service
-     * @return string
-     */
-    function serviceHTML($service)
-    {
-        global $ID;
-        $html = '';
-        $html .= '<a href="' . wl($ID, array('oauthlogin' => $service->getServiceID())) . '" class="plugin_oauth_' . $service->getServiceID() . '">';
-        $html .= $service->getServiceLabel();
-        $html .= '</a> ';
-        return $html;
-
     }
 
     /**
