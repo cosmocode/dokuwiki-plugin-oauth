@@ -167,7 +167,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
      *                           handler was registered]
      * @return void
      */
-    public function handle_profileform(Doku_Event &$event, $param)
+    public function handle_profileform(Doku_Event $event, $param)
     {
         global $USERINFO;
         /** @var auth_plugin_authplain $auth */
@@ -209,11 +209,8 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
      * @param mixed $param
      * @return void
      */
-    public function handleLoginform(Doku_Event &$event, $param)
+    public function handleLoginform(Doku_Event $event, $param)
     {
-        $singleService = $this->getConf('singleService');
-        $enabledServices = $this->hlp->listServices();
-
         /** @var Doku_Form $form */
         $form = $event->data;
         $html = '';
@@ -246,7 +243,6 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
      */
     public function handleDoLogin(Doku_Event $event, $param)
     {
-        global $lang;
         global $ID;
 
         if ($event->data != 'login') return true;

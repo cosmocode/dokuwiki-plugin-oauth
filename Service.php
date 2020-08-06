@@ -69,7 +69,7 @@ abstract class Service extends ActionPlugin
             $this->getServiceID(),
             $credentials,
             new Storage(),
-            $this->getScope()
+            $this->getScopes()
         );
 
         return $this->oAuth;
@@ -175,7 +175,7 @@ abstract class Service extends ActionPlugin
     /**
      * Retrieve the user's data via API
      *
-     * The returned array needs to contain at least 'email', 'name', 'user', 'grps'
+     * The returned array needs to contain at least 'email', 'name', 'user' and optionally 'grps'
      *
      * Use the request() method of the oauth object to talk to the API
      *
@@ -192,7 +192,7 @@ abstract class Service extends ActionPlugin
      *
      * @return array
      */
-    public function getScope()
+    public function getScopes()
     {
         return array();
     }
