@@ -17,27 +17,8 @@ class auth_plugin_oauth extends auth_plugin_authplain
         $this->cando['external'] = true;
     }
 
-    private function handleState($state)
-    {
-        /** @var \helper_plugin_farmer $farmer */
-        $farmer = plugin_load('helper', 'farmer', false, true);
-        $data = json_decode(base64_decode(urldecode($state)));
-        if (empty($data->animal) || $farmer->getAnimal() == $data->animal) {
-            return;
-        }
-        $animal = $data->animal;
-        $allAnimals = $farmer->getAllAnimals();
-        if (!in_array($animal, $allAnimals)) {
-            msg('Animal ' . $animal . ' does not exist!');
-            return;
-        }
-        global $INPUT;
-        $url = $farmer->getAnimalURL($animal) . '/doku.php?' . $INPUT->server->str('QUERY_STRING');
-        send_redirect($url);
-    }
-
     /** @inheritDoc */
-    function trustExternal($user, $pass, $sticky = false)
+    public function trustExternal($user, $pass, $sticky = false)
     {
         global $USERINFO, $INPUT;
 
@@ -114,6 +95,63 @@ class auth_plugin_oauth extends auth_plugin_authplain
 
         // do the "normal" plain auth login via form
         return auth_login($user, $pass, $sticky);
+    }
+
+    /**
+     * Enhance function to check against duplicate emails
+     *
+     * @param string $user
+     * @param string $pwd
+     * @param string $name
+     * @param string $mail
+     * @param null $grps
+     * @return bool|null|string
+     */
+    public function createUser($user, $pwd, $name, $mail, $grps = null)
+    {
+        if ($this->getUserByEmail($mail)) {
+            msg($this->getLang('emailduplicate'), -1);
+            return false;
+        }
+
+        return parent::createUser($user, $pwd, $name, $mail, $grps);
+    }
+
+    /**
+     * Enhance function to check against duplicate emails
+     *
+     * @param string $user
+     * @param array $changes
+     * @return bool
+     */
+    public function modifyUser($user, $changes)
+    {
+        global $conf;
+
+        if (isset($changes['mail'])) {
+            $found = $this->getUserByEmail($changes['mail']);
+            if ($found && $found != $user) {
+                msg($this->getLang('emailduplicate'), -1);
+                return false;
+            }
+        }
+
+        $ok = parent::modifyUser($user, $changes);
+
+        // refresh session cache
+        touch($conf['cachedir'] . '/sessionpurge');
+
+        return $ok;
+    }
+
+    /**
+     * Unset additional stuff in session on logout
+     */
+    public function logOff()
+    {
+        parent::logOff();
+
+        $this->cleanLogout();
     }
 
     /**
@@ -310,7 +348,6 @@ class auth_plugin_oauth extends auth_plugin_authplain
     protected function setUserSession($data, $service)
     {
         global $USERINFO;
-        global $conf;
 
         // set up groups
         if (!is_array($data['grps'])) {
@@ -344,16 +381,6 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
-     * Unset additional stuff in session on logout
-     */
-    public function logOff()
-    {
-        parent::logOff();
-
-        $this->cleanLogout();
-    }
-
-    /**
      * unset auth cookies and session information
      */
     private function cleanLogout()
@@ -368,52 +395,28 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
-     * Enhance function to check against duplicate emails
+     * Farmer plugin
      *
-     * @param string $user
-     * @param string $pwd
-     * @param string $name
-     * @param string $mail
-     * @param null $grps
-     * @return bool|null|string
+     * @param $state
      */
-    public function createUser($user, $pwd, $name, $mail, $grps = null)
+    private function handleState($state)
     {
-        if ($this->getUserByEmail($mail)) {
-            msg($this->getLang('emailduplicate'), -1);
-            return false;
+        /** @var \helper_plugin_farmer $farmer */
+        $farmer = plugin_load('helper', 'farmer', false, true);
+        $data = json_decode(base64_decode(urldecode($state)));
+        if (empty($data->animal) || $farmer->getAnimal() == $data->animal) {
+            return;
         }
-
-        return parent::createUser($user, $pwd, $name, $mail, $grps);
-    }
-
-    /**
-     * Enhance function to check aainst duplicate emails
-     *
-     * @param string $user
-     * @param array $changes
-     * @return bool
-     */
-    public function modifyUser($user, $changes)
-    {
-        global $conf;
-
-        if (isset($changes['mail'])) {
-            $found = $this->getUserByEmail($changes['mail']);
-            if ($found && $found != $user) {
-                msg($this->getLang('emailduplicate'), -1);
-                return false;
-            }
+        $animal = $data->animal;
+        $allAnimals = $farmer->getAllAnimals();
+        if (!in_array($animal, $allAnimals)) {
+            msg('Animal ' . $animal . ' does not exist!');
+            return;
         }
-
-        $ok = parent::modifyUser($user, $changes);
-
-        // refresh session cache
-        touch($conf['cachedir'] . '/sessionpurge');
-
-        return $ok;
+        global $INPUT;
+        $url = $farmer->getAnimalURL($animal) . '/doku.php?' . $INPUT->server->str('QUERY_STRING');
+        send_redirect($url);
     }
-
 }
 
 // vim:ts=4:sw=4:et:
