@@ -186,16 +186,13 @@ abstract class Service extends ActionPlugin
     abstract public function getUser();
 
     /**
-     * Return the scope to request
+     * Return the scopes to request
      *
-     * This should return the minimal scope needed for accessing the user's data
+     * This should return the minimal scopes needed for accessing the user's data
      *
      * @return array
      */
-    public function getScopes()
-    {
-        return array();
-    }
+    abstract public function getScopes();
 
     /**
      * Return the user friendly name of the service
