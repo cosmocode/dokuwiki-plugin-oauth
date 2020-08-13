@@ -20,78 +20,23 @@ class auth_plugin_oauth extends auth_plugin_authplain
     /** @inheritDoc */
     public function trustExternal($user, $pass, $sticky = false)
     {
-        global $USERINFO, $INPUT;
+        global $INPUT;
 
         if ($INPUT->has('state') && plugin_load('helper', 'farmer', false, true)) {
             $this->handleState($INPUT->str('state'));
         }
 
-        // check session for existing oAuth login data
-        $session = $_SESSION[DOKU_COOKIE]['auth'];
-        if (isset($session['oauth'])) {
-            $servicename = $session['oauth'];
-            // check if session data is still considered valid
-            if ($this->isSessionValid($session)) {
-                $_SERVER['REMOTE_USER'] = $session['user'];
-                $USERINFO = $session['info'];
-                return true;
-            }
-        }
+        if ($this->sessionLogin()) return true;
 
-        $existingLoginProcess = false;
-        // are we in login progress?
-        if (isset($_SESSION[DOKU_COOKIE]['oauth-inprogress'])) {
-            $servicename = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'];
-            $page = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'];
-            $params = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'];
+        list($servicename, $page, $params, $existingLoginProcess) = $this->inProgress();
 
-            unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
-            $existingLoginProcess = true;
-        }
-
-        // either we're in oauth login or a previous log needs to be rechecked
+        // either we're in oauth login or a previous login needs to be rechecked
         if (isset($servicename)) {
-            /** @var helper_plugin_oauth $hlp */
-            $hlp = plugin_load('helper', 'oauth');
-
-            /** @var OAuth\Plugin\AbstractAdapter $service */
-            $service = $hlp->loadService($servicename);
-            if (is_null($service)) {
-                $this->cleanLogout();
-                return false;
-            }
-
-            if ($service->checkToken()) {
-                $ok = $this->processLogin($sticky, $service, $servicename, $page, $params);
-                if (!$ok) {
-                    $this->cleanLogout();
-                    return false;
-                }
-                return true;
-            } else {
-                if ($existingLoginProcess) {
-                    msg($this->getLang('oauth login failed'), 0);
-                    $this->cleanLogout();
-                    return false;
-                } else {
-                    // first time here
-                    $this->relogin($servicename);
-                }
-            }
-
-            $this->cleanLogout();
-            return false; // something went wrong during oAuth login
-        } elseif (isset($_COOKIE[DOKU_COOKIE])) {
-            global $INPUT;
-            //try cookie
-            list($cookieuser, $cookiesticky, $auth, $servicename) = explode('|', $_COOKIE[DOKU_COOKIE]);
-            $cookieuser = base64_decode($cookieuser, true);
-            $auth = base64_decode($auth, true);
-            $servicename = base64_decode($servicename, true);
-            if ($auth === 'oauth') {
-                $this->relogin($servicename);
-            }
+            return $this->serviceLogin($servicename, $sticky, $page, $params, $existingLoginProcess);
         }
+
+        // otherwise try cookie
+        $this->cookieLogin();
 
         // do the "normal" plain auth login via form
         return auth_login($user, $pass, $sticky);
@@ -155,77 +100,132 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
-     * @param array $session cookie auth session
+     * check if auth data is present in session and is still considered valid
      *
      * @return bool
      */
-    protected function isSessionValid($session)
+    protected function sessionLogin()
     {
-        /** @var helper_plugin_oauth $hlp */
-        $hlp = plugin_load('helper', 'oauth');
-        if ($hlp->validBrowserID($session)) {
-            if (!$hlp->isSessionTimedOut($session)) {
-                return true;
-            } elseif (!($hlp->isGETRequest() && $hlp->isDokuPHP())) {
-                // only force a recheck on a timed-out session during a GET request on the main script doku.php
-                return true;
-            }
+        global $USERINFO;
+        $session = $_SESSION[DOKU_COOKIE]['auth'];
+        if (isset($session['oauth']) && $this->isSessionValid($session)) {
+            $_SERVER['REMOTE_USER'] = $session['user'];
+            $USERINFO = $session['info'];
+            return true;
         }
         return false;
     }
 
-    protected function relogin($servicename)
+    /**
+     * Try extracting data from login in progress
+     *
+     * @return array
+     */
+    protected function inProgress()
     {
-        global $INPUT;
+        $existingLoginProcess = false;
+        if (isset($_SESSION[DOKU_COOKIE]['oauth-inprogress'])) {
+            $servicename = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'];
+            $page = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'];
+            $params = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'];
 
-        /** @var helper_plugin_oauth $hlp */
-        $hlp = plugin_load('helper', 'oauth');
-        $service = $hlp->loadService($servicename);
-        if (is_null($service)) return false;
-
-        // remember service in session
-        session_start();
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'] = $INPUT->str('id');
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'] = $_GET;
-
-        $_SESSION[DOKU_COOKIE]['oauth-done']['$_REQUEST'] = $_REQUEST;
-
-        if (is_array($INPUT->post->param('do'))) {
-            $doPost = key($INPUT->post->arr('do'));
-        } else {
-            $doPost = $INPUT->post->str('do');
+            unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
+            $existingLoginProcess = true;
         }
-        $doGet = $INPUT->get->str('do');
-        if (!empty($doPost)) {
-            $_SESSION[DOKU_COOKIE]['oauth-done']['do'] = $doPost;
-        } elseif (!empty($doGet)) {
-            $_SESSION[DOKU_COOKIE]['oauth-done']['do'] = $doGet;
-        }
-
-        session_write_close();
-
-        $service->login();
+        return [$servicename, $page, $params, $existingLoginProcess];
     }
 
     /**
-     * @param                              $sticky
-     * @param OAuth\Plugin\AbstractAdapter $service
+     * Use cookie data to log in
+     */
+    protected function cookieLogin()
+    {
+        if (isset($_COOKIE[DOKU_COOKIE])) {
+            list($cookieuser, $cookiesticky, $auth, $servicename) = explode('|', $_COOKIE[DOKU_COOKIE]);
+            $auth = base64_decode($auth, true);
+            $servicename = base64_decode($servicename, true);
+            if ($auth === 'oauth') {
+                $this->doLogin($servicename);
+            }
+        }
+    }
+
+    /**
+     * Use the OAuth service
+     *
+     * @param $servicename
+     * @param $sticky
+     * @param $page
+     * @param $params
+     * @param $existingLoginProcess
+     * @return bool
+     * @throws \OAuth\Common\Exception\Exception
+     * @throws \OAuth\Common\Http\Exception\TokenResponseException
+     * @throws \OAuth\Common\Storage\Exception\TokenNotFoundException
+     */
+    protected function serviceLogin($servicename, $sticky, $page, $params, $existingLoginProcess)
+    {
+        $service = $this->getService($servicename);
+        if (is_null($service)) {
+            $this->cleanLogout();
+            return false;
+        }
+
+        if ($service->checkToken()) {
+            if (!$this->processLogin($sticky, $service, $servicename, $page, $params)) {
+                $this->cleanLogout();
+                return false;
+            }
+            return true;
+        } else {
+            if ($existingLoginProcess) {
+                msg($this->getLang('oauth login failed'), 0);
+                $this->cleanLogout();
+                return false;
+            } else {
+                // first time here
+                $this->doLogin($servicename);
+            }
+        }
+
+        $this->cleanLogout();
+        return false; // something went wrong during oAuth login
+    }
+
+    /**
+     * @param string $servicename
+     * @return void|false
+     * @throws \OAuth\Common\Http\Exception\TokenResponseException
+     */
+    protected function doLogin($servicename)
+    {
+        $service = $this->getService($servicename);
+        if (is_null($service)) return false;
+
+        $this->writeSession($servicename);
+        $service->login();
+    }
+
+
+    /**
+     * @param bool $sticky
+     * @param \dokuwiki\plugin\oauth\Service $service
      * @param string $servicename
      * @param string $page
      * @param array $params
      *
      * @return bool
+     * @throws \OAuth\Common\Exception\Exception
      */
-    protected function processLogin($sticky, $service, $servicename, $page, $params = array())
+    protected function processLogin($sticky, $service, $servicename, $page, $params = [])
     {
-        $uinfo = $service->getUser();
-        $ok = $this->processUser($uinfo, $servicename);
+        $userinfo = $service->getUser();
+        $ok = $this->processUserinfo($userinfo, $servicename);
         if (!$ok) {
             return false;
         }
-        $this->setUserSession($uinfo, $servicename);
-        $this->setUserCookie($uinfo['user'], $sticky, $servicename);
+        $this->setUserSession($userinfo, $servicename);
+        $this->setUserCookie($userinfo['user'], $sticky, $servicename);
         if (isset($page)) {
             if (!empty($params['id'])) unset($params['id']);
             send_redirect(wl($page, $params, false, '&'));
@@ -234,37 +234,37 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
-     * process the user and update the $uinfo array
+     * process the user and update the user info array
      *
-     * @param $uinfo
-     * @param $servicename
+     * @param array $userinfo User info received from authentication
+     * @param string $servicename Auth service
      *
      * @return bool
      */
-    protected function processUser(&$uinfo, $servicename)
+    protected function processUserinfo(&$userinfo, $servicename)
     {
-        $uinfo['user'] = $this->cleanUser((string)$uinfo['user']);
-        if (!$uinfo['name']) $uinfo['name'] = $uinfo['user'];
+        $userinfo['user'] = $this->cleanUser((string)$userinfo['user']);
+        if (!$userinfo['name']) $userinfo['name'] = $userinfo['user'];
 
-        if (!$uinfo['user'] || !$uinfo['mail']) {
+        if (!$userinfo['user'] || !$userinfo['mail']) {
             msg("$servicename did not provide the needed user info. Can't log you in", -1);
             return false;
         }
 
         // see if the user is known already
-        $user = $this->getUserByEmail($uinfo['mail']);
-        if ($user) {
-            $sinfo = $this->getUserData($user);
+        $localUser = $this->getUserByEmail($userinfo['mail']);
+        if ($localUser) {
+            $localUserInfo = $this->getUserData($localUser);
             // check if the user allowed access via this service
-            if (!in_array($this->cleanGroup($servicename), $sinfo['grps'])) {
+            if (!in_array($this->cleanGroup($servicename), $localUserInfo['grps'])) {
                 msg(sprintf($this->getLang('authnotenabled'), $servicename), -1);
                 return false;
             }
-            $uinfo['user'] = $user;
-            $uinfo['name'] = $sinfo['name'];
-            $uinfo['grps'] = array_merge((array)$uinfo['grps'], $sinfo['grps']);
+            $userinfo['user'] = $localUser;
+            $userinfo['name'] = $localUserInfo['name'];
+            $userinfo['grps'] = array_merge((array)$userinfo['grps'], $localUserInfo['grps']);
         } elseif (actionOK('register') || $this->getConf('register-on-auth')) {
-            $ok = $this->addUser($uinfo, $servicename);
+            $ok = $this->addUser($userinfo, $servicename);
             if (!$ok) {
                 msg('something went wrong creating your user account. please try again later.', -1);
                 return false;
@@ -279,15 +279,15 @@ class auth_plugin_oauth extends auth_plugin_authplain
     /**
      * new user, create him - making sure the login is unique by adding a number if needed
      *
-     * @param array $uinfo user info received from the oAuth service
+     * @param array $userinfo user info received from the oAuth service
      * @param string $servicename
      *
      * @return bool
      */
-    protected function addUser(&$uinfo, $servicename)
+    protected function addUser(&$userinfo, $servicename)
     {
         global $conf;
-        $user = $uinfo['user'];
+        $user = $userinfo['user'];
         $count = '';
         while ($this->getUserData($user . $count)) {
             if ($count) {
@@ -297,15 +297,15 @@ class auth_plugin_oauth extends auth_plugin_authplain
             }
         }
         $user = $user . $count;
-        $uinfo['user'] = $user;
+        $userinfo['user'] = $user;
         $groups_on_creation = array();
         $groups_on_creation[] = $conf['defaultgroup'];
         $groups_on_creation[] = $this->cleanGroup($servicename); // add service as group
-        $uinfo['grps'] = array_merge((array)$uinfo['grps'], $groups_on_creation);
+        $userinfo['grps'] = array_merge((array)$userinfo['grps'], $groups_on_creation);
 
         $ok = $this->triggerUserMod(
             'create',
-            array($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $groups_on_creation,)
+            array($user, auth_pwgen($user), $userinfo['name'], $userinfo['mail'], $groups_on_creation,)
         );
         if (!$ok) {
             return false;
@@ -313,12 +313,12 @@ class auth_plugin_oauth extends auth_plugin_authplain
 
         // send notification about the new user
         $subscription = new Subscription();
-        $subscription->send_register($user, $uinfo['name'], $uinfo['mail']);
+        $subscription->send_register($user, $userinfo['name'], $userinfo['mail']);
         return true;
     }
 
     /**
-     * Find a user by his email address
+     * Find a user by email address
      *
      * @param $mail
      * @return bool|string
@@ -334,14 +334,43 @@ class auth_plugin_oauth extends auth_plugin_authplain
         }
         $mail = strtolower($mail);
 
-        foreach ($this->users as $user => $uinfo) {
-            if (strtolower($uinfo['mail']) == $mail) return $user;
+        foreach ($this->users as $user => $userinfo) {
+            if (strtolower($userinfo['mail']) == $mail) return $user;
         }
 
         return false;
     }
 
     /**
+     * unset auth cookies and session information
+     */
+    private function cleanLogout()
+    {
+        if (isset($_SESSION[DOKU_COOKIE]['oauth-done'])) {
+            unset($_SESSION[DOKU_COOKIE]['oauth-done']);
+        }
+        if (isset($_SESSION[DOKU_COOKIE]['auth'])) {
+            unset($_SESSION[DOKU_COOKIE]['auth']);
+        }
+        $this->setUserCookie('', true, '', -60);
+    }
+
+    /**
+     * @param string $servicename
+     * @return \dokuwiki\plugin\oauth\Service
+     */
+    protected function getService($servicename)
+    {
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+
+        return $hlp->loadService($servicename);
+    }
+
+
+    /**
+     * Save user and auth data
+     *
      * @param array $data
      * @param string $service
      */
@@ -381,17 +410,54 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
-     * unset auth cookies and session information
+     * @param array $session cookie auth session
+     *
+     * @return bool
      */
-    private function cleanLogout()
+    protected function isSessionValid($session)
     {
-        if (isset($_SESSION[DOKU_COOKIE]['oauth-done'])) {
-            unset($_SESSION[DOKU_COOKIE]['oauth-done']);
+        /** @var helper_plugin_oauth $hlp */
+        $hlp = plugin_load('helper', 'oauth');
+        if ($hlp->validBrowserID($session)) {
+            if (!$hlp->isSessionTimedOut($session)) {
+                return true;
+            } elseif (!($hlp->isGETRequest() && $hlp->isDokuPHP())) {
+                // only force a recheck on a timed-out session during a GET request on the main script doku.php
+                return true;
+            }
         }
-        if (isset($_SESSION[DOKU_COOKIE]['auth'])) {
-            unset($_SESSION[DOKU_COOKIE]['auth']);
+        return false;
+    }
+
+    /**
+     * Save login info in session
+     *
+     * @param string $servicename
+     */
+    protected function writeSession($servicename)
+    {
+        global $INPUT;
+
+        session_start();
+        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
+        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'] = $INPUT->str('id');
+        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'] = $_GET;
+
+        $_SESSION[DOKU_COOKIE]['oauth-done']['$_REQUEST'] = $_REQUEST;
+
+        if (is_array($INPUT->post->param('do'))) {
+            $doPost = key($INPUT->post->arr('do'));
+        } else {
+            $doPost = $INPUT->post->str('do');
         }
-        $this->setUserCookie('', true, '', -60);
+        $doGet = $INPUT->get->str('do');
+        if (!empty($doPost)) {
+            $_SESSION[DOKU_COOKIE]['oauth-done']['do'] = $doPost;
+        } elseif (!empty($doGet)) {
+            $_SESSION[DOKU_COOKIE]['oauth-done']['do'] = $doGet;
+        }
+
+        session_write_close();
     }
 
     /**
