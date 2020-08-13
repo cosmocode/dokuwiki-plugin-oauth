@@ -260,7 +260,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
             return false;
         }
 
-        $service = $enabledServices[0];
+        $service = array_shift($enabledServices);
 
         $url = wl($ID, array('oauthlogin' => $service->getServiceID()), true, '&');
         send_redirect($url);
