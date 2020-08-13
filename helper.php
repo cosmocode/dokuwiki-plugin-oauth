@@ -6,7 +6,6 @@
  * @author  Andreas Gohr <andi@splitbrain.org>
  */
 
-// must be run within Dokuwiki
 use dokuwiki\Extension\Event;
 use dokuwiki\plugin\oauth\Service;
 
@@ -163,5 +162,3 @@ class helper_plugin_oauth extends DokuWiki_Plugin
         }
     }
 }
-
-// vim:ts=4:sw=4:et:

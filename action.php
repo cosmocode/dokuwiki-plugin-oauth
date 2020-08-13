@@ -1,6 +1,5 @@
 <?php
 
-use dokuwiki\plugin\oauth\Service;
 use OAuth\Common\Http\Exception\TokenResponseException;
 
 /**
@@ -14,6 +13,11 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
     /** @var helper_plugin_oauth */
     protected $hlp;
 
+    /**
+     * Constructor
+     *
+     * Initializes the helper
+     */
     public function __construct()
     {
         $this->hlp = plugin_load('helper', 'oauth');
@@ -118,7 +122,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
      *                           handler was registered]
      * @return void
      */
-    public function handle_usermod(Doku_Event &$event, $param)
+    public function handle_usermod(Doku_Event $event, $param)
     {
         global $ACT;
         global $USERINFO;
@@ -260,8 +264,7 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin
 
         $url = wl($ID, array('oauthlogin' => $service->getServiceID()), true, '&');
         send_redirect($url);
-        return true; // nver reached
+        return true; // never reached
     }
 
 }
-// vim:ts=4:sw=4:et:
