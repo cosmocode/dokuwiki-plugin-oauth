@@ -1,5 +1,7 @@
 <?php
 
+use dokuwiki\plugin\oauth\SessionManager;
+
 /**
  * DokuWiki Plugin oauth (Auth Component)
  *
@@ -22,17 +24,23 @@ class auth_plugin_oauth extends auth_plugin_authplain
     {
         global $INPUT;
 
+        // handle redirects from farmer to animal wiki instances
         if ($INPUT->has('state') && plugin_load('helper', 'farmer', false, true)) {
             $this->handleState($INPUT->str('state'));
         }
 
+        // first check in auth setup: is auth data present and still valid?
         if ($this->sessionLogin()) return true;
 
-        list($servicename, $page, $params, $existingLoginProcess) = $this->inProgress();
-
-        // either we're in oauth login or a previous login needs to be rechecked
-        if (isset($servicename)) {
-            return $this->serviceLogin($servicename, $sticky, $page, $params, $existingLoginProcess);
+        // if we have a service in session, either we're in oauth login or a previous login needs to be revalidated
+        $servicename = SessionManager::getServiceName();
+        if ($servicename) {
+            return $this->serviceLogin($servicename,
+                $sticky,
+                SessionManager::getPid(),
+                SessionManager::getParams(),
+                SessionManager::hasState()
+            );
         }
 
         // otherwise try cookie
@@ -108,31 +116,14 @@ class auth_plugin_oauth extends auth_plugin_authplain
     {
         global $USERINFO;
         $session = $_SESSION[DOKU_COOKIE]['auth'];
+        // FIXME session can be null at this point (e.g. coming from sprintdoc svg.php)
+        // FIXME and so the subsequent check for non-GET non-doku.php requests is not performed
         if (isset($session['oauth']) && $this->isSessionValid($session)) {
             $_SERVER['REMOTE_USER'] = $session['user'];
             $USERINFO = $session['info'];
             return true;
         }
         return false;
-    }
-
-    /**
-     * Try extracting data from login in progress
-     *
-     * @return array
-     */
-    protected function inProgress()
-    {
-        $existingLoginProcess = false;
-        if (isset($_SESSION[DOKU_COOKIE]['oauth-inprogress'])) {
-            $servicename = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'];
-            $page = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'];
-            $params = $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'];
-
-            unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
-            $existingLoginProcess = true;
-        }
-        return [$servicename, $page, $params, $existingLoginProcess];
     }
 
     /**
@@ -145,7 +136,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
             $auth = base64_decode($auth, true);
             $servicename = base64_decode($servicename, true);
             if ($auth === 'oauth') {
-                $this->doLogin($servicename);
+                $this->relogin($servicename);
             }
         }
     }
@@ -184,7 +175,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
                 return false;
             } else {
                 // first time here
-                $this->doLogin($servicename);
+                $this->relogin($servicename);
             }
         }
 
@@ -193,11 +184,13 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
+     * Relogin using auth info read from session / cookie
+     *
      * @param string $servicename
      * @return void|false
      * @throws \OAuth\Common\Http\Exception\TokenResponseException
      */
-    protected function doLogin($servicename)
+    protected function relogin($servicename)
     {
         $service = $this->getService($servicename);
         if (is_null($service)) return false;
@@ -438,9 +431,11 @@ class auth_plugin_oauth extends auth_plugin_authplain
     {
         global $INPUT;
 
+        // FIXME delegate to SessionManager? in action/login.php as well?
         session_start();
         $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
         $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'] = $INPUT->str('id');
+
         $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'] = $_GET;
 
         $_SESSION[DOKU_COOKIE]['oauth-done']['$_REQUEST'] = $_REQUEST;
@@ -461,7 +456,10 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
-     * Farmer plugin
+     * Farmer plugin support
+     *
+     * When coming back to farmer instance via OAUTH redirectURI, we need to redirect again
+     * to a proper animal instance detected from $state
      *
      * @param $state
      */
