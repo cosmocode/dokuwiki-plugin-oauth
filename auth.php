@@ -35,11 +35,15 @@ class auth_plugin_oauth extends auth_plugin_authplain
         // if we have a service in session, either we're in oauth login or a previous login needs to be revalidated
         $servicename = SessionManager::getServiceName();
         if ($servicename) {
+            $pid = SessionManager::getPid();
+            $params = SessionManager::getParams();
+            $inProgress = SessionManager::hasState();
+            SessionManager::clearState();
             return $this->serviceLogin($servicename,
                 $sticky,
-                SessionManager::getPid(),
-                SessionManager::getParams(),
-                SessionManager::hasState()
+                $pid,
+                $params,
+                $inProgress
             );
         }
 

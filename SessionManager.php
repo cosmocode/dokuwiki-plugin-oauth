@@ -48,7 +48,7 @@ class SessionManager
         $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'] = $params;
     }
 
-    public function clearState()
+    public static function clearState()
     {
         unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
     }
