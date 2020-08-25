@@ -160,7 +160,7 @@ abstract class Service extends ActionPlugin
         global $ID;
 
         $attr = buildAttributes([
-            'href' => wl($ID, array('oauthlogin' => $this->getServiceID())),
+            'href' => wl($ID, array('oauthlogin' => $this->getServiceID()), false, '&'),
             'class' => 'plugin_oauth_' . $this->getServiceID(),
             'style' => 'background-color: ' . $this->getColor(),
         ]);
