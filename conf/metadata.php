@@ -11,7 +11,7 @@ class setting_plugin_oauth extends setting {
         return true;
     }
 
-    public function html(&$plugin, $echo = false) {
+    public function html(admin_plugin_config $plugin, $echo = false) {
         /** @var helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
 
