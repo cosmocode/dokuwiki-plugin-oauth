@@ -1,5 +1,6 @@
 <?php
 
+use dokuwiki\plugin\oauth\SessionManager;
 use OAuth\Common\Http\Exception\TokenResponseException;
 
 /**
@@ -52,7 +53,9 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         global $INPUT;
 
         // login has been done, but there's environment to be restored
-        if (isset($_SESSION[DOKU_COOKIE]['oauth-done']['do']) || !empty($_SESSION[DOKU_COOKIE]['oauth-done']['rev'])) {
+        // TODO when is this the case?
+        $sessionManager = SessionManager::getInstance();
+        if ($sessionManager->getDo() || $sessionManager->getRev()) {
             $this->restoreSessionEnvironment();
             return;
         }
@@ -63,7 +66,7 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     }
 
     /**
-     * Add the oAuth login links
+     * Add the oAuth login links to login form
      *
      * @param Doku_Event $event event object by reference
      * @return void
@@ -138,10 +141,10 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         if (is_null($service)) return;
 
         // remember service in session
-        session_start();
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'] = $ID;
-        session_write_close();
+        $sessionManager = SessionManager::getInstance();
+        $sessionManager->setServiceName($servicename);
+        $sessionManager->setPid($ID);
+        $sessionManager->saveState();
 
         try {
             $service->login(); // redirects
@@ -156,8 +159,10 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     protected function restoreSessionEnvironment()
     {
         global $INPUT, $ACT, $TEXT, $PRE, $SUF, $SUM, $RANGE, $DATE_AT, $REV;
-        $ACT = $_SESSION[DOKU_COOKIE]['oauth-done']['do'];
-        $_REQUEST = $_SESSION[DOKU_COOKIE]['oauth-done']['$_REQUEST'];
+
+        $sessionManager = SessionManager::getInstance();
+        $ACT = $sessionManager->getDo();
+        $_REQUEST = $sessionManager->getRequest();
 
         $REV = $INPUT->int('rev');
         $DATE_AT = $INPUT->str('at');
@@ -169,6 +174,8 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         $SUF = cleanText($INPUT->post->str('suffix'));
         $SUM = $INPUT->post->str('summary');
 
-        unset($_SESSION[DOKU_COOKIE]['oauth-done']);
+        $sessionManager->setDo('');
+        $sessionManager->setRequest([]);
+        $sessionManager->saveState();
     }
 }

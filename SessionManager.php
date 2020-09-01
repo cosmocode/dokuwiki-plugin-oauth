@@ -11,46 +11,120 @@ namespace dokuwiki\plugin\oauth;
 class SessionManager
 {
     /**
+     * Authentication state to be preserved in session
+     *
+     * @var AuthState
+     */
+    protected static $state = null;
+
+    /**
+     * @var SessionManager
+     */
+    protected static $instance = null;
+
+    protected function __construct()
+    {
+        self::restoreState();
+        if (self::$state === null) {
+            self::$state = new AuthState();
+        }
+    }
+
+    /**
+     * @return SessionManager
+     */
+    public static function getInstance()
+    {
+        if (self::$instance === null) {
+            self::$instance = new SessionManager();
+        }
+        return self::$instance;
+    }
+
+    public function saveState()
+    {
+        session_start();
+        $_SESSION[DOKU_COOKIE]['oauth-state'] = serialize(self::$state);
+        session_write_close();
+    }
+
+    /**
+     * @return AuthState
+     */
+    public static function restoreState()
+    {
+        if (isset($_SESSION[DOKU_COOKIE]['oauth-state'])) {
+            self::$state = unserialize($_SESSION[DOKU_COOKIE]['oauth-state']);
+        }
+        return self::$state;
+    }
+
+    /**
      * @return bool
      */
-    public static function hasState()
+    public function isInProgress()
     {
-        return isset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
+        return self::$state->isInProgress();
     }
 
-    public static function getServiceName()
+    public function getServiceName()
     {
-        return $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'];
+        return self::$state->getService();
     }
 
-    public static function getPid()
+    public function getPid()
     {
-        return $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'];
+        return self::$state->getId();
     }
 
-    public static function getParams()
+    public function getParams()
     {
-        return $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'];
+        return self::$state->getLoginParams();
+    }
+
+    public function getDo()
+    {
+        return self::$state->getDo();
+    }
+
+    public function getRequest()
+    {
+        return self::$state->getRequest();
+    }
+
+    public function getRev()
+    {
+        return self::$state->getRev();
     }
 
     public function setServiceName($serviceName)
     {
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $serviceName;
+        self::$state->setService($serviceName);
     }
 
     public function setPid($pid)
     {
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'] = $pid;
+        self::$state->setId($pid);
     }
 
     public function setParams($params)
     {
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'] = $params;
+        self::$state->setLoginParams($params);
     }
 
-    public static function clearState()
+    public function setDo($do)
     {
-        unset($_SESSION[DOKU_COOKIE]['oauth-inprogress']);
+        self::$state->setDo($do);
+    }
+
+    public function setRequest($request)
+    {
+        self::$state->setRequest($request);
+    }
+
+    public function setInProgress($progress)
+    {
+        self::$state->setInProgress($progress);
     }
 
 }

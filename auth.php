@@ -11,12 +11,18 @@ use dokuwiki\plugin\oauth\SessionManager;
 class auth_plugin_oauth extends auth_plugin_authplain
 {
 
+    /**
+     * @var SessionManager
+     */
+    protected static $sessionManager;
+
     /** @inheritDoc */
     public function __construct()
     {
         parent::__construct();
 
         $this->cando['external'] = true;
+        self::$sessionManager = SessionManager::getInstance();
     }
 
     /** @inheritDoc */
@@ -26,19 +32,21 @@ class auth_plugin_oauth extends auth_plugin_authplain
 
         // handle redirects from farmer to animal wiki instances
         if ($INPUT->has('state') && plugin_load('helper', 'farmer', false, true)) {
-            $this->handleState($INPUT->str('state'));
+            $this->handleFarmState($INPUT->str('state'));
         }
 
         // first check in auth setup: is auth data present and still valid?
         if ($this->sessionLogin()) return true;
 
         // if we have a service in session, either we're in oauth login or a previous login needs to be revalidated
-        $servicename = SessionManager::getServiceName();
+        $servicename = self::$sessionManager->getServiceName();
+
         if ($servicename) {
-            $pid = SessionManager::getPid();
-            $params = SessionManager::getParams();
-            $inProgress = SessionManager::hasState();
-            SessionManager::clearState();
+            $pid = self::$sessionManager->getPid();
+            $params = self::$sessionManager->getParams();
+            $inProgress = self::$sessionManager->isInProgress();
+            self::$sessionManager->setInProgress(false);
+            self::$sessionManager->saveState();
             return $this->serviceLogin($servicename,
                 $sticky,
                 $pid,
@@ -135,6 +143,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
      */
     protected function cookieLogin()
     {
+        // FIXME SessionManager access?
         if (isset($_COOKIE[DOKU_COOKIE])) {
             list($cookieuser, $cookiesticky, $auth, $servicename) = explode('|', $_COOKIE[DOKU_COOKIE]);
             $auth = base64_decode($auth, true);
@@ -384,6 +393,9 @@ class auth_plugin_oauth extends auth_plugin_authplain
 
         $USERINFO = $data;
         $_SERVER['REMOTE_USER'] = $data['user'];
+
+
+        // FIXME this is not handled by SessionManager because auth.php accesses the data directly
         $_SESSION[DOKU_COOKIE]['auth']['user'] = $data['user'];
         $_SESSION[DOKU_COOKIE]['auth']['pass'] = $data['pass'];
         $_SESSION[DOKU_COOKIE]['auth']['info'] = $USERINFO;
@@ -435,14 +447,13 @@ class auth_plugin_oauth extends auth_plugin_authplain
     {
         global $INPUT;
 
-        // FIXME delegate to SessionManager? in action/login.php as well?
-        session_start();
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['service'] = $servicename;
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['id'] = $INPUT->str('id');
+        // used to be in 'oauth-inprogress'
+        self::$sessionManager->setServiceName($servicename);
+        self::$sessionManager->setPid($INPUT->str('id'));
+        self::$sessionManager->setParams($_GET);
 
-        $_SESSION[DOKU_COOKIE]['oauth-inprogress']['params'] = $_GET;
-
-        $_SESSION[DOKU_COOKIE]['oauth-done']['$_REQUEST'] = $_REQUEST;
+        // used to be in 'oauth-done'
+        self::$sessionManager->setRequest($_REQUEST);
 
         if (is_array($INPUT->post->param('do'))) {
             $doPost = key($INPUT->post->arr('do'));
@@ -451,12 +462,11 @@ class auth_plugin_oauth extends auth_plugin_authplain
         }
         $doGet = $INPUT->get->str('do');
         if (!empty($doPost)) {
-            $_SESSION[DOKU_COOKIE]['oauth-done']['do'] = $doPost;
+            self::$sessionManager->setDo($doPost);
         } elseif (!empty($doGet)) {
-            $_SESSION[DOKU_COOKIE]['oauth-done']['do'] = $doGet;
+            self::$sessionManager->setDo($doGet);
         }
-
-        session_write_close();
+        self::$sessionManager->saveState();
     }
 
     /**
@@ -467,7 +477,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
      *
      * @param $state
      */
-    private function handleState($state)
+    private function handleFarmState($state)
     {
         /** @var \helper_plugin_farmer $farmer */
         $farmer = plugin_load('helper', 'farmer', false, true);
