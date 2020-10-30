@@ -14,7 +14,7 @@ use OAuth\Common\Http\Uri\UriInterface;
 class Auth0 extends AbstractService
 {
 
-    const SCOPE_OPENID = 'openid';
+    const SCOPE_OPENID = 'openid profile email';
     protected $domain;
 
     public function __construct(

@@ -66,3 +66,4 @@ $meta['singleService']       = array('multichoice',
                                          'Yahoo',
                                          'Doorkeeper',
                                          'Keycloak'));
+$meta['register-on-auth']    = array('onoff','_caution' => 'security');

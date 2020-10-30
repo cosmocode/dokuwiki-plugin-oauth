@@ -23,3 +23,4 @@ $lang['keycloak-secret']       = 'Geheimcode deiner Keycloak Applikation';
 $lang['mailRestriction']       = 'Beschränke Anmeldung auf Benutzerprofile dieser Domäne (optional, muss mit <code>@</code> beginnen)';
 $lang['singleService']         = 'Nur einen oAuth Service zulassen (lokale Anmeldung wird deaktiviert!)';
 $lang['singleService_o_']      = 'Alle Services zulassen';
+$lang['register-on-auth']      = 'Registriere authentifizierte Benutzer selbst wenn Selbstregistrierung in der Hauptkonfiguration nicht erlaubt ist.';
