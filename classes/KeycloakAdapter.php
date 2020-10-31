@@ -16,7 +16,7 @@ class KeycloakAdapter extends AbstractAdapter {
     /**
      * Retrieve the user's data
      *
-     * The array needs to contain at least 'user', 'mail', 'name' and optional 'grps'
+     * The array needs to contain at least 'user', 'mail', 'name' and optional 'grps' and 'roles'
      *
      * @return array
      */
@@ -30,13 +30,39 @@ class KeycloakAdapter extends AbstractAdapter {
         $data['user'] = $result['preferred_username'];
         $data['name'] = $result['name'];
         $data['mail'] = $result['email'];
+
         if( !empty($result['groups']) )
         {
             $data['grps'] = $result['groups'];
         }
         $data['grps'] = $result['groups'];
 
+        $data['roles'] = $result['roles'];
+
         return $data;
+    }
+
+    /**
+     * Extend authorization checking by checking if the user has the requested role.
+     * Does nothing, if the keycloak-required-role config option is not set
+     *
+     * @return bool
+     */
+    public function checkToken() {
+        $res = parent::checkToken();
+        if (!$res) return $res;
+
+        $requiredRole = $this->hlp->getRequiredRole('Keycloak');
+        if (!empty($requiredRole))
+        {
+            $userData = $this->getUser();
+            if (empty($userData['roles']))
+            {
+                return false;
+            }
+            return in_array($requiredRole, $userData['roles'])
+        }
+        return $res;
     }
 
     /**

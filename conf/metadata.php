@@ -42,6 +42,7 @@ $meta['keycloak-key']        = array('string');
 $meta['keycloak-secret']     = array('string');
 $meta['keycloak-authurl']    = array('string');
 $meta['keycloak-tokenurl']   = array('string');
+$meta['keycloak-required-role'] = array('string');
 $meta['keycloak-userinfourl'] = array('string');
 $meta['yahoo-key']           = array('string');
 $meta['yahoo-secret']        = array('string');

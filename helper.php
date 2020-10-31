@@ -127,6 +127,17 @@ class helper_plugin_oauth extends DokuWiki_Plugin {
     }
 
     /**
+     * Return the configured required role, which has to be a member in the 'role' info, if set.
+     *
+     * @param $service
+     * @return string
+     */
+    public function getRequiredRole($service) {
+        $service = strtolower($service);
+        return $this->getConf($service.'-required-role');
+    }
+
+    /**
      * Return the configured User Info Endpoint URL for the given service
      *
      * @param $service
