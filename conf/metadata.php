@@ -34,6 +34,9 @@ $meta['facebook-key']        = array('string');
 $meta['facebook-secret']     = array('string');
 $meta['github-key']          = array('string');
 $meta['github-secret']       = array('string');
+$meta['gitlab-url']          = array('string');
+$meta['gitlab-key']          = array('string');
+$meta['gitlab-secret']       = array('string');
 $meta['google-key']          = array('string');
 $meta['google-secret']       = array('string');
 $meta['dataporten-key']      = array('string');
@@ -58,6 +61,7 @@ $meta['singleService']       = array('multichoice',
                                          'Dataporten',
                                          'Facebook',
                                          'Github',
+                                         'Gitlab',
                                          'Yahoo',
                                          'Doorkeeper',
                                          'Keycloak'));

@@ -15,6 +15,9 @@ $lang['facebook-key']    = 'The App ID of your registered <a href="https://devel
 $lang['facebook-secret'] = 'The App Secret of your registered <a href="https://developers.facebook.com/apps">Facebook application</a>';
 $lang['github-key']      = 'The Client ID of your registered <a href="https://github.com/settings/applications">Github application</a>';
 $lang['github-secret']   = 'The Client Secret of your registered <a href="https://github.com/settings/applications">Github application</a>';
+$lang['gitlab-url']      = 'The base URL of you Gitlab instance (if self-hosted). Example: https://my.gilab.tld';
+$lang['gitlab-key']      = 'The Client ID of your registered <a href="https://gitlab.com/-/profile/applications">Gilab application</a>';
+$lang['gitlab-secret']   = 'The Client Secret of your registered <a href="https://gitlab.com/-/profile/applications">Gitlab application</a>';
 $lang['google-key']      = 'The Client ID of your registered <a href="https://console.developers.google.com/project">Google Project</a> (see Credentials Screen)';
 $lang['google-secret']   = 'The Client Secret of your registered <a href="https://console.developers.google.com/project">Google Project</a> (see Credentials Screen)';
 $lang['dataporten-key']  = 'The Client ID of your registered <a href="https://dashboard.dataporten.no">Dataporten application</a>';
