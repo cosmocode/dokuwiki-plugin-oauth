@@ -17,6 +17,7 @@ $conf['gitlab-name']         = '';
 $conf['gitlab-url']          = 'https://gitlab.com';
 $conf['gitlab-key']          = '';
 $conf['gitlab-secret']       = '';
+$conf['gitlab-rules']        = '';
 $conf['google-key']          = '';
 $conf['google-secret']       = '';
 $conf['dataporten-key']      = '';

@@ -38,6 +38,7 @@ $meta['gitlab-name']         = array('string');
 $meta['gitlab-url']          = array('string');
 $meta['gitlab-key']          = array('string');
 $meta['gitlab-secret']       = array('string');
+$meta['gitlab-rules']        = array('', '_caution' => 'warning');
 $meta['google-key']          = array('string');
 $meta['google-secret']       = array('string');
 $meta['dataporten-key']      = array('string');

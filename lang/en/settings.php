@@ -19,6 +19,7 @@ $lang['gitlab-name']     = 'The displayed text of the login Gitlab button';
 $lang['gitlab-url']      = 'The base URL of you Gitlab instance (if self-hosted). Example: https://my.gilab.tld';
 $lang['gitlab-key']      = 'The Client ID of your registered <a href="https://gitlab.com/-/profile/applications">Gilab application</a>';
 $lang['gitlab-secret']   = 'The Client Secret of your registered <a href="https://gitlab.com/-/profile/applications">Gitlab application</a>';
+$lang['gitlab-rules']    = 'Optionnals new-line separated rules that must match the Gitlab user. Rules check if a key exist or a condition match user, groups, or projects data<br>Examples:<br>user/can_create_project<br>user/external = 0<br>user/job_title != intern<br>groups/geeks<br>groups/comm = <br>projects/wargame';
 $lang['google-key']      = 'The Client ID of your registered <a href="https://console.developers.google.com/project">Google Project</a> (see Credentials Screen)';
 $lang['google-secret']   = 'The Client Secret of your registered <a href="https://console.developers.google.com/project">Google Project</a> (see Credentials Screen)';
 $lang['dataporten-key']  = 'The Client ID of your registered <a href="https://dashboard.dataporten.no">Dataporten application</a>';
