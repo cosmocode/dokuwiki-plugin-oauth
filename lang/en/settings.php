@@ -15,6 +15,7 @@ $lang['facebook-key']    = 'The App ID of your registered <a href="https://devel
 $lang['facebook-secret'] = 'The App Secret of your registered <a href="https://developers.facebook.com/apps">Facebook application</a>';
 $lang['github-key']      = 'The Client ID of your registered <a href="https://github.com/settings/applications">Github application</a>';
 $lang['github-secret']   = 'The Client Secret of your registered <a href="https://github.com/settings/applications">Github application</a>';
+$lang['gitlab-name']     = 'The displayed text of the login Gitlab button';
 $lang['gitlab-url']      = 'The base URL of you Gitlab instance (if self-hosted). Example: https://my.gilab.tld';
 $lang['gitlab-key']      = 'The Client ID of your registered <a href="https://gitlab.com/-/profile/applications">Gilab application</a>';
 $lang['gitlab-secret']   = 'The Client Secret of your registered <a href="https://gitlab.com/-/profile/applications">Gitlab application</a>';

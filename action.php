@@ -222,9 +222,14 @@ class action_plugin_oauth extends DokuWiki_Action_Plugin {
 
     function service_html ($service){
         global $ID;
+        
+        if (!$serviceName = $this->getConf(strtolower($service).'-name')) {
+            $serviceName = $service;
+        }
+        
         $html = '';
         $html .= '<a href="' . wl($ID, array('oauthlogin' => $service)) . '" class="plugin_oauth_' . $service . '">';
-        $html .= $service;
+        $html .= $serviceName;
         $html .= '</a> ';
         return $html;
 

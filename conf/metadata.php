@@ -34,6 +34,7 @@ $meta['facebook-key']        = array('string');
 $meta['facebook-secret']     = array('string');
 $meta['github-key']          = array('string');
 $meta['github-secret']       = array('string');
+$meta['gitlab-name']         = array('string');
 $meta['gitlab-url']          = array('string');
 $meta['gitlab-key']          = array('string');
 $meta['gitlab-secret']       = array('string');
