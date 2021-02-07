@@ -342,6 +342,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
      * @param int    $validityPeriodInSeconds optional, per default 1 Year
      */
     private function setUserCookie($user, $sticky, $servicename, $validityPeriodInSeconds = 31536000) {
+        global $conf;
         $cookie = base64_encode($user).'|'.((int) $sticky).'|'.base64_encode('oauth').'|'.base64_encode($servicename);
         $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
         $time      = $sticky ? (time() + $validityPeriodInSeconds) : 0;
