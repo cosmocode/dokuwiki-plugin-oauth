@@ -2,6 +2,8 @@
 
 namespace OAuth\Plugin;
 
+use OAuth\OAuth2\Service\Keycloak;
+
 /**
  * Class KeycloakAdapter
  *
@@ -37,6 +39,15 @@ class KeycloakAdapter extends AbstractAdapter {
         $data['grps'] = $result['groups'];
 
         return $data;
+    }
+
+    /**
+     * Access to user and his email addresses
+     *
+     * @return array
+     */
+    public function getScope() {
+        return array(Keycloak::SCOPE_OPENID);
     }
 
     /**
