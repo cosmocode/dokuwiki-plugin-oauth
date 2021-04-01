@@ -3,6 +3,7 @@
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
+ * @author Inv Alide <inv@li.de>
  * @author F. Mueller-Donath <j.felix@mueller-donath.de>
  */
 $lang['info']                  = 'Weiterleitungs-URI für die Konfiguration der Applikationen';
@@ -18,6 +19,8 @@ $lang['google-key']            = 'Client-ID Ihres <a href="https://console.devel
 $lang['google-secret']         = 'Clientschlüssel Ihres <a href="https://console.developers.google.com/project">Google Projects</a> (siehe "APIs & Dienste / Zugangsdaten")';
 $lang['dataporten-key']        = 'Client ID Ihrer <a href="https://dashboard.dataporten.no">Dataporten Applikation</a>';
 $lang['dataporten-secret']     = 'Client Geheimhcode Ihrer <a href="https://dashboard.dataporten.no">Dataporten Applikation</a>';
+$lang['keycloak-key']          = 'Resource ID Ihrer Keycloak Applikation';
+$lang['keycloak-secret']       = 'Geheimcode Ihrer Keycloak Applikation';
 $lang['mailRestriction']       = 'Beschränke Anmeldung auf Benutzerprofile dieser Domäne (optional, muss mit <code>@</code> beginnen)';
 $lang['singleService']         = 'Nur einen oAuth Service zulassen (lokale Anmeldung wird deaktiviert!)';
 $lang['singleService_o_']      = 'Alle Services zulassen';
