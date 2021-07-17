@@ -20,6 +20,9 @@ $lang['dataporten-key']        = 'Client ID deiner <a href="https://dashboard.da
 $lang['dataporten-secret']     = 'Client Geheimhcode deiner <a href="https://dashboard.dataporten.no">Dataporten Applikation</a>';
 $lang['keycloak-key']          = 'Resource ID deiner Keycloak Applikation';
 $lang['keycloak-secret']       = 'Geheimcode deiner Keycloak Applikation';
+$lanf['iserv-key']             = 'Die Client-ID deiner in iServ registrierten Anwendung';
+$meta['iserv-secret']          = 'Das Client-Geheimnis deiner in iServ registrierten Anwendung';
+$meta['iserv-url']             = 'Die URL deiner iServ-Instanz';
 $lang['mailRestriction']       = 'Beschränke Anmeldung auf Benutzerprofile dieser Domäne (optional, muss mit <code>@</code> beginnen)';
 $lang['singleService']         = 'Nur einen oAuth Service zulassen (lokale Anmeldung wird deaktiviert!)';
 $lang['singleService_o_']      = 'Alle Services zulassen';

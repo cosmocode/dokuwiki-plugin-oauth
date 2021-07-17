@@ -18,6 +18,9 @@ $lang['google-key']            = 'Client-ID Ihres <a href="https://console.devel
 $lang['google-secret']         = 'Clientschlüssel Ihres <a href="https://console.developers.google.com/project">Google Projects</a> (siehe "APIs & Dienste / Zugangsdaten")';
 $lang['dataporten-key']        = 'Client ID Ihrer <a href="https://dashboard.dataporten.no">Dataporten Applikation</a>';
 $lang['dataporten-secret']     = 'Client Geheimhcode Ihrer <a href="https://dashboard.dataporten.no">Dataporten Applikation</a>';
+$lanf['iserv-key']             = 'Die Client-ID Ihrer in iServ registrierten Anwendung';
+$meta['iserv-secret']          = 'Das Client-Geheimnis Ihrer in iServ registrierten Anwendung';
+$meta['iserv-url']             = 'Die URL Ihrer iServ-Instanz';
 $lang['mailRestriction']       = 'Beschränke Anmeldung auf Benutzerprofile dieser Domäne (optional, muss mit <code>@</code> beginnen)';
 $lang['singleService']         = 'Nur einen oAuth Service zulassen (lokale Anmeldung wird deaktiviert!)';
 $lang['singleService_o_']      = 'Alle Services zulassen';
