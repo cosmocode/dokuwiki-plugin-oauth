@@ -33,7 +33,7 @@ class IservAdapter extends AbstractAdapter {
         $data['mail'] = $result['email'];
         $data['grps'] = array();
         foreach($result['groups'] as $group){
-           array_push($groups, $group['act']);
+           array_push($data['grps'], $group['act']);
         }
         return $data;
     }
