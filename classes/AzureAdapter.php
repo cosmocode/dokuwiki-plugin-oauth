@@ -54,7 +54,7 @@ class AzureAdapter extends AbstractAdapter
 
         $data['user'] = $result['userPrincipalName'];
         $data['name'] = $result['displayName'];
-        $data['mail'] = $result['mail'];
+        $data['mail'] = $result['mail'] ? $result['mail'] : $result['userPrincipalName'];
 
         $grpmap = $this->hlp->getConf('azure-groupmapping');
 

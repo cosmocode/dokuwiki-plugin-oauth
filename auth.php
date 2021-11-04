@@ -231,9 +231,21 @@ class auth_plugin_oauth extends auth_plugin_authplain {
                 msg(sprintf($this->getLang('authnotenabled'), $servicename), -1);
                 return false;
             }
+
+            global $conf;
             $uinfo['user'] = $user;
             $uinfo['name'] = $sinfo['name'];
-            $uinfo['grps'] = array_merge((array) $uinfo['grps'], $sinfo['grps']);
+            $index = array_search($conf['defaultgroup'], $sinfo['grps']);
+            array_splice($sinfo['grps'],0,$index,$uinfo['grps']);
+            $uinfo['grps'] = $sinfo['grps'];
+            $changes=array();
+            $changes['grps'] = $sinfo['grps'];
+
+            $ok = $this->triggerUserMod('modify',array($user,$changes));
+
+            if(!$ok){
+                return false;
+            }
         } elseif(actionOK('register') || $this->getConf('register-on-auth')) {
             $ok = $this->addUser($uinfo, $servicename);
             if(!$ok) {
@@ -275,7 +287,7 @@ class auth_plugin_oauth extends auth_plugin_authplain {
 
         $ok = $this->triggerUserMod(
             'create',
-            array($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $groups_on_creation,)
+            array($user, auth_pwgen($user), $uinfo['name'], $uinfo['mail'], $uinfo['grps'],)
         );
         if(!$ok) {
             return false;
