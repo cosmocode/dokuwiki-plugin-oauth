@@ -1,5 +1,6 @@
 <?php
 
+use dokuwiki\Form\Form;
 use dokuwiki\plugin\oauth\SessionManager;
 use OAuth\Common\Http\Exception\TokenResponseException;
 
@@ -38,7 +39,8 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         $conf['profileconfirm'] = false; // password confirmation doesn't work with oauth only users
 
         $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'handleStart');
-        $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handleLoginform');
+        $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handleOldLoginForm'); // @deprecated
+        $controller->register_hook('FORM_LOGIN_OUTPUT', 'BEFORE', $this, 'handleLoginForm');
         $controller->register_hook('ACTION_ACT_PREPROCESS', 'BEFORE', $this, 'handleDoLogin');
     }
 
@@ -69,12 +71,52 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
      * Add the oAuth login links to login form
      *
      * @param Doku_Event $event event object by reference
+     * @deprecated can be removed in the future
      * @return void
      */
-    public function handleLoginform(Doku_Event $event)
+    public function handleOldLoginForm(Doku_Event $event)
     {
         /** @var Doku_Form $form */
         $form = $event->data;
+        $html = $this->prepareLoginButtons();
+        if (!$html) return;
+
+        $form->_content[] = form_openfieldset(
+            [
+                '_legend' => $this->getLang('loginwith'),
+                'class' => 'plugin_oauth',
+            ]
+        );
+        $form->_content[] = $html;
+        $form->_content[] = form_closefieldset();
+    }
+
+
+    /**
+     * Add the oAuth login links to login form
+     *
+     * @param Doku_Event $event event object by reference
+     * @deprecated can be removed in the future
+     * @return void
+     */
+    public function handleLoginForm(Doku_Event $event)
+    {
+        /** @var Form $form */
+        $form = $event->data;
+        $html = $this->prepareLoginButtons();
+        if (!$html) return;
+
+        $form->addFieldsetOpen($this->getLang('loginwith'))->addClass('plugin_oauth');
+        $form->addHTML($html);
+        $form->addFieldsetClose();
+    }
+
+    /**
+     * Create HTML for the various login buttons
+     *
+     * @return string the HTML
+     */
+    protected function prepareLoginButtons() {
         $html = '';
 
         $validDomains = $this->hlp->getValidDomains();
@@ -86,16 +128,8 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         foreach ($this->hlp->listServices() as $service) {
             $html .= $service->loginButton();
         }
-        if (!$html) return;
 
-        $form->_content[] = form_openfieldset(
-            [
-                '_legend' => $this->getLang('loginwith'),
-                'class' => 'plugin_oauth',
-            ]
-        );
-        $form->_content[] = $html;
-        $form->_content[] = form_closefieldset();
+        return $html;
     }
 
     /**
