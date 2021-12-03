@@ -8,7 +8,9 @@ use OAuth\Common\Exception\Exception;
 use OAuth\Common\Http\Exception\TokenResponseException;
 use OAuth\Common\Storage\Exception\TokenNotFoundException;
 use OAuth\OAuth1\Service\AbstractService as Abstract1Service;
+use OAuth\OAuth1\Token\TokenInterface;
 use OAuth\OAuth2\Service\AbstractService as Abstract2Service;
+use OAuth\OAuth2\Service\Exception\InvalidAuthorizationStateException;
 use OAuth\ServiceFactory;
 
 /**
@@ -36,8 +38,6 @@ abstract class Service extends ActionPlugin
 
     /**
      * Auto register this plugin with the oAuth authentication plugin
-     *
-     * @inheritDoc
      */
     public function handleRegister(\Doku_Event $event, $param)
     {
@@ -89,7 +89,7 @@ abstract class Service extends ActionPlugin
     {
         $oauth = $this->getOAuthService();
 
-        if (is_a($oauth, 'OAuth\OAuth2\Service\AbstractService')) { /* oAuth2 handling */
+        if (is_a($oauth, Abstract2Service::class)) { /* oAuth2 handling */
             $url = $oauth->getAuthorizationUri();
         } else { /* oAuth1 handling */
             // extra request needed for oauth1 to request a request token
@@ -115,6 +115,7 @@ abstract class Service extends ActionPlugin
      * @return bool true if authentication was successful
      * @throws TokenResponseException
      * @throws TokenNotFoundException
+     * @throws InvalidAuthorizationStateException
      */
     public function checkToken()
     {
@@ -122,14 +123,17 @@ abstract class Service extends ActionPlugin
 
         $oauth = $this->getOAuthService();
 
-        if (is_a($oauth, 'OAuth\OAuth2\Service\AbstractService')) { /* oAuth2 handling */
+        if (is_a($oauth, Abstract2Service::class)) {
+            /** @var Abstract2Service $oauth */
             if (!$INPUT->get->has('code')) return false;
             $state = $INPUT->get->str('state', null);
-            $this->oAuth->requestAccessToken($INPUT->get->str('code'), $state);
-        } else { /* oAuth1 handling */
+            $oauth->requestAccessToken($INPUT->get->str('code'), $state);
+        } else {
+            /** @var Abstract1Service $oauth */
             if (!$INPUT->get->has('oauth_token')) return false;
+            /** @var TokenInterface $token */
             $token = $oauth->getStorage()->retrieveAccessToken($this->getServiceID());
-            $this->oAuth->requestAccessToken(
+            $oauth->requestAccessToken(
                 $INPUT->get->str('oauth_token'),
                 $INPUT->get->str('oauth_verifier'),
                 $token->getRequestTokenSecret()
@@ -216,7 +220,7 @@ abstract class Service extends ActionPlugin
      */
     public function getServiceID()
     {
-        $name = strtolower($this->getPluginName());
+        $name = $this->getPluginName();
         if (substr($name, 0, 5) === 'oauth') {
             $name = substr($name, 5);
         }
