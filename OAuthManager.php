@@ -12,37 +12,37 @@ class OAuthManager
     // region main flow
 
     /**
+     * Explicitly starts the oauth flow by redirecting to IDP
+     *
      * @throws Exception
      * @throws TokenResponseException
      */
     public function startFlow($servicename)
     {
+        global $ID;
+
         // generate a new GUID to identify this user
         $guid = bin2hex(random_bytes(16));
 
         $session = Session::getInstance();
-        $session->setLoginData($servicename, $guid);
-
-        // fixme store environment
+        $session->setLoginData($servicename, $guid, $ID);
         $service = $this->loadService($servicename);
         $service->initOAuthService($guid);
         $service->login(); // redirects
-
     }
 
     /**
+     * Continues the flow from various states
+     *
      * @return bool true if the login has been handled
      * @throws Exception
      * @throws \OAuth\Common\Exception\Exception
-     * @todo this probably moves over to auth
      */
     public function continueFlow()
     {
-
         return $this->loginByService() or
             $this->loginBySession() or
             $this->loginByCookie();
-
     }
 
     /**
@@ -81,8 +81,10 @@ class OAuthManager
         $session->setUser($userdata); // log in
         $session->setCookie($logindata['servicename'], $logindata['guid']); // set cookie
 
-        // fixme restore environment
-
+        // redirect to the appropriate ID
+        if (!empty($logindata['id'])) {
+            send_redirect(wl($logindata['id'], [], true, '&'));
+        }
         return true;
     }
 
@@ -103,8 +105,8 @@ class OAuthManager
         }
 
         $userdata = $session->getUser();
+        if(!$userdata) return false;
         $session->setUser($userdata, false); // does a login without resetting the time
-
         return true;
     }
 

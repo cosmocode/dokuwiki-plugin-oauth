@@ -31,49 +31,44 @@ class Session
     }
 
     /**
-     * Set a service and guid for a login in progress
+     * Set the environment needed to verify a login in progress
      *
-     * @param string $servicename
-     * @param string $guid
+     * @param string $servicename the name of the service used
+     * @param string $guid the GUID assigned to the user
+     * @param string $id pageID to return to after login
      * @return void
      */
-    public function setLoginData($servicename, $guid)
+    public function setLoginData($servicename, $guid, $id)
     {
-        $_SESSION[DOKU_COOKIE]['auth']['oauth']['service'] = $servicename;
-        $_SESSION[DOKU_COOKIE]['auth']['oauth']['guid'] = $guid;
+        $_SESSION[DOKU_COOKIE]['auth']['oauth'] = [
+            'servicename' => $servicename,
+            'guid' => $guid,
+            'id' => $id,
+        ];
     }
 
     /**
-     * Get currently used login service
+     * Get the current login environment
      *
-     * @return false|array Either [servicename=>*,guid=>*] or false
+     * @return false|array Either [servicename=>*,guid=>*, id=>*] or false
      */
     public function getLoginData()
     {
-        if (
-            isset($_SESSION[DOKU_COOKIE]['auth']['oauth']['service']) and
-            isset($_SESSION[DOKU_COOKIE]['auth']['oauth']['guid'])
-
-        ) {
-            return [
-                'servicename' => $_SESSION[DOKU_COOKIE]['auth']['oauth']['service'],
-                'guid' => $_SESSION[DOKU_COOKIE]['auth']['oauth']['guid'],
-            ];
+        if (isset($_SESSION[DOKU_COOKIE]['auth']['oauth'])) {
+            return $_SESSION[DOKU_COOKIE]['auth']['oauth'];
         }
         return false;
     }
 
     /**
-     * Remove login service from session
+     * Clear login environment after login
+     *
      * @return void
      */
     public function clearLoginData()
     {
-        if (isset($_SESSION[DOKU_COOKIE]['auth']['oauth']['service'])) {
-            unset($_SESSION[DOKU_COOKIE]['auth']['oauth']['service']);
-        }
-        if (isset($_SESSION[DOKU_COOKIE]['auth']['oauth']['guid'])) {
-            unset($_SESSION[DOKU_COOKIE]['auth']['oauth']['guid']);
+        if (isset($_SESSION[DOKU_COOKIE]['auth']['oauth'])) {
+            unset($_SESSION[DOKU_COOKIE]['auth']['oauth']);
         }
     }
 
