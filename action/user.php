@@ -1,5 +1,7 @@
 <?php
 
+use dokuwiki\Form\Form;
+
 /**
  * DokuWiki Plugin oauth (Action Component)
  *
@@ -37,9 +39,12 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
 
         $conf['profileconfirm'] = false; // password confirmation doesn't work with oauth only users
 
-        $controller->register_hook('HTML_UPDATEPROFILEFORM_OUTPUT', 'BEFORE', $this, 'handleProfileform');
+        $controller->register_hook('HTML_UPDATEPROFILEFORM_OUTPUT', 'BEFORE', $this,
+            'handleOldProfileform'); // deprecated
+        $controller->register_hook('FORM_UPDATEPROFILE_OUTPUT', 'BEFORE', $this, 'handleProfileform');
         $controller->register_hook('AUTH_USER_CHANGE', 'BEFORE', $this, 'handleUsermod');
     }
+
     /**
      * Save groups for all the services a user has enabled
      *
@@ -88,8 +93,9 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
      *
      * @param Doku_Event $event event object by reference
      * @return void
+     * @deprecated
      */
-    public function handleProfileform(Doku_Event $event)
+    public function handleOldProfileform(Doku_Event $event)
     {
         global $USERINFO;
         /** @var auth_plugin_authplain $auth */
@@ -121,5 +127,40 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
         }
         $form->insertElement(++$pos, form_closefieldset());
         $form->insertElement(++$pos, form_openfieldset([]));
+    }
+
+    /**
+     * Add service selection to user profile
+     *
+     * @param Doku_Event $event event object by reference
+     * @return void
+     */
+    public function handleProfileform(Doku_Event $event)
+    {
+        global $USERINFO;
+        /** @var auth_plugin_authplain $auth */
+        global $auth;
+
+        /** @var Form $form */
+        $form = $event->data;
+        $pos = $form->findPositionByAttribute('type', 'submit');
+
+        $services = $this->hlp->listServices();
+        if (!$services) return;
+
+        $form->addFieldsetOpen($this->getLang('loginwith'), $pos)->addClass('plugin_oauth');
+
+        foreach ($services as $service) {
+            $group = $auth->cleanGroup($service->getServiceID());
+            $cb = $form->addCheckbox(
+                'oauth_group[' . $group . ']',
+                $service->getServiceLabel(),
+                ++$pos
+            );
+            if (in_array($group, $USERINFO['grps'])) {
+                $cb->attr('checked', 'checked');
+            }
+        }
+        $form->addFieldsetClose(++$pos);
     }
 }
