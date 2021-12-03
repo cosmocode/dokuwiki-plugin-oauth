@@ -15,6 +15,6 @@ $lang['authnotenabled']        = 'Le compte associé à cette adresse de courrie
 $lang['wrongConfig']           = 'le greffon oAuth est mal configuré et n\'utilise donc que l\'authentification locale. Veuillez contacter l\'administrateur du wiki.';
 $lang['loginButton']           = 'Se connecter avec';
 $lang['rejectedEMail']         = 'Compte de courriel invalide. Seuls les adresses du domaine %s sont autorisées.';
-$lang['eMailRestricted']       = '<p id="oauth_email_restricted">Seuls les comptes de courriel de %s sont autorisés.</p>';
+$lang['eMailRestricted']       = 'Seuls les comptes de courriel de %s sont autorisés.';
 $lang['addUser not possible']  = 'L\'enregistrement automatique est désactivé en ce moment, ou il est impossible de modifier conf/users.auth.php. Veuillez demander à l\'administrateur du wiki de créer un compte manuellement.';
 $lang['oauth login failed']    = 'Votre (re)connexion a échoué.';

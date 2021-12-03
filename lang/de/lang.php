@@ -11,6 +11,6 @@ $lang['authnotenabled']        = 'Für das mit dieser Emailadresse verknüpfte B
 $lang['wrongConfig']           = 'Das oAuth Plugin ist fehlerhaft konfiguriert, es können derzeit nur lokale Anmeldedaten verwendet werden. Bitte wenden Sie Sich an den Administrator dieses Wikis.';
 $lang['loginButton']           = 'Anmelden mit';
 $lang['rejectedEMail']         = 'Ungültige Emailadresse. Nur Adressen aus den folgenden Domänen sind erlaubt: %s!';
-$lang['eMailRestricted']       = '<p id="oauth_email_restricted">Nur Adressen aus den folgenden Domänen sind erlaubt: %s!</p>';
+$lang['eMailRestricted']       = 'Nur Adressen aus den folgenden Domänen sind erlaubt: %s!';
 $lang['addUser not possible']  = 'Die Registrierung ist nicht erlaubt oder conf/users.auth.php ist nicht schreibbar. Bitte wenden Sie Sich an den Administrator dieses Wikis.';
 $lang['oauth login failed']    = 'Anmeldung fehlgeschlagen.';
