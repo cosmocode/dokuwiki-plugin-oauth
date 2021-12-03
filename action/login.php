@@ -57,17 +57,16 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     {
         global $INPUT;
 
-        // login has been done, but there's environment to be restored
-        // TODO when is this the case?
-        $sessionManager = SessionManager::getInstance();
-        if ($sessionManager->getDo() || $sessionManager->getRev()) {
-            $this->restoreSessionEnvironment();
-            return;
-        }
-
         // see if a login needs to be started
         $servicename = $INPUT->str('oauthlogin');
-        if ($servicename) $this->startOAuthLogin($servicename);
+        if (!$servicename) return;
+
+        try {
+            $om = new \dokuwiki\plugin\oauth\OAuthManager();
+            $om->startFlow($servicename);
+        } catch (TokenResponseException|Exception $e) {
+            $this->hlp->showException($e, 'login failed');
+        }
     }
 
     /**
@@ -186,12 +185,7 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
 //        $sessionManager->setPid($ID);
 //        $sessionManager->saveState();
 
-        try {
-            $om = new \dokuwiki\plugin\oauth\OAuthManager();
-            $om->startFlow($servicename);
-        } catch (TokenResponseException|Exception $e) {
-            $this->hlp->showException($e, 'login failed');
-        }
+
     }
 
     /**

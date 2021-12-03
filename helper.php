@@ -27,8 +27,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin
     {
         $services = $this->listServices(true);
         if (!isset($services[$servicename])) return null;
-        $service = $services[$servicename];
-        return $service;
+        return $services[$servicename];
     }
 
     /**
@@ -47,6 +46,8 @@ class helper_plugin_oauth extends DokuWiki_Plugin
 
     /**
      * List available Services
+     *
+     * Services returned here, do not have initialized oAuth providers yet!
      *
      * @param bool $enabledonly list only services that have been configured
      * @triggers PLUGIN_OAUTH_BACKEND_REGISTER

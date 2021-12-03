@@ -4,8 +4,12 @@ namespace dokuwiki\plugin\oauth;
 
 use OAuth\Common\Http\Exception\TokenResponseException;
 
+/**
+ * Implements the flow control for oAuth
+ */
 class OAuthManager
 {
+    // region main flow
 
     /**
      * @throws Exception
@@ -42,7 +46,9 @@ class OAuthManager
     }
 
     /**
-     * @return bool true if successful, false if not applies,
+     * Second step in a explicit login, validates the oauth code
+     *
+     * @return bool true if successful, false if not applies
      * @throws \OAuth\Common\Exception\Exception
      * @throws Exception
      */
@@ -81,11 +87,11 @@ class OAuthManager
     }
 
     /**
-     * Login a user based on their current session data
+     * Login based on user's current session data
      *
      * This will also log in plainauth users
      *
-     * @return bool true if successful, false if not applies,
+     * @return bool true if successful, false if not applies
      * @throws Exception
      */
     protected function loginBySession()
@@ -103,9 +109,9 @@ class OAuthManager
     }
 
     /**
-     * Login a user based on their cookie and a previously saved access token
+     * Login based on user cookie and a previously saved access token
      *
-     * @return bool true if successful, false if not applies,
+     * @return bool true if successful, false if not applies
      * @throws Exception
      */
     protected function loginByCookie()
@@ -121,10 +127,18 @@ class OAuthManager
             return false; // maybe cookie had old service that is no longer available
         }
 
-        $userdata = $service->getUser(); // this should use a previously saved token
+        // this should use a previously saved token
+        $userdata = $service->getUser();
+
+        // processing
+        $userdata = $this->validateUserData($userdata, $cookie['servicename']);
+        $userdata = $this->processUserData($userdata, $cookie['servicename']);
+
         $session->setUser($userdata); // log in
         return true;
     }
+
+    // endregion
 
     /**
      * Clean and validate the user data provided from the service
