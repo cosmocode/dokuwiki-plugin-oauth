@@ -7,7 +7,7 @@
  */
 
 use dokuwiki\Extension\Event;
-use dokuwiki\plugin\oauth\Service;
+use dokuwiki\plugin\oauth\Adapter;
 
 require_once(__DIR__ . '/vendor/autoload.php');
 
@@ -21,7 +21,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin
      * Load the needed libraries and initialize the named oAuth service
      *
      * @param string $servicename
-     * @return null|Service
+     * @return null|Adapter
      */
     public function loadService($servicename)
     {
@@ -51,7 +51,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin
      *
      * @param bool $enabledonly list only services that have been configured
      * @triggers PLUGIN_OAUTH_BACKEND_REGISTER
-     * @return Service[] list of service objects
+     * @return Adapter[] list of service objects
      */
     public function listServices($enabledonly = true)
     {
@@ -63,7 +63,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin
         // filter out unconfigured services
         if ($enabledonly) {
             $services = array_filter($services, function ($service) {
-                /** @var Service $service */
+                /** @var Adapter $service */
                 return (bool)$service->getKey();
             });
         }

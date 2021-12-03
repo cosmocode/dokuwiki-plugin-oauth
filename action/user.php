@@ -117,7 +117,7 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
             $group = $auth->cleanGroup($service->getServiceID());
             $elem = form_makeCheckboxField(
                 'oauth_group[' . $group . ']',
-                1, $service->getServiceLabel(), '', 'simple',
+                1, $service->getLabel(), '', 'simple',
                 [
                     'checked' => (in_array($group, $USERINFO['grps'])) ? 'checked' : '',
                 ]
@@ -154,7 +154,7 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
             $group = $auth->cleanGroup($service->getServiceID());
             $cb = $form->addCheckbox(
                 'oauth_group[' . $group . ']',
-                $service->getServiceLabel(),
+                $service->getLabel(),
                 ++$pos
             );
             if (in_array($group, $USERINFO['grps'])) {

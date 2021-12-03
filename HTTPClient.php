@@ -21,7 +21,9 @@ class HTTPClient implements ClientInterface
         $method = 'POST'
     ) {
         $http = new DokuHTTPClient;
+        $http->keep_alive = false;
         $http->headers = array_merge($http->headers, $extraHeaders);
+
 
         $ok = $http->sendRequest($endpoint->getAbsoluteUri(), $requestBody, $method);
         if (!$ok) {

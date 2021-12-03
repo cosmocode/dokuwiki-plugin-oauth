@@ -14,15 +14,18 @@ class OAuthManager
     /**
      * Explicitly starts the oauth flow by redirecting to IDP
      *
-     * @throws Exception
-     * @throws TokenResponseException
+     * @throws \OAuth\Common\Exception\Exception
      */
     public function startFlow($servicename)
     {
         global $ID;
 
         // generate a new GUID to identify this user
-        $guid = bin2hex(random_bytes(16));
+        try {
+            $guid = bin2hex(random_bytes(16));
+        } catch (\Exception $e) {
+            throw new \OAuth\Common\Exception\Exception($e->getMessage());
+        }
 
         $session = Session::getInstance();
         $session->setLoginData($servicename, $guid, $ID);
@@ -50,7 +53,6 @@ class OAuthManager
      *
      * @return bool true if successful, false if not applies
      * @throws \OAuth\Common\Exception\Exception
-     * @throws Exception
      */
     protected function loginByService()
     {
@@ -70,7 +72,7 @@ class OAuthManager
         $session->clearLoginData();
 
         // oAuth login
-        if (!$service->checkToken()) throw new Exception("Login failed");
+        if (!$service->checkToken()) throw new \OAuth\Common\Exception\Exception("Invalid Token - Login failed");
         $userdata = $service->getUser();
 
         // processing
@@ -105,7 +107,8 @@ class OAuthManager
         }
 
         $userdata = $session->getUser();
-        if(!$userdata) return false;
+        if (!$userdata) return false;
+        if (!isset($userdata['user'])) return false; // default dokuwiki does not put username here, let DW handle it
         $session->setUser($userdata, false); // does a login without resetting the time
         return true;
     }
@@ -125,7 +128,7 @@ class OAuthManager
         try {
             $service = $this->loadService($cookie['servicename']);
             $service->initOAuthService($cookie['guid']);
-        } catch (Exception $e) {
+        } catch (\OAuth\Common\Exception\Exception $e) {
             return false; // maybe cookie had old service that is no longer available
         }
 
@@ -221,7 +224,7 @@ class OAuthManager
      * Instantiates a Service by name
      *
      * @param string $servicename
-     * @return Service
+     * @return Adapter
      * @throws Exception
      */
     protected function loadService($servicename)

@@ -5,7 +5,6 @@ namespace dokuwiki\plugin\oauth;
 use dokuwiki\Extension\ActionPlugin;
 use OAuth\Common\Consumer\Credentials;
 use OAuth\Common\Http\Exception\TokenResponseException;
-use OAuth\Common\Storage\Exception\TokenNotFoundException;
 use OAuth\OAuth1\Service\AbstractService as Abstract1Service;
 use OAuth\OAuth1\Token\TokenInterface;
 use OAuth\OAuth2\Service\AbstractService as Abstract2Service;
@@ -15,7 +14,7 @@ use OAuth\ServiceFactory;
 /**
  * Base class to implement a Backend Service for the oAuth Plugin
  */
-abstract class Service extends ActionPlugin
+abstract class Adapter extends ActionPlugin
 {
     /**
      * @var Abstract2Service|Abstract1Service
@@ -47,6 +46,7 @@ abstract class Service extends ActionPlugin
      * Initialize the oAuth service
      *
      * @param string $guid UIID for the user to authenticate
+     * @throws \OAuth\Common\Exception\Exception
      */
     public function initOAuthService($guid)
     {
@@ -61,13 +61,22 @@ abstract class Service extends ActionPlugin
 
         $serviceFactory = new ServiceFactory();
         $serviceFactory->setHttpClient(new HTTPClient());
+        $servicename = $this->getServiceID();
+        $serviceclass = $this->registerServiceClass();
+        if ($serviceclass) {
+            $serviceFactory->registerService($servicename, $serviceclass);
+        }
 
         $this->oAuth = $serviceFactory->createService(
-            $this->getServiceID(),
+            $servicename,
             $credentials,
             new Storage($guid),
             $this->getScopes()
         );
+
+        if ($this->oAuth === null) {
+            throw new Exception('Failed to initialize Service ' . $this->getLabel());
+        }
     }
 
     /**
@@ -89,6 +98,7 @@ abstract class Service extends ActionPlugin
      * but might need to be overwritten for specific services
      *
      * @throws TokenResponseException
+     * @throws Exception
      */
     public function login()
     {
@@ -108,14 +118,12 @@ abstract class Service extends ActionPlugin
             $oauth->getStorage()->storeAuthorizationState($oauth->service(), $parameters['state']);
         }
 
-        if (is_a($oauth, Abstract2Service::class)) { /* oAuth2 handling */
-            $url = $oauth->getAuthorizationUri($parameters);
-        } else { /* oAuth1 handling */
+        if (is_a($oauth, Abstract1Service::class)) { /* oAuth1 handling */
             // extra request needed for oauth1 to request a request token
             $token = $oauth->requestRequestToken();
             $parameters['oauth_token'] = $token->getRequestToken();
-            $url = $oauth->getAuthorizationUri($parameters);
         }
+        $url = $oauth->getAuthorizationUri($parameters);
 
         send_redirect($url);
     }
@@ -133,8 +141,7 @@ abstract class Service extends ActionPlugin
      * oauth data at all. This can probably be silently ignored.
      *
      * @return bool true if authentication was successful
-     * @throws TokenResponseException
-     * @throws TokenNotFoundException
+     * @throws \OAuth\Common\Exception\Exception
      * @throws InvalidAuthorizationStateException
      */
     public function checkToken()
@@ -177,7 +184,7 @@ abstract class Service extends ActionPlugin
             'style' => 'background-color: ' . $this->getColor(),
         ]);
 
-        return '<a ' . $attr . '>' . $this->getSvgLogo() . '<span>' . $this->getServiceLabel() . '</span></a> ';
+        return '<a ' . $attr . '>' . $this->getSvgLogo() . '<span>' . $this->getLabel() . '</span></a> ';
     }
     // endregion
 
@@ -201,9 +208,12 @@ abstract class Service extends ActionPlugin
      *
      * This should return the minimal scopes needed for accessing the user's data
      *
-     * @return array
+     * @return string[]
      */
-    abstract public function getScopes();
+    public function getScopes()
+    {
+        return [];
+    }
 
     /**
      * Return the user friendly name of the service
@@ -212,7 +222,7 @@ abstract class Service extends ActionPlugin
      *
      * @return string
      */
-    public function getServiceLabel()
+    public function getLabel()
     {
         return ucfirst($this->getServiceID());
     }
@@ -233,6 +243,16 @@ abstract class Service extends ActionPlugin
         }
 
         return $name;
+    }
+
+    /**
+     * Register a new Service
+     *
+     * @return string A fully qualified class name to register as new Service for your ServiceID
+     */
+    public function registerServiceClass()
+    {
+        return null;
     }
 
     /**
