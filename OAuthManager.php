@@ -190,7 +190,7 @@ class OAuthManager
      */
     protected function processUserData($userdata, $servicename)
     {
-        /** @var \auth_plugin_oauth */
+        /** @var \auth_plugin_oauth $auth */
         global $auth;
 
         // see if the user is known already
@@ -205,7 +205,7 @@ class OAuthManager
             $userdata['name'] = $localUserInfo['name'];
             $userdata['grps'] = array_merge((array)$userdata['grps'], $localUserInfo['grps']);
         } elseif (actionOK('register') || $auth->getConf('register-on-auth')) {
-            if (!$auth->addUser($userdata, $servicename)) {
+            if (!$auth->registerOAuthUser($userdata, $servicename)) {
                 throw new Exception('something went wrong creating your user account. please try again later.');
             }
         } else {

@@ -3,10 +3,11 @@
 namespace dokuwiki\plugin\oauth;
 
 /**
- * OAuth Plugin Exceptions
+ * Our own OAuth Plugin Exceptions
  *
  * @todo maybe add debug logging here later
+ * @todo add translations here
  */
-class Exception extends \Exception
+class Exception extends \OAuth\Common\Exception\Exception
 {
 }

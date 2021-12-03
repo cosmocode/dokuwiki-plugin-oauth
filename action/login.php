@@ -1,7 +1,7 @@
 <?php
 
 use dokuwiki\Form\Form;
-use dokuwiki\plugin\oauth\SessionManager;
+use dokuwiki\plugin\oauth\OAuthManager;
 use OAuth\Common\Http\Exception\TokenResponseException;
 
 /**
@@ -62,7 +62,7 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         if (!$servicename) return;
 
         try {
-            $om = new \dokuwiki\plugin\oauth\OAuthManager();
+            $om = new OAuthManager();
             $om->startFlow($servicename);
         } catch (TokenResponseException|Exception $e) {
             $this->hlp->showException($e, 'login failed');
@@ -165,53 +165,4 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         return true; // never reached
     }
 
-    /**
-     * start the oauth login
-     *
-     * This will redirect to the external service and stop processing in this request.
-     * The second part of the login will happen in auth
-     *
-     * @see auth_plugin_oauth
-     */
-    protected function startOAuthLogin($servicename)
-    {
-        global $ID;
-//        $service = $this->hlp->loadService($servicename);
-//        if (is_null($service)) return;
-//
-//        // remember service in session
-//        $sessionManager = SessionManager::getInstance();
-//        $sessionManager->setServiceName($servicename);
-//        $sessionManager->setPid($ID);
-//        $sessionManager->saveState();
-
-
-    }
-
-    /**
-     * Restore the request environment that had been set before the oauth shuffle
-     * @todo this should be handled by the session manager, if we really need it
-     */
-    protected function restoreSessionEnvironment()
-    {
-        global $INPUT, $ACT, $TEXT, $PRE, $SUF, $SUM, $RANGE, $DATE_AT, $REV;
-
-        $sessionManager = SessionManager::getInstance();
-        $ACT = $sessionManager->getDo();
-        $_REQUEST = $sessionManager->getRequest();
-
-        $REV = $INPUT->int('rev');
-        $DATE_AT = $INPUT->str('at');
-        $RANGE = $INPUT->str('range');
-        if ($INPUT->post->has('wikitext')) {
-            $TEXT = cleanText($INPUT->post->str('wikitext'));
-        }
-        $PRE = cleanText(substr($INPUT->post->str('prefix'), 0, -1));
-        $SUF = cleanText($INPUT->post->str('suffix'));
-        $SUM = $INPUT->post->str('summary');
-
-        $sessionManager->setDo('');
-        $sessionManager->setRequest([]);
-        $sessionManager->saveState();
-    }
 }

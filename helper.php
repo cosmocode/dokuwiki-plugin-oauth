@@ -102,26 +102,6 @@ class helper_plugin_oauth extends DokuWiki_Plugin
     }
 
     /**
-     * @return bool
-     */
-    public function isGETRequest()
-    {
-        global $INPUT;
-        return $INPUT->server->str('REQUEST_METHOD') === 'GET';
-    }
-
-    /**
-     * check if we are handling a request to doku.php. Only doku.php defines $updateVersion
-     *
-     * @return bool
-     */
-    public function isDokuPHP()
-    {
-        global $updateVersion;
-        return isset($updateVersion);
-    }
-
-    /**
      * Display an exception to the user
      *
      * @param Exception $e

@@ -178,7 +178,8 @@ class Session
      */
     public function clear()
     {
+        //FIXME clear cookie?
         $this->clearLoginData();
-        auth_logoff();
+
     }
 }
