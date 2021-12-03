@@ -31,8 +31,8 @@ class auth_plugin_oauth extends auth_plugin_authplain
     {
         global $INPUT;
 
-        // handle redirects from farmer to animal wiki instances  FIXME this is probably broken currently
-        if ($INPUT->has('state') && plugin_load('helper', 'farmer', false, true)) {
+        // handle redirects from farmer to animal wiki instances
+        if ($INPUT->has('state') && plugin_load('helper', 'farmer')) {
             $this->handleFarmState($INPUT->str('state'));
         }
 

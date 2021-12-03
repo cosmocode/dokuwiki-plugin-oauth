@@ -71,11 +71,12 @@ abstract class Service extends ActionPlugin
     }
 
     /**
-     * @throws Exception
      * @return Abstract2Service|Abstract1Service
+     * @throws Exception
      */
-    public function getOAuthService() {
-        if($this->oAuth === null) throw new Exception('OAuth Service not properly initialized');
+    public function getOAuthService()
+    {
+        if ($this->oAuth === null) throw new Exception('OAuth Service not properly initialized');
         return $this->oAuth;
     }
 
@@ -93,12 +94,27 @@ abstract class Service extends ActionPlugin
     {
         $oauth = $this->getOAuthService();
 
+        // store Farmer animal in oAuth state parameter
+        /** @var \helper_plugin_farmer $farmer */
+        $farmer = plugin_load('helper', 'farmer');
+        $parameters = [];
+        if ($farmer && $animal = $farmer->getAnimal()) {
+            $parameters['state'] = urlencode(base64_encode(json_encode(
+                [
+                    'animal' => $animal,
+                    'state' => md5(rand()),
+                ]
+            )));
+            $oauth->getStorage()->storeAuthorizationState($oauth->service(), $parameters['state']);
+        }
+
         if (is_a($oauth, Abstract2Service::class)) { /* oAuth2 handling */
-            $url = $oauth->getAuthorizationUri();
+            $url = $oauth->getAuthorizationUri($parameters);
         } else { /* oAuth1 handling */
             // extra request needed for oauth1 to request a request token
             $token = $oauth->requestRequestToken();
-            $url = $oauth->getAuthorizationUri(['oauth_token' => $token->getRequestToken()]);
+            $parameters['oauth_token'] = $token->getRequestToken();
+            $url = $oauth->getAuthorizationUri($parameters);
         }
 
         send_redirect($url);
@@ -143,18 +159,6 @@ abstract class Service extends ActionPlugin
                 $token->getRequestTokenSecret()
             );
         }
-
-        // FIXME move this completely to main plugin
-        /*
-        $validDomains = $this->hlp->getValidDomains();
-        if (count($validDomains) > 0) {
-            $userData = $this->getUser();
-            if (!$this->hlp->checkMail($userData['mail'])) {
-                msg(sprintf($this->hlp->getLang("rejectedEMail"), join(', ', $validDomains)), -1);
-                send_redirect(wl('', array('do' => 'login',), false, '&'));
-            }
-        }
-        */
         return true;
     }
 
@@ -175,7 +179,6 @@ abstract class Service extends ActionPlugin
 
         return '<a ' . $attr . '>' . $this->getSvgLogo() . '<span>' . $this->getServiceLabel() . '</span></a> ';
     }
-
     // endregion
 
     // region overridable methods
