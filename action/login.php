@@ -130,9 +130,11 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
                 ) . '</p>';
         }
 
+        $html .= '<div>';
         foreach ($this->hlp->listServices() as $service) {
             $html .= $service->loginButton();
         }
+        $html .= '</div>';
 
         return $html;
     }
