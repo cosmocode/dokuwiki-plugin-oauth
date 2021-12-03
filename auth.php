@@ -136,7 +136,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
                 auth_pwgen($user),
                 $userinfo['name'],
                 $userinfo['mail'],
-                $groups_on_creation,
+                $userinfo['grps'],
             ]
         );
         if (!$ok) {
