@@ -4,6 +4,6 @@
     "type": "project",
     "license": "GPL2",
     "require": {
-        "lusitanian/oauth": "^0.8.11"
+        "lusitanian/oauth": "0.8.*"
     }
 }
