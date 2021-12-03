@@ -1,7 +1,5 @@
 <?php
 
-use dokuwiki\plugin\oauth\SessionManager;
-
 /**
  * DokuWiki Plugin oauth (Auth Component)
  *
@@ -11,18 +9,12 @@ use dokuwiki\plugin\oauth\SessionManager;
 class auth_plugin_oauth extends auth_plugin_authplain
 {
 
-    /**
-     * @var SessionManager
-     */
-    protected static $sessionManager;
-
     /** @inheritDoc */
     public function __construct()
     {
         parent::__construct();
 
         $this->cando['external'] = true;
-        self::$sessionManager = SessionManager::getInstance();
     }
 
     /** @inheritDoc */
@@ -35,31 +27,14 @@ class auth_plugin_oauth extends auth_plugin_authplain
             $this->handleFarmState($INPUT->str('state'));
         }
 
-        // first check in auth setup: is auth data present and still valid?
-        if ($this->sessionLogin()) return true;
-
-        // if we have a service in session, either we're in oauth login or a previous login needs to be revalidated
-        $servicename = self::$sessionManager->getServiceName();
-
-        if ($servicename) {
-            $pid = self::$sessionManager->getPid();
-            $params = self::$sessionManager->getParams();
-            $inProgress = self::$sessionManager->isInProgress();
-            self::$sessionManager->setInProgress(false);
-            self::$sessionManager->saveState();
-            return $this->serviceLogin($servicename,
-                $sticky,
-                $pid,
-                $params,
-                $inProgress
-            );
+        $om = new \dokuwiki\plugin\oauth\OAuthManager();
+        try {
+            // either oauth or "normal" plain auth login via form
+            return $om->continueFlow() || auth_login($user, $pass, $sticky);
+        } catch (\OAuth\Common\Exception\Exception|\dokuwiki\plugin\oauth\Exception $e) {
+            msg(hsc($e->getMessage()), -1);
+            return false;
         }
-
-        // otherwise try cookie
-        $this->cookieLogin();
-
-        // do the "normal" plain auth login via form
-        return auth_login($user, $pass, $sticky);
     }
 
     /**
@@ -212,7 +187,6 @@ class auth_plugin_oauth extends auth_plugin_authplain
         $service->login();
     }
 
-
     /**
      * @param bool $sticky
      * @param \dokuwiki\plugin\oauth\Service $service
@@ -290,7 +264,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
      *
      * @return bool
      */
-    protected function addUser(&$userinfo, $servicename)
+    public function addUser(&$userinfo, $servicename)
     {
         global $conf;
         $user = $userinfo['user'];
@@ -317,7 +291,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
             return false;
         }
 
-        // send notification about the new user
+        // send notification about the new user   FIXME is this needed? can't we simply call createUser?
         $subscription = new Subscription();
         $subscription->send_register($user, $userinfo['name'], $userinfo['mail']);
         return true;
@@ -329,7 +303,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
      * @param $mail
      * @return bool|string
      */
-    protected function getUserByEmail($mail)
+    public function getUserByEmail($mail)
     {
         if ($this->users === null) {
             if (is_callable([$this, '_loadUserData'])) {
@@ -362,19 +336,6 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
-     * @param string $servicename
-     * @return \dokuwiki\plugin\oauth\Service
-     */
-    protected function getService($servicename)
-    {
-        /** @var helper_plugin_oauth $hlp */
-        $hlp = plugin_load('helper', 'oauth');
-
-        return $hlp->loadService($servicename);
-    }
-
-
-    /**
      * Save user and auth data
      *
      * @param array $data
@@ -393,7 +354,6 @@ class auth_plugin_oauth extends auth_plugin_authplain
 
         $USERINFO = $data;
         $_SERVER['REMOTE_USER'] = $data['user'];
-
 
         // FIXME this is not handled by SessionManager because auth.php accesses the data directly
         $_SESSION[DOKU_COOKIE]['auth']['user'] = $data['user'];

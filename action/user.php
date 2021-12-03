@@ -3,6 +3,9 @@
 /**
  * DokuWiki Plugin oauth (Action Component)
  *
+ * This manages profile changes and allows the user to change their oauth groups.
+ * We use group memberships to define if logins are okay with the given services.
+ *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Andreas Gohr <andi@splitbrain.org>
  */

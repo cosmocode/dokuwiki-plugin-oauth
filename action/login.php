@@ -7,6 +7,9 @@ use OAuth\Common\Http\Exception\TokenResponseException;
 /**
  * DokuWiki Plugin oauth (Action Component)
  *
+ * This adds buttons to the login page and initializes the oAuth flow by redirecting the user
+ * to the third party service
+ *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Andreas Gohr <andi@splitbrain.org>
  */
@@ -71,8 +74,8 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
      * Add the oAuth login links to login form
      *
      * @param Doku_Event $event event object by reference
-     * @deprecated can be removed in the future
      * @return void
+     * @deprecated can be removed in the future
      */
     public function handleOldLoginForm(Doku_Event $event)
     {
@@ -91,13 +94,12 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         $form->_content[] = form_closefieldset();
     }
 
-
     /**
      * Add the oAuth login links to login form
      *
      * @param Doku_Event $event event object by reference
-     * @deprecated can be removed in the future
      * @return void
+     * @deprecated can be removed in the future
      */
     public function handleLoginForm(Doku_Event $event)
     {
@@ -116,7 +118,8 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
      *
      * @return string the HTML
      */
-    protected function prepareLoginButtons() {
+    protected function prepareLoginButtons()
+    {
         $html = '';
 
         $validDomains = $this->hlp->getValidDomains();
@@ -174,24 +177,26 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     protected function startOAuthLogin($servicename)
     {
         global $ID;
-        $service = $this->hlp->loadService($servicename);
-        if (is_null($service)) return;
-
-        // remember service in session
-        $sessionManager = SessionManager::getInstance();
-        $sessionManager->setServiceName($servicename);
-        $sessionManager->setPid($ID);
-        $sessionManager->saveState();
+//        $service = $this->hlp->loadService($servicename);
+//        if (is_null($service)) return;
+//
+//        // remember service in session
+//        $sessionManager = SessionManager::getInstance();
+//        $sessionManager->setServiceName($servicename);
+//        $sessionManager->setPid($ID);
+//        $sessionManager->saveState();
 
         try {
-            $service->login(); // redirects
-        } catch (TokenResponseException $e) {
+            $om = new \dokuwiki\plugin\oauth\OAuthManager();
+            $om->startFlow($servicename);
+        } catch (TokenResponseException|Exception $e) {
             $this->hlp->showException($e, 'login failed');
         }
     }
 
     /**
      * Restore the request environment that had been set before the oauth shuffle
+     * @todo this should be handled by the session manager, if we really need it
      */
     protected function restoreSessionEnvironment()
     {

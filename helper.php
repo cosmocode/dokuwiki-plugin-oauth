@@ -28,12 +28,6 @@ class helper_plugin_oauth extends DokuWiki_Plugin
         $services = $this->listServices(true);
         if (!isset($services[$servicename])) return null;
         $service = $services[$servicename];
-
-        if (!$service->getOAuthService()) {
-            msg(hsc("Failed to initialize $servicename authentication service. Check credentials"), -1);
-            return null;
-        }
-
         return $service;
     }
 
@@ -104,27 +98,6 @@ class helper_plugin_oauth extends DokuWiki_Plugin
             }
         }
         return false;
-    }
-
-    /**
-     * @param array $session cookie auth session
-     *
-     * @return bool
-     */
-    public function validBrowserID($session)
-    {
-        return $session['buid'] == auth_browseruid();
-    }
-
-    /**
-     * @param array $session cookie auth session
-     *
-     * @return bool
-     */
-    public function isSessionTimedOut($session)
-    {
-        global $conf;
-        return $session['time'] < time() - $conf['auth_security_timeout'];
     }
 
     /**

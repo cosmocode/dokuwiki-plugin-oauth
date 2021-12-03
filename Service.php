@@ -4,7 +4,6 @@ namespace dokuwiki\plugin\oauth;
 
 use dokuwiki\Extension\ActionPlugin;
 use OAuth\Common\Consumer\Credentials;
-use OAuth\Common\Exception\Exception;
 use OAuth\Common\Http\Exception\TokenResponseException;
 use OAuth\Common\Storage\Exception\TokenNotFoundException;
 use OAuth\OAuth1\Service\AbstractService as Abstract1Service;
@@ -47,12 +46,10 @@ abstract class Service extends ActionPlugin
     /**
      * Initialize the oAuth service
      *
-     * @return Abstract2Service|Abstract1Service
+     * @param string $guid UIID for the user to authenticate
      */
-    public function getOAuthService()
+    public function initOAuthService($guid)
     {
-        if ($this->oAuth !== null) return $this->oAuth;
-
         /** @var \helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
 
@@ -68,10 +65,17 @@ abstract class Service extends ActionPlugin
         $this->oAuth = $serviceFactory->createService(
             $this->getServiceID(),
             $credentials,
-            new Storage(),
+            new Storage($guid),
             $this->getScopes()
         );
+    }
 
+    /**
+     * @throws Exception
+     * @return Abstract2Service|Abstract1Service
+     */
+    public function getOAuthService() {
+        if($this->oAuth === null) throw new Exception('OAuth Service not properly initialized');
         return $this->oAuth;
     }
 

@@ -11,16 +11,26 @@ use OAuth\Common\Token\TokenInterface;
  */
 class Storage implements TokenStorageInterface
 {
+    /** @var string */
+    protected $guid;
 
     /**
-     * The path to the file where tokens for this service are stored
+     * @param string $guid The GUID identifying the user
+     */
+    public function __construct($guid)
+    {
+        $this->guid = $guid;
+    }
+
+    /**
+     * The path to the file where tokens for this service and user are stored
      *
      * @param string $service
      * @return string
      */
     protected function getServiceFile($service)
     {
-        return getCacheName($service, '.oauth');
+        return getCacheName($this->guid . $service, '.oauth');
     }
 
     /**
