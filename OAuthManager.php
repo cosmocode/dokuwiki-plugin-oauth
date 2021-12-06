@@ -2,8 +2,6 @@
 
 namespace dokuwiki\plugin\oauth;
 
-use OAuth\Common\Http\Exception\TokenResponseException;
-
 /**
  * Implements the flow control for oAuth
  */
@@ -117,7 +115,7 @@ class OAuthManager
      * Login based on user cookie and a previously saved access token
      *
      * @return bool true if successful, false if not applies
-     * @throws Exception
+     * @throws \OAuth\Common\Exception\Exception
      */
     protected function loginByCookie()
     {
@@ -125,11 +123,17 @@ class OAuthManager
         $cookie = $session->getCookie();
         if (!$cookie) return false;
 
-        try {
-            $service = $this->loadService($cookie['servicename']);
-            $service->initOAuthService($cookie['guid']);
-        } catch (\OAuth\Common\Exception\Exception $e) {
-            return false; // maybe cookie had old service that is no longer available
+        $service = $this->loadService($cookie['servicename']);
+        $service->initOAuthService($cookie['guid']);
+
+        // ensure that we have a current access token
+        $oauth = $service->getOAuthService();
+        if (!$oauth->getStorage()->hasAccessToken($oauth->service())) return false;
+        $accessToken = $oauth->getStorage()->retrieveAccessToken($oauth->service());
+        if ($accessToken->getEndOfLife() > 0 &&
+            $accessToken->getEndOfLife() - time() < 3600 &&
+            $accessToken->getRefreshToken()) {
+            $oauth->refreshAccessToken($accessToken);
         }
 
         // this should use a previously saved token

@@ -110,7 +110,8 @@ class helper_plugin_oauth extends DokuWiki_Plugin
     public function showException(\Exception $e, $prefix = '')
     {
         global $conf;
-        msg('OAuth: ' . $prefix . ' ' . hsc($e->getMessage()), -1);
+
+        msg('OAuth: ' . $prefix . ' ' . get_class($e) . ' ' . hsc($e->getMessage()), -1);
         if ($conf['allowdebug']) {
             msg('<pre>' . hsc($e->getTraceAsString()) . '</pre>', -1);
         }

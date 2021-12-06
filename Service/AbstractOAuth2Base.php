@@ -28,9 +28,9 @@ abstract class AbstractOAuth2Base extends AbstractService
         $token->setAccessToken($data['access_token']);
         unset($data['access_token']);
 
-        if (isset($data['expires'])) {
-            $token->setLifeTime($data['expires']);
-            unset($data['expires']);
+        if (isset($data['expires_in'])) {
+            $token->setLifeTime($data['expires_in']);
+            unset($data['expires_in']);
         } else {
             $token->setEndOfLife(StdOAuth2Token::EOL_NEVER_EXPIRES);
         }
