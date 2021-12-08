@@ -154,18 +154,25 @@ abstract class Adapter extends ActionPlugin
             /** @var Abstract2Service $oauth */
             if (!$INPUT->get->has('code')) return false;
             $state = $INPUT->get->str('state', null);
-            $oauth->requestAccessToken($INPUT->get->str('code'), $state);
+            $accessToken = $oauth->requestAccessToken($INPUT->get->str('code'), $state);
         } else {
             /** @var Abstract1Service $oauth */
             if (!$INPUT->get->has('oauth_token')) return false;
             /** @var TokenInterface $token */
             $token = $oauth->getStorage()->retrieveAccessToken($this->getServiceID());
-            $oauth->requestAccessToken(
+            $accessToken = $oauth->requestAccessToken(
                 $INPUT->get->str('oauth_token'),
                 $INPUT->get->str('oauth_verifier'),
                 $token->getRequestTokenSecret()
             );
         }
+
+        if (
+            $accessToken->getEndOfLife() !== $accessToken::EOL_NEVER_EXPIRES &&
+            !$accessToken->getRefreshToken()) {
+            msg('Service did not provide a Refresh Token. You will be logged out when the session expires.');
+        }
+
         return true;
     }
 
