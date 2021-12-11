@@ -127,14 +127,7 @@ class OAuthManager
         $service->initOAuthService($cookie['guid']);
 
         // ensure that we have a current access token
-        $oauth = $service->getOAuthService();
-        if (!$oauth->getStorage()->hasAccessToken($oauth->service())) return false;
-        $accessToken = $oauth->getStorage()->retrieveAccessToken($oauth->service());
-        if ($accessToken->getEndOfLife() > 0 &&
-            $accessToken->getEndOfLife() - time() < 3600 &&
-            $accessToken->getRefreshToken()) {
-            $oauth->refreshAccessToken($accessToken);
-        }
+        $service->refreshOutdatedToken();
 
         // this should use a previously saved token
         $userdata = $service->getUser();

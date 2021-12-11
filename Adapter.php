@@ -5,10 +5,12 @@ namespace dokuwiki\plugin\oauth;
 use dokuwiki\Extension\ActionPlugin;
 use OAuth\Common\Consumer\Credentials;
 use OAuth\Common\Http\Exception\TokenResponseException;
+use OAuth\Common\Storage\Exception\TokenNotFoundException;
 use OAuth\OAuth1\Service\AbstractService as Abstract1Service;
 use OAuth\OAuth1\Token\TokenInterface;
 use OAuth\OAuth2\Service\AbstractService as Abstract2Service;
 use OAuth\OAuth2\Service\Exception\InvalidAuthorizationStateException;
+use OAuth\OAuth2\Service\Exception\MissingRefreshTokenException;
 use OAuth\ServiceFactory;
 
 /**
@@ -87,6 +89,43 @@ abstract class Adapter extends ActionPlugin
     {
         if ($this->oAuth === null) throw new Exception('OAuth Service not properly initialized');
         return $this->oAuth;
+    }
+
+    /**
+     * Refresh a possibly outdated access token
+     *
+     * Does nothing when the current token is still good to use
+     *
+     * @return void
+     * @throws MissingRefreshTokenException
+     * @throws TokenNotFoundException
+     * @throws TokenResponseException
+     * @throws Exception
+     */
+    public function refreshOutdatedToken()
+    {
+        $oauth = $this->getOAuthService();
+
+        if (!$oauth->getStorage()->hasAccessToken($oauth->service())) {
+            // no token to refresh
+            return;
+        }
+
+        $token = $oauth->getStorage()->retrieveAccessToken($oauth->service());
+        if ($token->getEndOfLife() < 0 ||
+            $token->getEndOfLife() - time() > 3600) {
+            // token is still good
+            return;
+        }
+
+        $refreshToken = $token->getRefreshToken();
+        $token = $oauth->refreshAccessToken($token);
+
+        // If the IDP did not provide a new refresh token, store the old one
+        if (!$token->getRefreshToken()) {
+            $token->setRefreshToken($refreshToken);
+            $oauth->getStorage()->storeAccessToken($oauth->service(), $token);
+        }
     }
 
     /**
