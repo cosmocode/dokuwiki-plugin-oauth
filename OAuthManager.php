@@ -169,6 +169,8 @@ class OAuthManager
             throw new Exception("$servicename did not provide the an email address. Can't log you in");
         }
 
+        $userdata['mail'] = strtolower($userdata['mail']);
+
         // mail needs to be allowed
         /** @var \helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
