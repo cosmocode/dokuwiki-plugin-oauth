@@ -12,14 +12,14 @@ use OAuth\Common\Token\TokenInterface;
 class Storage implements TokenStorageInterface
 {
     /** @var string */
-    protected $guid;
+    protected $storageId;
 
     /**
-     * @param string $guid The GUID identifying the user
+     * @param string $storageId The ID identifying the user
      */
-    public function __construct($guid)
+    public function __construct($storageId)
     {
-        $this->guid = $guid;
+        $this->storageId = $storageId;
     }
 
     /**
@@ -30,7 +30,7 @@ class Storage implements TokenStorageInterface
      */
     protected function getServiceFile($service)
     {
-        return getCacheName($this->guid . $service, '.oauth');
+        return getCacheName($this->storageId . $service, '.oauth');
     }
 
     /**

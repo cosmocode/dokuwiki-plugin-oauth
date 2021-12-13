@@ -42,6 +42,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
             return $om->continueFlow() || auth_login($user, $pass, $sticky);
         } catch (OAuthException $e) {
             $this->hlp->showException($e);
+            auth_logoff(); // clears all session and cookie data
             return false;
         }
     }

@@ -18,17 +18,10 @@ class OAuthManager
     {
         global $ID;
 
-        // generate a new GUID to identify this user
-        try {
-            $guid = bin2hex(random_bytes(16));
-        } catch (\Exception $e) {
-            throw new \OAuth\Common\Exception\Exception($e->getMessage());
-        }
-
         $session = Session::getInstance();
-        $session->setLoginData($servicename, $guid, $ID);
+        $session->setLoginData($servicename, $ID);
         $service = $this->loadService($servicename);
-        $service->initOAuthService($guid);
+        $service->initOAuthService();
         $service->login(); // redirects
     }
 
@@ -66,7 +59,7 @@ class OAuthManager
         $logindata = $session->getLoginData();
         if (!$logindata) return false;
         $service = $this->loadService($logindata['servicename']);
-        $service->initOAuthService($logindata['guid']);
+        $service->initOAuthService();
         $session->clearLoginData();
 
         // oAuth login
@@ -77,9 +70,13 @@ class OAuthManager
         $userdata = $this->validateUserData($userdata, $logindata['servicename']);
         $userdata = $this->processUserData($userdata, $logindata['servicename']);
 
+        // store data
+        $storageId = $this->getStorageId($userdata['mail']);
+        $service->upgradeStorage($storageId);
+
         // login
         $session->setUser($userdata); // log in
-        $session->setCookie($logindata['servicename'], $logindata['guid']); // set cookie
+        $session->setCookie($logindata['servicename'], $storageId); // set cookie
 
         // redirect to the appropriate ID
         if (!empty($logindata['id'])) {
@@ -124,7 +121,7 @@ class OAuthManager
         if (!$cookie) return false;
 
         $service = $this->loadService($cookie['servicename']);
-        $service->initOAuthService($cookie['guid']);
+        $service->initOAuthService($cookie['storageId']);
 
         // ensure that we have a current access token
         $service->refreshOutdatedToken();
@@ -141,6 +138,17 @@ class OAuthManager
     }
 
     // endregion
+
+    /**
+     * The ID we store authentication data as
+     *
+     * @param string $mail
+     * @return string
+     */
+    protected function getStorageId($mail)
+    {
+        return md5($mail);
+    }
 
     /**
      * Clean and validate the user data provided from the service

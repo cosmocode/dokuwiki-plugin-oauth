@@ -34,15 +34,13 @@ class Session
      * Set the environment needed to verify a login in progress
      *
      * @param string $servicename the name of the service used
-     * @param string $guid the GUID assigned to the user
      * @param string $id pageID to return to after login
      * @return void
      */
-    public function setLoginData($servicename, $guid, $id)
+    public function setLoginData($servicename, $id)
     {
         $_SESSION[DOKU_COOKIE]['auth']['oauth'] = [
             'servicename' => $servicename,
-            'guid' => $guid,
             'id' => $id,
         ];
     }
@@ -50,7 +48,7 @@ class Session
     /**
      * Get the current login environment
      *
-     * @return false|array Either [servicename=>*,guid=>*, id=>*] or false
+     * @return false|array Either [servicename=>*, id=>*] or false
      */
     public function getLoginData()
     {
@@ -125,14 +123,14 @@ class Session
      * We use the same cookie as standard DokuWiki, but write different info.
      *
      * @param string $servicename
-     * @param string $guid
+     * @param string $storageId
      * @return void
      */
-    public function setCookie($servicename, $guid)
+    public function setCookie($servicename, $storageId)
     {
         global $conf;
         $validityPeriodInSeconds = 60 * 60 * 24 * 365;
-        $cookie = "$servicename|oauth|$guid";
+        $cookie = "$servicename|oauth|$storageId";
         $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
         $time = time() + $validityPeriodInSeconds;
         setcookie(DOKU_COOKIE, $cookie, $time, $cookieDir, '', ($conf['securecookie'] && is_ssl()), true);
@@ -141,14 +139,14 @@ class Session
     /**
      * Get oAuth info from cookie
      *
-     * @return array|false Either [servicename=>?, guid=>?] or false if no oauth data in cookie
+     * @return array|false Either [servicename=>?, storageID=>?] or false if no oauth data in cookie
      */
     public function getCookie()
     {
         if (!isset($_COOKIE[DOKU_COOKIE])) return false;
-        list($servicename, $oauth, $guid) = explode('|', $_COOKIE[DOKU_COOKIE]);
+        list($servicename, $oauth, $storageId) = explode('|', $_COOKIE[DOKU_COOKIE]);
         if ($oauth !== 'oauth') return false;
-        return ['servicename' => $servicename, 'guid' => $guid];
+        return ['servicename' => $servicename, 'storageId' => $storageId];
     }
 
     /**

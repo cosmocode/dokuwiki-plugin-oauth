@@ -6,6 +6,7 @@ use dokuwiki\Extension\ActionPlugin;
 use OAuth\Common\Consumer\Credentials;
 use OAuth\Common\Http\Exception\TokenResponseException;
 use OAuth\Common\Storage\Exception\TokenNotFoundException;
+use OAuth\Common\Storage\Session as SessionStorage;
 use OAuth\OAuth1\Service\AbstractService as Abstract1Service;
 use OAuth\OAuth1\Token\TokenInterface;
 use OAuth\OAuth2\Service\AbstractService as Abstract2Service;
@@ -47,10 +48,10 @@ abstract class Adapter extends ActionPlugin
     /**
      * Initialize the oAuth service
      *
-     * @param string $guid UIID for the user to authenticate
+     * @param string $storageId user based storage key (if available, yet)
      * @throws \OAuth\Common\Exception\Exception
      */
-    public function initOAuthService($guid)
+    public function initOAuthService($storageId = '')
     {
         /** @var \helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
@@ -69,10 +70,16 @@ abstract class Adapter extends ActionPlugin
             $serviceFactory->registerService($servicename, $serviceclass);
         }
 
+        if ($storageId) {
+            $storage = new Storage($storageId);
+        } else {
+            $storage = new SessionStorage();
+        }
+
         $this->oAuth = $serviceFactory->createService(
             $servicename,
             $credentials,
-            new Storage($guid),
+            $storage,
             $this->getScopes()
         );
 
@@ -89,6 +96,30 @@ abstract class Adapter extends ActionPlugin
     {
         if ($this->oAuth === null) throw new Exception('OAuth Service not properly initialized');
         return $this->oAuth;
+    }
+
+    /**
+     * Once a user has been authenticated, the current token storage needs to be made permanent
+     *
+     * @param string $storageId
+     * @throws Exception
+     * @throws TokenNotFoundException
+     */
+    public function upgradeStorage($storageId)
+    {
+        $oauth = $this->getOAuthService();
+        $service = $oauth->service();
+
+        $oldStorage = $oauth->getStorage();
+        $newStorage = new Storage($storageId);
+        if ($oldStorage->hasAccessToken($service)) {
+            $newStorage->storeAccessToken($service, $oldStorage->retrieveAccessToken($service));
+        }
+        if ($oldStorage->hasAuthorizationState($service)) {
+            $newStorage->storeAuthorizationState($service, $oldStorage->retrieveAuthorizationState($service));
+        }
+
+        // fixme invalidate current oauth object? reinitialize it?
     }
 
     /**
