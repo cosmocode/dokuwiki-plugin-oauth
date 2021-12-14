@@ -172,6 +172,20 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
+     * Fall back to plain auth strings
+     *
+     * @inheritdoc
+     */
+    public function getLang($id)
+    {
+        $result = parent::getLang($id);
+        if($result) return $result;
+
+        $parent = new auth_plugin_authplain();
+        return $parent->getLang($id);
+    }
+
+    /**
      * Farmer plugin support
      *
      * When coming back to farmer instance via OAUTH redirectURI, we need to redirect again
