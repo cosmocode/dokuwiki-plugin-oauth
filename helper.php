@@ -106,15 +106,29 @@ class helper_plugin_oauth extends DokuWiki_Plugin
      * Display an exception to the user
      *
      * @param Exception $e
-     * @param string $prefix - user friendly explanation if available
+     * @param string $friendly - user friendly explanation if available
      */
-    public function showException(\Exception $e, $prefix = '')
+    public function showException(\Exception $e, $friendly = '')
     {
         global $conf;
 
-        msg('OAuth: ' . $prefix . ' ' . get_class($e) . ' ' . hsc($e->getMessage()), -1);
+        $msg = $e->getMessage();
+
+        // translate the message if possible, using context if available
+        $trans = $this->getLang($msg);
+        if ($trans) {
+            if (is_a($e, \dokuwiki\plugin\oauth\Exception::class)) {
+                $context = $e->getContext();
+                $trans = sprintf($trans, ...$context);
+            }
+            $msg = $trans;
+        }
+
+        msg('OAuth: ' . $friendly . ' ' . hsc($msg), -1);
         if ($conf['allowdebug']) {
-            msg('<pre>' . hsc($e->getTraceAsString()) . '</pre>', -1);
+            $msg = get_class($e) . ' at ' . $e->getFile() . ':' . $e->getLine() . '<br>';
+            $msg .= hsc($e->getTraceAsString());
+            msg("<pre>$msg</pre>", -1);
         }
     }
 }

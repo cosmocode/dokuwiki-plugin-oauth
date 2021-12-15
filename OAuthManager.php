@@ -165,7 +165,7 @@ class OAuthManager
 
         // mail is required
         if (empty($userdata['mail'])) {
-            throw new Exception("$servicename did not provide the an email address. Can't log you in");
+            throw new Exception('noEmail', [$servicename]);
         }
 
         $userdata['mail'] = strtolower($userdata['mail']);
@@ -175,8 +175,7 @@ class OAuthManager
         $hlp = plugin_load('helper', 'oauth');
 
         if (!$hlp->checkMail($userdata['mail'])) {
-            msg(sprintf($hlp->getLang("rejectedEMail"),join(', ', $hlp->getValidDomains())),-1);
-            send_redirect(wl('', ['do' => 'login'],false,'&'));
+            throw new Exception('rejectedEMail', [join(', ', $hlp->getValidDomains())]);
         }
 
         // make username from mail if empty
@@ -219,17 +218,17 @@ class OAuthManager
             $localUserInfo = $auth->getUserData($localUser);
             // check if the user allowed access via this service
             if (!in_array($auth->cleanGroup($servicename), $localUserInfo['grps'])) {
-                throw new Exception(sprintf($auth->getLang('authnotenabled'), $servicename));
+                throw new Exception('authnotenabled', [$servicename]);
             }
             $userdata['user'] = $localUser;
             $userdata['name'] = $localUserInfo['name'];
             $userdata['grps'] = array_merge((array)$userdata['grps'], $localUserInfo['grps']);
         } elseif (actionOK('register') || $auth->getConf('register-on-auth')) {
             if (!$auth->registerOAuthUser($userdata, $servicename)) {
-                throw new Exception('something went wrong creating your user account. please try again later.');
+                throw new Exception('generic create error');
             }
         } else {
-            throw new Exception($auth->getLang('addUser not possible'));
+            throw new Exception('addUser not possible');
         }
 
         return $userdata;
