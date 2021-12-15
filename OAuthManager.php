@@ -157,7 +157,6 @@ class OAuthManager
      * @param string $servicename
      * @return array
      * @throws Exception
-     * @todo test
      */
     protected function validateUserData($userdata, $servicename)
     {
@@ -177,8 +176,9 @@ class OAuthManager
         $hlp->checkMail($userdata['mail']);
 
         // make username from mail if empty
+        if (!isset($userdata['user'])) $userdata['user'] = '';
         $userdata['user'] = $auth->cleanUser((string)$userdata['user']);
-        if ($userdata === '') {
+        if ($userdata['user'] === '') {
             list($userdata['user']) = explode('@', $userdata['mail']);
         }
 
@@ -186,6 +186,10 @@ class OAuthManager
         if (empty($userdata['name'])) {
             $userdata['name'] = $userdata['user'];
         }
+
+        // make sure groups are array and valid
+        if (!isset($userdata['grps'])) $userdata['grps'] = [];
+        $userdata['grps'] = array_map([$auth, 'cleanGroup'], (array)$userdata['grps']);
 
         return $userdata;
     }
