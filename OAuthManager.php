@@ -173,7 +173,11 @@ class OAuthManager
         // mail needs to be allowed
         /** @var \helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
-        $hlp->checkMail($userdata['mail']);
+
+        if (!$hlp->checkMail($userdata['mail'])) {
+            msg(sprintf($hlp->getLang("rejectedEMail"),join(', ', $hlp->getValidDomains())),-1);
+            send_redirect(wl('', ['do' => 'login'],false,'&'));
+        }
 
         // make username from mail if empty
         if (!isset($userdata['user'])) $userdata['user'] = '';

@@ -91,9 +91,10 @@ class helper_plugin_oauth extends DokuWiki_Plugin
      */
     public function checkMail($mail)
     {
-        $hostedDomains = $this->getValidDomains();
+        $validDomains = $this->getValidDomains();
+        if (empty($validDomains)) return true;
 
-        foreach ($hostedDomains as $validDomain) {
+        foreach ($validDomains as $validDomain) {
             if (substr($mail, -strlen($validDomain)) === $validDomain) {
                 return true;
             }

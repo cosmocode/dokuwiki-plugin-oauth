@@ -27,6 +27,7 @@ class CheckMailTest extends DokuWikiTest
             ['@foo.org', 'bar@foo.org', true],
             ['@foo.org', 'bar@example.com', false],
             ['@foo.org', 'bar@bar.org', false],
+            ['', 'bar@bar.org', true],
 
         ];
     }
