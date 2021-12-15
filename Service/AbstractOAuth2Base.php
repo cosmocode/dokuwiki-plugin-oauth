@@ -44,4 +44,16 @@ abstract class AbstractOAuth2Base extends AbstractService
 
         return $token;
     }
+
+    /**
+     * We accept arbitrary scopes
+     *
+     * @param string $scope
+     * @return bool
+     */
+    public function isValidScope($scope)
+    {
+        return true;
+    }
+
 }
