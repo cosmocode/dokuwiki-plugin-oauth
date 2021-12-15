@@ -13,3 +13,4 @@ $lang['custom-redirectURI']    = 'Utiliser cet URI de redirection personnalisé'
 $lang['mailRestriction']       = 'Limiter l\'authentification aux utilisateurs de ce domaine (optionnel, doit commencer par un <code>@</code>).';
 $lang['singleService']         = 'Se connecter uniquement avec oAuth (désactive les logins locaux)';
 $lang['singleService_o_']      = 'Autoriser tous les services';
+$lang['register-on-auth']      = 'Enregistrer les utilisateurs authentifiés même si l\'enregistrement automatique est désactivé dans la configuration principale';
