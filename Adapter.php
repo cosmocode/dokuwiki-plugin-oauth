@@ -268,6 +268,17 @@ abstract class Adapter extends ActionPlugin
     // region overridable methods
 
     /**
+     * Called on logout
+     *
+     * If there are required procedures for the service, you can implement them by overriding this.
+     *
+     * @return void
+     */
+    public function logout()
+    {
+    }
+
+    /**
      * Retrieve the user's data via API
      *
      * The returned array needs to contain at least 'email', 'name', 'user' and optionally 'grps'
