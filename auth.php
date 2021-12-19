@@ -16,6 +16,9 @@ class auth_plugin_oauth extends auth_plugin_authplain
     /** @var helper_plugin_oauth */
     protected $hlp;
 
+    /** @var OAuthManager */
+    protected $om;
+
     // region standard auth methods
 
     /** @inheritDoc */
@@ -38,8 +41,8 @@ class auth_plugin_oauth extends auth_plugin_authplain
 
         try {
             // either oauth or "normal" plain auth login via form
-            $om = new OAuthManager();
-            return $om->continueFlow() || auth_login($user, $pass, $sticky);
+            $this->om = new OAuthManager();
+            return $this->om->continueFlow() || auth_login($user, $pass, $sticky);
         } catch (OAuthException $e) {
             $this->hlp->showException($e);
             auth_logoff(); // clears all session and cookie data
@@ -92,6 +95,9 @@ class auth_plugin_oauth extends auth_plugin_authplain
     public function logOff()
     {
         parent::logOff();
+        if (isset($this->om)) {
+            $this->om->logout();
+        }
         (Session::getInstance())->clear();
     }
 

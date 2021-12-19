@@ -137,6 +137,25 @@ class OAuthManager
         return true;
     }
 
+    /**
+     * Callback service's logout
+     *
+     * @return void
+     */
+    public function logout()
+    {
+        $session = Session::getInstance();
+        $cookie = $session->getCookie();
+        if (!$cookie) return;
+        try {
+            $service = $this->loadService($cookie['servicename']);
+            $service->initOAuthService($cookie['storageId']);
+            $service->logout();
+        } catch (\OAuth\Common\Exception\Exception $e) {
+            return;
+        }
+    }
+
     // endregion
 
     /**
