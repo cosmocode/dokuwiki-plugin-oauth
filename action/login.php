@@ -83,6 +83,12 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         $html = $this->prepareLoginButtons();
         if (!$html) return;
 
+        // remove login form if single service is set
+        $singleService = $this->getConf('singleService');
+        if ($singleService) {
+            $form->_content = [];
+        }
+
         $form->_content[] = form_openfieldset(
             [
                 '_legend' => $this->getLang('loginwith'),
@@ -106,6 +112,14 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         $form = $event->data;
         $html = $this->prepareLoginButtons();
         if (!$html) return;
+
+        // remove login form if single service is set
+        $singleService = $this->getConf('singleService');
+        if ($singleService) {
+            do {
+                $form->removeElement(0);
+            } while ($form->elementCount() > 0);
+        }
 
         $form->addFieldsetOpen($this->getLang('loginwith'))->addClass('plugin_oauth');
         $form->addHTML($html);
