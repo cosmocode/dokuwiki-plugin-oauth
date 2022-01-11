@@ -24,11 +24,10 @@ class HTTPClient implements ClientInterface
         $http->keep_alive = false;
         $http->headers = array_merge($http->headers, $extraHeaders);
 
-
         $ok = $http->sendRequest($endpoint->getAbsoluteUri(), $requestBody, $method);
-        if (!$ok) {
+        if (!$ok || $http->status < 200 || $http->status > 299) {
             $msg = "An error occured during the request to the oauth provider:\n";
-            throw new TokenResponseException($msg . $http->error);
+            throw new TokenResponseException($msg . $http->error . ' [HTTP ' . $http->status . ']');
         }
 
         return $http->resp_body;
