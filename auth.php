@@ -42,7 +42,8 @@ class auth_plugin_oauth extends auth_plugin_authplain
         try {
             // either oauth or "normal" plain auth login via form
             $this->om = new OAuthManager();
-            return $this->om->continueFlow() || auth_login($user, $pass, $sticky);
+            if ($this->om->continueFlow()) return true;
+            return null; // triggers the normal auth_login()
         } catch (OAuthException $e) {
             $this->hlp->showException($e);
             auth_logoff(); // clears all session and cookie data
@@ -185,7 +186,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
     public function getLang($id)
     {
         $result = parent::getLang($id);
-        if($result) return $result;
+        if ($result) return $result;
 
         $parent = new auth_plugin_authplain();
         return $parent->getLang($id);
