@@ -1,6 +1,6 @@
 <?php
 /**
- * slovak language file for oauth plugin
+ * Czech language file for oauth plugin
  *
  * @author David 'ilicz' Klementa <ilicz@inmail.cz>
  */
