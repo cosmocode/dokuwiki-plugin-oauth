@@ -242,6 +242,9 @@ class OAuthManager
             $userdata['user'] = $localUser;
             $userdata['name'] = $localUserInfo['name'];
             $userdata['grps'] = array_merge((array)$userdata['grps'], $localUserInfo['grps']);
+
+            // update user
+             $auth->modifyUser($localUser, $userdata);
         } elseif (actionOK('register') || $auth->getConf('register-on-auth')) {
             if (!$auth->registerOAuthUser($userdata, $servicename)) {
                 throw new Exception('generic create error');
