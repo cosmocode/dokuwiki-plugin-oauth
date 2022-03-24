@@ -241,7 +241,7 @@ class OAuthManager
             }
             $userdata['user'] = $localUser;
             $userdata['name'] = $localUserInfo['name'];
-            $userdata['grps'] = array_merge((array)$userdata['grps'], $localUserInfo['grps']);
+            $userdata['grps'] = $this->mergeGroups($localUserInfo['grps'], $userdata, $servicename, $auth->getConf('overwrite-groups'));
 
             // update user
              $auth->modifyUser($localUser, $userdata);
@@ -254,6 +254,36 @@ class OAuthManager
         }
 
         return $userdata;
+    }
+
+    /**
+     * Merges local and provider user groups. Keeps internal
+     * Dokuwiki groups unless configured to overwrite all ('overwrite-groups' setting)
+     *
+     * @param array $localGroups Local user groups
+     * @param array $userdata User data from provider, may contain groups
+     * @param string $servicename
+     * @param bool $overwrite Config setting to overwrite local DokuWiki groups
+     *
+     * @return array
+     */
+    protected function mergeGroups($localGroups, $userdata, $servicename, $overwrite)
+    {
+        // no groups from provider, simply use local ones
+        if (empty($userdata['grps'])) {
+            return $localGroups;
+        }
+
+        // overwrite-groups set in config, use only groups from provider
+        if ($overwrite) {
+            return $userdata['grps'];
+        }
+
+        // otherwise keep reserved local groups and add those from provider
+        global $conf;
+        $reservedLocal = [$servicename, $conf['defaultgroup']];
+
+        return array_merge($userdata['grps'], $reservedLocal);
     }
 
     /**

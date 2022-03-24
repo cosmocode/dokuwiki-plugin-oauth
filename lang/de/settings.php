@@ -11,3 +11,4 @@ $lang['mailRestriction']       = 'Beschränke Anmeldung auf Benutzerprofile dies
 $lang['singleService']         = 'Nur einen oAuth Service zulassen (lokale Anmeldung wird deaktiviert!)';
 $lang['singleService_o_']      = 'Alle Services zulassen';
 $lang['register-on-auth']      = 'Authentifizierte Benutzer registrieren, auch wenn Selbstregistrierung in der Hauptkonfiguration nicht erlaubt ist.';
+$lang['overwrite-groups']      = 'Alle DokuWiki Nutzergruppen mit Service-Gruppen überschreiben';
