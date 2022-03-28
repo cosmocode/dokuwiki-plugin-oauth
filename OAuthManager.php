@@ -281,7 +281,10 @@ class OAuthManager
 
         // otherwise keep reserved local groups and add those from provider
         global $conf;
-        $reservedLocal = [$servicename, $conf['defaultgroup']];
+        $helper = plugin_load('helper', 'oauth');
+        $services = $helper->listServices(false);
+        $localOauth = array_intersect($localGroups, array_keys($services));
+        $reservedLocal = array_merge([$conf['defaultgroup']], $localOauth);
 
         return array_merge($userdata['grps'], $reservedLocal);
     }
