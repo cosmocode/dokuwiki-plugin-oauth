@@ -241,7 +241,10 @@ class OAuthManager
             }
             $userdata['user'] = $localUser;
             $userdata['name'] = $localUserInfo['name'];
-            $userdata['grps'] = array_merge((array)$userdata['grps'], $localUserInfo['grps']);
+            $userdata['grps'] = $this->mergeGroups($localUserInfo['grps'], $userdata, $servicename, $auth->getConf('overwrite-groups'));
+
+            // update user
+             $auth->modifyUser($localUser, $userdata);
         } elseif (actionOK('register') || $auth->getConf('register-on-auth')) {
             if (!$auth->registerOAuthUser($userdata, $servicename)) {
                 throw new Exception('generic create error');
@@ -251,6 +254,39 @@ class OAuthManager
         }
 
         return $userdata;
+    }
+
+    /**
+     * Merges local and provider user groups. Keeps internal
+     * Dokuwiki groups unless configured to overwrite all ('overwrite-groups' setting)
+     *
+     * @param array $localGroups Local user groups
+     * @param array $userdata User data from provider, may contain groups
+     * @param string $servicename
+     * @param bool $overwrite Config setting to overwrite local DokuWiki groups
+     *
+     * @return array
+     */
+    protected function mergeGroups($localGroups, $userdata, $servicename, $overwrite)
+    {
+        // no groups from provider, simply use local ones
+        if (empty($userdata['grps'])) {
+            return $localGroups;
+        }
+
+        // overwrite-groups set in config, use only groups from provider
+        if ($overwrite) {
+            return $userdata['grps'];
+        }
+
+        // otherwise keep reserved local groups and add those from provider
+        global $conf;
+        $helper = plugin_load('helper', 'oauth');
+        $services = $helper->listServices(false);
+        $localOauth = array_intersect($localGroups, array_keys($services));
+        $reservedLocal = array_merge([$conf['defaultgroup']], $localOauth);
+
+        return array_merge($userdata['grps'], $reservedLocal);
     }
 
     /**
