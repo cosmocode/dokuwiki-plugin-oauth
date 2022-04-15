@@ -14,3 +14,4 @@ $lang['mailRestriction']       = 'Limiter l\'authentification aux utilisateurs d
 $lang['singleService']         = 'Se connecter uniquement avec oAuth (désactive les logins locaux)';
 $lang['singleService_o_']      = 'Autoriser tous les services';
 $lang['register-on-auth']      = 'Enregistrer les utilisateurs authentifiés même si l\'enregistrement automatique est désactivé dans la configuration principale';
+$lang['overwrite-groups']      = 'Écraser tous les groupes d\'utilisateurs DokuWiki par ceux livrés par le fournisseur.';
