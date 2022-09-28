@@ -162,11 +162,17 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     public function handleDoLogin(Doku_Event $event)
     {
         global $ID;
+        global $INPUT;
 
-        if ($event->data != 'login') return true;
+        if ($event->data != 'login' && $event->data != 'denied') return true;
 
         $singleService = $this->getConf('singleService');
         if (!$singleService) return true;
+
+        if($INPUT->server->str('REMOTE_USER') !== '') {
+            // already logged in
+            return true;
+        }
 
         $enabledServices = $this->hlp->listServices();
         if (count($enabledServices) !== 1) {
