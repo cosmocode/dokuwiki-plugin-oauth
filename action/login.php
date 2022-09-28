@@ -45,6 +45,7 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         $controller->register_hook('HTML_LOGINFORM_OUTPUT', 'BEFORE', $this, 'handleOldLoginForm'); // @deprecated
         $controller->register_hook('FORM_LOGIN_OUTPUT', 'BEFORE', $this, 'handleLoginForm');
         $controller->register_hook('ACTION_ACT_PREPROCESS', 'BEFORE', $this, 'handleDoLogin');
+        $controller->register_hook('ACTION_DENIED_TPLCONTENT', 'BEFORE', $this, 'handleDeniedForm');
     }
 
     /**
@@ -169,7 +170,7 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         $singleService = $this->getConf('singleService');
         if (!$singleService) return true;
 
-        if($INPUT->server->str('REMOTE_USER') !== '') {
+        if ($INPUT->server->str('REMOTE_USER') !== '') {
             // already logged in
             return true;
         }
@@ -187,4 +188,19 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         return true; // never reached
     }
 
+    /**
+     * Do not show a login form on restricted pages when SingleService is enabled
+     *
+     * This can happen when the user is already logged in, but still doesn't have enough permissions
+     *
+     * @param Doku_Event $event
+     * @return void
+     */
+    public function handleDeniedForm(Doku_Event $event)
+    {
+        if ($this->getConf('singleService')) {
+            $event->preventDefault();
+            $event->stopPropagation();
+        }
+    }
 }
