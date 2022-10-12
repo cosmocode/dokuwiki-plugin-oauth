@@ -239,12 +239,20 @@ class OAuthManager
             if (!in_array($auth->cleanGroup($servicename), $localUserInfo['grps'])) {
                 throw new Exception('authnotenabled', [$servicename]);
             }
+
+            $helper = plugin_load('helper', 'oauth');
+
             $userdata['user'] = $localUser;
             $userdata['name'] = $localUserInfo['name'];
-            $userdata['grps'] = $this->mergeGroups($localUserInfo['grps'], $userdata, $servicename, $auth->getConf('overwrite-groups'));
+            $userdata['grps'] = $this->mergeGroups(
+                $localUserInfo['grps'],
+                $userdata['grps'] ?? [],
+                array_keys($helper->listServices(false)),
+                $auth->getConf('overwrite-groups')
+            );
 
             // update user
-             $auth->modifyUser($localUser, $userdata);
+            $auth->modifyUser($localUser, $userdata);
         } elseif (actionOK('register') || $auth->getConf('register-on-auth')) {
             if (!$auth->registerOAuthUser($userdata, $servicename)) {
                 throw new Exception('generic create error');
@@ -260,33 +268,23 @@ class OAuthManager
      * Merges local and provider user groups. Keeps internal
      * Dokuwiki groups unless configured to overwrite all ('overwrite-groups' setting)
      *
-     * @param array $localGroups Local user groups
-     * @param array $userdata User data from provider, may contain groups
-     * @param string $servicename
+     * @param string[] $localGroups Local user groups
+     * @param string[] $providerGroups Groups fetched from the provider
+     * @param string[] $servicenames Service names that should be kept if set
      * @param bool $overwrite Config setting to overwrite local DokuWiki groups
      *
      * @return array
      */
-    protected function mergeGroups($localGroups, $userdata, $servicename, $overwrite)
+    protected function mergeGroups($localGroups, $providerGroups, $servicenames, $overwrite)
     {
-        // no groups from provider, simply use local ones
-        if (empty($userdata['grps'])) {
-            return $localGroups;
-        }
-
-        // overwrite-groups set in config, use only groups from provider
-        if ($overwrite) {
-            return $userdata['grps'];
-        }
-
-        // otherwise keep reserved local groups and add those from provider
         global $conf;
-        $helper = plugin_load('helper', 'oauth');
-        $services = $helper->listServices(false);
-        $localOauth = array_intersect($localGroups, array_keys($services));
-        $reservedLocal = array_merge([$conf['defaultgroup']], $localOauth);
 
-        return array_merge($userdata['grps'], $reservedLocal);
+        // overwrite-groups set in config - remove all local groups except services and default
+        if ($overwrite) {
+            $localGroups = array_intersect($localGroups, array_merge($servicenames, [$conf['defaultgroup']]));
+        }
+
+        return array_unique(array_merge($localGroups, $providerGroups));
     }
 
     /**
