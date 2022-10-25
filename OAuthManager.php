@@ -235,6 +235,9 @@ class OAuthManager
         $localUser = $auth->getUserByEmail($userdata['mail']);
         if ($localUser) {
             $localUserInfo = $auth->getUserData($localUser);
+            $localUserInfo['user'] = $localUser;
+            if(isset($localUserInfo['pass'])) unset($localUserInfo['pass']);
+
             // check if the user allowed access via this service
             if (!in_array($auth->cleanGroup($servicename), $localUserInfo['grps'])) {
                 throw new Exception('authnotenabled', [$servicename]);
@@ -251,8 +254,12 @@ class OAuthManager
                 $auth->getConf('overwrite-groups')
             );
 
-            // update user
-            $auth->modifyUser($localUser, $userdata);
+            // update user if changed
+            array_multisort($localUserInfo);
+            array_multisort($userdata);
+            if($localUserInfo != $userdata) {
+                $auth->modifyUser($localUser, $userdata);
+            }
         } elseif (actionOK('register') || $auth->getConf('register-on-auth')) {
             if (!$auth->registerOAuthUser($userdata, $servicename)) {
                 throw new Exception('generic create error');
