@@ -2,6 +2,8 @@
 
 namespace dokuwiki\plugin\oauth;
 
+use dokuwiki\Logger;
+
 /**
  * Implements the flow control for oAuth
  */
@@ -255,9 +257,9 @@ class OAuthManager
             );
 
             // update user if changed
-            array_multisort($localUserInfo);
-            array_multisort($userdata);
-            if($localUserInfo != $userdata) {
+            sort($localUserInfo['grps']);
+            sort($userdata['grps']);
+            if ($localUserInfo != $userdata && !isset($localUserInfo['protected'])) {
                 $auth->modifyUser($localUser, $userdata);
             }
         } elseif (actionOK('register') || $auth->getConf('register-on-auth')) {
