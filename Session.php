@@ -96,7 +96,7 @@ class Session
         $_SERVER['REMOTE_USER'] = $userdata['user'];
 
         $_SESSION[DOKU_COOKIE]['auth']['user'] = $userdata['user'];
-        $_SESSION[DOKU_COOKIE]['auth']['pass'] = $userdata['pass'];
+        $_SESSION[DOKU_COOKIE]['auth']['pass'] = 'not-set'; // pass is neither needed nor wanted
         $_SESSION[DOKU_COOKIE]['auth']['info'] = $USERINFO;
         $_SESSION[DOKU_COOKIE]['auth']['buid'] = auth_browseruid();
         if ($resettime) {
