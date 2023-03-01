@@ -3,7 +3,7 @@
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
- * @author Gerrit Uitslag <klapinklapin@gmail.com>
+ * @author Gerrit <klapinklapin@gmail.com>
  * @author Hans Drexler <bedrijven-post@klaan.nl>
  */
 $lang['emailduplicate']        = 'Dit e-mail adres hoort bij een andere gebruiker.';
@@ -13,5 +13,7 @@ $lang['wrongConfig']           = 'De oAuth plugin is verkeerd geconfigureerd. Ov
 $lang['loginButton']           = 'Login met';
 $lang['rejectedEMail']         = 'Ongeschikt e-mail adres gebruikt. Enkel e-mail accounts van de volgende domeinen zijn toegestaan: %s';
 $lang['eMailRestricted']       = 'Enkel e-mail accounts van de volgende domeinen zijn toegestaan: %s';
+$lang['noEmail']               = '%s service heeft geen e-mailadres verstrekt. Daardoor kun je niet inloggen.';
 $lang['addUser not possible']  = 'Zelf-registratie is momenteel uitgeschakeld, of het bestand conf/users.auth.php is niet schrijfbaar. Vraag a.u.b. uw DokuWiki beheerder om uw account handmatig aan te maken.';
 $lang['oauth login failed']    = 'Uw (her)login is mislukt.';
+$lang['generic create error']  = 'Iets ging verkeerd bij het aanmaken van uw gebruikersaccount. Probeer later alstublieft opnieuw.';
