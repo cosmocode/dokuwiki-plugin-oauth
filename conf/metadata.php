@@ -10,5 +10,7 @@ $meta['info']                = array(\dokuwiki\plugin\oauth\RedirectSetting::cla
 $meta['custom-redirectURI']  = array('string','_caution' => 'warning');
 $meta['mailRestriction']     = array('string','_pattern' => '!^(@[^,@]+(\.[^,@]+)+(,|$))*$!'); // https://regex101.com/r/mG4aL5/3
 $meta['singleService']       = array('onoff');
+$meta['hideLocal'] 	         = array('onoff');
+$meta['denyLocal'] 	         = array('onoff','_caution' => 'danger');
 $meta['register-on-auth']    = array('onoff','_caution' => 'security');
 $meta['overwrite-groups']    = array('onoff','_caution' => 'danger');

@@ -9,5 +9,7 @@ $conf['info'] = '';
 $conf['custom-redirectURI']  = '';
 $conf['mailRestriction']     = '';
 $conf['singleService']       = '';
+$conf['hideLocal']           = '';
+$conf['denyLocal']           = '';
 $conf['register-on-auth']    = 0;
 $conf['overwrite-groups']    = 0;

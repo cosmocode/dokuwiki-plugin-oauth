@@ -114,9 +114,10 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         $html = $this->prepareLoginButtons();
         if (!$html) return;
 
-        // remove login form if single service is set
-        $singleService = $this->getConf('singleService');
-        if ($singleService) {
+        // remove login form if local logins are denied
+        $denyLocal = $this->getConf('denyLocal');
+        $hideLocal = $this->getConf('hideLocal');
+        if ($denyLocal or $hideLocal) {
             do {
                 $form->removeElement(0);
             } while ($form->elementCount() > 0);

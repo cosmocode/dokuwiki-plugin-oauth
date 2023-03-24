@@ -43,8 +43,8 @@ class auth_plugin_oauth extends auth_plugin_authplain
             // either oauth or "normal" plain auth login via form
             $this->om = new OAuthManager();
             if ($this->om->continueFlow()) return true;
-            if($this->getConf('singleService')) {
-                return false; // no normal login in singleService mode
+            if($this->getConf('denyLocal')) {
+                return false; // deny local logins
             }
             return null; // triggers the normal auth_login()
         } catch (OAuthException $e) {
