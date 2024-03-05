@@ -1,7 +1,7 @@
 base   oauth
 author Andreas Gohr
 email  dokuwiki@cosmocode.de
-date   2023-03-27
+date   2024-03-05
 name   oauth plugin
 desc   Generic oAuth plugin to login via various services
 url    http://www.dokuwiki.org/plugin:oauth
