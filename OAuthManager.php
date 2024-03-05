@@ -22,6 +22,7 @@ class OAuthManager
 
         $session = Session::getInstance();
         $session->setLoginData($servicename, $ID);
+
         $service = $this->loadService($servicename);
         $service->initOAuthService();
         $service->login(); // redirects
@@ -36,9 +37,7 @@ class OAuthManager
      */
     public function continueFlow()
     {
-        return $this->loginByService() or
-            $this->loginBySession() or
-            $this->loginByCookie();
+        return $this->loginByService() || $this->loginBySession() || $this->loginByCookie();
     }
 
     /**
@@ -62,6 +61,7 @@ class OAuthManager
         if (!$logindata) return false;
         $service = $this->loadService($logindata['servicename']);
         $service->initOAuthService();
+
         $session->clearLoginData();
 
         // oAuth login
@@ -196,14 +196,14 @@ class OAuthManager
         $hlp = plugin_load('helper', 'oauth');
 
         if (!$hlp->checkMail($userdata['mail'])) {
-            throw new Exception('rejectedEMail', [join(', ', $hlp->getValidDomains())]);
+            throw new Exception('rejectedEMail', [implode(', ', $hlp->getValidDomains())]);
         }
 
         // make username from mail if empty
         if (!isset($userdata['user'])) $userdata['user'] = '';
         $userdata['user'] = $auth->cleanUser((string)$userdata['user']);
         if ($userdata['user'] === '') {
-            list($userdata['user']) = explode('@', $userdata['mail']);
+            [$userdata['user']] = explode('@', $userdata['mail']);
         }
 
         // make full name from username if empty
@@ -238,7 +238,7 @@ class OAuthManager
         if ($localUser) {
             $localUserInfo = $auth->getUserData($localUser);
             $localUserInfo['user'] = $localUser;
-            if(isset($localUserInfo['pass'])) unset($localUserInfo['pass']);
+            if (isset($localUserInfo['pass'])) unset($localUserInfo['pass']);
 
             // check if the user allowed access via this service
             if (!in_array($auth->cleanGroup($servicename), $localUserInfo['grps'])) {
@@ -312,5 +312,4 @@ class OAuthManager
         if ($srv === null) throw new Exception("No such service $servicename");
         return $srv;
     }
-
 }

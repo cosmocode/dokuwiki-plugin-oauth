@@ -43,7 +43,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
             // either oauth or "normal" plain auth login via form
             $this->om = new OAuthManager();
             if ($this->om->continueFlow()) return true;
-            if($this->getConf('singleService')) {
+            if ($this->getConf('singleService')) {
                 return false; // no normal login in singleService mode
             }
             return null; // triggers the normal auth_login()
@@ -132,7 +132,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
                 $count = 1;
             }
         }
-        $user = $user . $count;
+        $user .= $count;
         $userinfo['user'] = $user;
         $groups_on_creation = [];
         $groups_on_creation[] = $conf['defaultgroup'];
@@ -175,7 +175,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
         $mail = strtolower($mail);
 
         foreach ($this->users as $user => $userinfo) {
-            if (strtolower($userinfo['mail']) == $mail) return $user;
+            if (strtolower($userinfo['mail']) === $mail) return $user;
         }
 
         return false;

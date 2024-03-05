@@ -7,10 +7,11 @@ use dokuwiki\plugin\config\core\Setting\Setting;
 /**
  * Custom Setting to display the default redirect URL
  */
-class RedirectSetting  extends Setting {
-
+class RedirectSetting extends Setting
+{
     /** @inheritdoc  */
-    function update($input) {
+    public function update($input)
+    {
         return true;
     }
 
@@ -22,11 +23,10 @@ class RedirectSetting  extends Setting {
         $hlp = plugin_load('helper', 'oauth');
 
         $key   = htmlspecialchars($this->key);
-        $value = '<code>'.$hlp->redirectURI().'</code>';
+        $value = '<code>' . $hlp->redirectURI() . '</code>';
 
-        $label = '<label for="config___'.$key.'">'.$this->prompt($plugin).'</label>';
-        $input = '<div>'.$value.'</div>';
-        return array($label, $input);
+        $label = '<label for="config___' . $key . '">' . $this->prompt($plugin) . '</label>';
+        $input = '<div>' . $value . '</div>';
+        return [$label, $input];
     }
-
 }

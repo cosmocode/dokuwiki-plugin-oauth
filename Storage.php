@@ -45,7 +45,7 @@ class Storage implements TokenStorageInterface
         if (file_exists($file)) {
             return unserialize(io_readFile($file, false));
         } else {
-            return array();
+            return [];
         }
     }
 

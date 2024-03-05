@@ -1,4 +1,7 @@
 <?php
+
+// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
+
 /**
  * DokuWiki Plugin oauth (Helper Component)
  *
@@ -6,17 +9,17 @@
  * @author  Andreas Gohr <andi@splitbrain.org>
  */
 
+use dokuwiki\Extension\Plugin;
 use dokuwiki\Extension\Event;
 use dokuwiki\plugin\oauth\Adapter;
 
-require_once(__DIR__ . '/vendor/autoload.php');
+require_once(__DIR__ . '/vendor/autoload.php'); // @todo can be removed with next dw release
 
 /**
  * Basic helper methods for the oauth flow
  */
-class helper_plugin_oauth extends DokuWiki_Plugin
+class helper_plugin_oauth extends Plugin
 {
-
     /**
      * Load the needed libraries and initialize the named oAuth service
      *
@@ -62,10 +65,9 @@ class helper_plugin_oauth extends DokuWiki_Plugin
 
         // filter out unconfigured services
         if ($enabledonly) {
-            $services = array_filter($services, function ($service) {
+            $services = array_filter($services, static fn($service) =>
                 /** @var Adapter $service */
-                return (bool)$service->getKey();
-            });
+                (bool)$service->getKey());
         }
 
         return $services;
@@ -77,11 +79,10 @@ class helper_plugin_oauth extends DokuWiki_Plugin
     public function getValidDomains()
     {
         if ($this->getConf('mailRestriction') === '') {
-            return array();
+            return [];
         }
         $validDomains = explode(',', trim($this->getConf('mailRestriction'), ','));
-        $validDomains = array_map('trim', $validDomains);
-        return $validDomains;
+        return array_map('trim', $validDomains);
     }
 
     /**
@@ -95,7 +96,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin
         if (empty($validDomains)) return true;
 
         foreach ($validDomains as $validDomain) {
-            if (substr($mail, -strlen($validDomain)) === $validDomain) {
+            if (str_ends_with($mail, $validDomain)) {
                 return true;
             }
         }
@@ -108,7 +109,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin
      * @param Exception $e
      * @param string $friendly - user friendly explanation if available
      */
-    public function showException(\Exception $e, $friendly = '')
+    public function showException(Exception $e, $friendly = '')
     {
         global $conf;
 
@@ -117,7 +118,7 @@ class helper_plugin_oauth extends DokuWiki_Plugin
         // translate the message if possible, using context if available
         $trans = $this->getLang($msg);
         if ($trans) {
-            if (is_a($e, \dokuwiki\plugin\oauth\Exception::class)) {
+            if ($e instanceof \dokuwiki\plugin\oauth\Exception) {
                 $context = $e->getContext();
                 $trans = sprintf($trans, ...$context);
             }

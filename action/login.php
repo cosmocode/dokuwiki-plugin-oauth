@@ -1,5 +1,8 @@
 <?php
 
+use dokuwiki\Extension\ActionPlugin;
+use dokuwiki\Extension\EventHandler;
+use dokuwiki\Extension\Event;
 use dokuwiki\Form\Form;
 use dokuwiki\plugin\oauth\OAuthManager;
 use OAuth\Common\Http\Exception\TokenResponseException;
@@ -13,7 +16,7 @@ use OAuth\Common\Http\Exception\TokenResponseException;
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Andreas Gohr <andi@splitbrain.org>
  */
-class action_plugin_oauth_login extends DokuWiki_Action_Plugin
+class action_plugin_oauth_login extends ActionPlugin
 {
     /** @var helper_plugin_oauth */
     protected $hlp;
@@ -31,10 +34,10 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     /**
      * Registers a callback function for a given event
      *
-     * @param Doku_Event_Handler $controller DokuWiki's event controller object
+     * @param EventHandler $controller DokuWiki's event controller object
      * @return void
      */
-    public function register(Doku_Event_Handler $controller)
+    public function register(EventHandler $controller)
     {
         global $conf;
         if ($conf['authtype'] != 'oauth') return;
@@ -51,10 +54,10 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     /**
      * Start an oAuth login or restore  environment after successful login
      *
-     * @param Doku_Event $event
+     * @param Event $event
      * @return void
      */
-    public function handleStart(Doku_Event $event)
+    public function handleStart(Event $event)
     {
         global $INPUT;
 
@@ -65,7 +68,7 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
         try {
             $om = new OAuthManager();
             $om->startFlow($servicename);
-        } catch (TokenResponseException|Exception $e) {
+        } catch (TokenResponseException | Exception $e) {
             $this->hlp->showException($e, 'login failed');
         }
     }
@@ -73,11 +76,11 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     /**
      * Add the oAuth login links to login form
      *
-     * @param Doku_Event $event event object by reference
+     * @param Event $event event object by reference
      * @return void
      * @deprecated can be removed in the future
      */
-    public function handleOldLoginForm(Doku_Event $event)
+    public function handleOldLoginForm(Event $event)
     {
         /** @var Doku_Form $form */
         $form = $event->data;
@@ -103,11 +106,11 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     /**
      * Add the oAuth login links to login form
      *
-     * @param Doku_Event $event event object by reference
+     * @param Event $event event object by reference
      * @return void
      * @deprecated can be removed in the future
      */
-    public function handleLoginForm(Doku_Event $event)
+    public function handleLoginForm(Event $event)
     {
         /** @var Form $form */
         $form = $event->data;
@@ -140,9 +143,9 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
 
         if (count($validDomains) > 0) {
             $html .= '<p class="plugin-oauth-emailrestriction">' . sprintf(
-                    $this->getLang('eMailRestricted'),
-                    '<b>' . join(', ', $validDomains) . '</b>'
-                ) . '</p>';
+                $this->getLang('eMailRestricted'),
+                '<b>' . implode(', ', $validDomains) . '</b>'
+            ) . '</p>';
         }
 
         $html .= '<div>';
@@ -157,10 +160,10 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
     /**
      * When singleservice is wanted, do not show login, but execute login right away
      *
-     * @param Doku_Event $event
+     * @param Event $event
      * @return bool
      */
-    public function handleDoLogin(Doku_Event $event)
+    public function handleDoLogin(Event $event)
     {
         global $ID;
         global $INPUT;
@@ -193,10 +196,10 @@ class action_plugin_oauth_login extends DokuWiki_Action_Plugin
      *
      * This can happen when the user is already logged in, but still doesn't have enough permissions
      *
-     * @param Doku_Event $event
+     * @param Event $event
      * @return void
      */
-    public function handleDeniedForm(Doku_Event $event)
+    public function handleDeniedForm(Event $event)
     {
         if ($this->getConf('singleService')) {
             $event->preventDefault();

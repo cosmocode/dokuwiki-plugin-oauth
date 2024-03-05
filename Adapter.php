@@ -2,6 +2,8 @@
 
 namespace dokuwiki\plugin\oauth;
 
+use dokuwiki\Extension\EventHandler;
+use dokuwiki\Extension\Event;
 use dokuwiki\Extension\ActionPlugin;
 use OAuth\Common\Consumer\Credentials;
 use OAuth\Common\Http\Exception\TokenResponseException;
@@ -32,7 +34,7 @@ abstract class Adapter extends ActionPlugin
      *
      * @inheritDoc
      */
-    public function register(\Doku_Event_Handler $controller)
+    public function register(EventHandler $controller)
     {
         $controller->register_hook('PLUGIN_OAUTH_BACKEND_REGISTER', 'AFTER', $this, 'handleRegister');
     }
@@ -40,7 +42,7 @@ abstract class Adapter extends ActionPlugin
     /**
      * Auto register this plugin with the oAuth authentication plugin
      */
-    public function handleRegister(\Doku_Event $event, $param)
+    public function handleRegister(Event $event, $param)
     {
         $event->data[$this->getServiceID()] = $this;
     }
@@ -64,6 +66,7 @@ abstract class Adapter extends ActionPlugin
 
         $serviceFactory = new ServiceFactory();
         $serviceFactory->setHttpClient(new HTTPClient());
+
         $servicename = $this->getServiceID();
         $serviceclass = $this->registerServiceClass();
         if ($serviceclass) {
@@ -143,8 +146,10 @@ abstract class Adapter extends ActionPlugin
         }
 
         $token = $oauth->getStorage()->retrieveAccessToken($oauth->service());
-        if ($token->getEndOfLife() < 0 ||
-            $token->getEndOfLife() - time() > 3600) {
+        if (
+            $token->getEndOfLife() < 0 ||
+            $token->getEndOfLife() - time() > 3600
+        ) {
             // token is still good
             return;
         }
@@ -168,7 +173,7 @@ abstract class Adapter extends ActionPlugin
      * but might need to be overwritten for specific services
      *
      * @throws TokenResponseException
-     * @throws Exception
+     * @throws \Exception
      */
     public function login()
     {
@@ -182,7 +187,7 @@ abstract class Adapter extends ActionPlugin
             $parameters['state'] = urlencode(base64_encode(json_encode(
                 [
                     'animal' => $animal,
-                    'state' => md5(rand()),
+                    'state' => md5(random_int(0, mt_getrandmax())),
                 ]
             )));
             $oauth->getStorage()->storeAuthorizationState($oauth->service(), $parameters['state']);
@@ -221,12 +226,10 @@ abstract class Adapter extends ActionPlugin
         $oauth = $this->getOAuthService();
 
         if (is_a($oauth, Abstract2Service::class)) {
-            /** @var Abstract2Service $oauth */
             if (!$INPUT->get->has('code')) return false;
             $state = $INPUT->get->str('state', null);
             $accessToken = $oauth->requestAccessToken($INPUT->get->str('code'), $state);
         } else {
-            /** @var Abstract1Service $oauth */
             if (!$INPUT->get->has('oauth_token')) return false;
             /** @var TokenInterface $token */
             $token = $oauth->getStorage()->retrieveAccessToken($this->getServiceID());
@@ -239,7 +242,8 @@ abstract class Adapter extends ActionPlugin
 
         if (
             $accessToken->getEndOfLife() !== $accessToken::EOL_NEVER_EXPIRES &&
-            !$accessToken->getRefreshToken()) {
+            !$accessToken->getRefreshToken()
+        ) {
             msg('Service did not provide a Refresh Token. You will be logged out when the session expires.');
         }
 
@@ -256,7 +260,7 @@ abstract class Adapter extends ActionPlugin
         global $ID;
 
         $attr = buildAttributes([
-            'href' => wl($ID, array('oauthlogin' => $this->getServiceID()), false, '&'),
+            'href' => wl($ID, ['oauthlogin' => $this->getServiceID()], false, '&'),
             'class' => 'plugin_oauth_' . $this->getServiceID(),
             'style' => 'background-color: ' . $this->getColor(),
         ]);

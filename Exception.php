@@ -43,5 +43,4 @@ class Exception extends \OAuth\Common\Exception\Exception
     {
         $this->context = $context;
     }
-
 }

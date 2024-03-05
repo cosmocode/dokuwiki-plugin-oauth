@@ -1,5 +1,8 @@
 <?php
 
+use dokuwiki\Extension\ActionPlugin;
+use dokuwiki\Extension\EventHandler;
+use dokuwiki\Extension\Event;
 use dokuwiki\Form\Form;
 
 /**
@@ -11,7 +14,7 @@ use dokuwiki\Form\Form;
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Andreas Gohr <andi@splitbrain.org>
  */
-class action_plugin_oauth_user extends DokuWiki_Action_Plugin
+class action_plugin_oauth_user extends ActionPlugin
 {
     /** @var helper_plugin_oauth */
     protected $hlp;
@@ -29,18 +32,22 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
     /**
      * Registers a callback function for a given event
      *
-     * @param Doku_Event_Handler $controller DokuWiki's event controller object
+     * @param EventHandler $controller DokuWiki's event controller object
      * @return void
      */
-    public function register(Doku_Event_Handler $controller)
+    public function register(EventHandler $controller)
     {
         global $conf;
         if ($conf['authtype'] != 'oauth') return;
 
         $conf['profileconfirm'] = false; // password confirmation doesn't work with oauth only users
 
-        $controller->register_hook('HTML_UPDATEPROFILEFORM_OUTPUT', 'BEFORE', $this,
-            'handleOldProfileform'); // deprecated
+        $controller->register_hook(
+            'HTML_UPDATEPROFILEFORM_OUTPUT',
+            'BEFORE',
+            $this,
+            'handleOldProfileform'
+        ); // deprecated
         $controller->register_hook('FORM_UPDATEPROFILE_OUTPUT', 'BEFORE', $this, 'handleProfileform');
         $controller->register_hook('AUTH_USER_CHANGE', 'BEFORE', $this, 'handleUsermod');
     }
@@ -48,10 +55,10 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
     /**
      * Save groups for all the services a user has enabled
      *
-     * @param Doku_Event $event event object by reference
+     * @param Event $event event object by reference
      * @return void
      */
-    public function handleUsermod(Doku_Event $event)
+    public function handleUsermod(Event $event)
     {
         global $ACT;
         global $USERINFO;
@@ -91,11 +98,11 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
     /**
      * Add service selection to user profile
      *
-     * @param Doku_Event $event event object by reference
+     * @param Event $event event object by reference
      * @return void
      * @deprecated
      */
-    public function handleOldProfileform(Doku_Event $event)
+    public function handleOldProfileform(Event $event)
     {
         global $USERINFO;
         /** @var auth_plugin_authplain $auth */
@@ -117,7 +124,10 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
             $group = $auth->cleanGroup($service->getServiceID());
             $elem = form_makeCheckboxField(
                 'oauth_group[' . $group . ']',
-                1, $service->getLabel(), '', 'simple',
+                1,
+                $service->getLabel(),
+                '',
+                'simple',
                 [
                     'checked' => (in_array($group, $USERINFO['grps'])) ? 'checked' : '',
                 ]
@@ -132,10 +142,10 @@ class action_plugin_oauth_user extends DokuWiki_Action_Plugin
     /**
      * Add service selection to user profile
      *
-     * @param Doku_Event $event event object by reference
+     * @param Event $event event object by reference
      * @return void
      */
-    public function handleProfileform(Doku_Event $event)
+    public function handleProfileform(Event $event)
     {
         global $USERINFO;
         /** @var auth_plugin_authplain $auth */

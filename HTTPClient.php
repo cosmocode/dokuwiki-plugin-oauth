@@ -12,15 +12,14 @@ use OAuth\Common\Http\Uri\UriInterface;
  */
 class HTTPClient implements ClientInterface
 {
-
     /** @inheritDoc */
     public function retrieveResponse(
         UriInterface $endpoint,
         $requestBody,
-        array $extraHeaders = array(),
+        array $extraHeaders = [],
         $method = 'POST'
     ) {
-        $http = new DokuHTTPClient;
+        $http = new DokuHTTPClient();
         $http->keep_alive = false;
         $http->headers = array_merge($http->headers, $extraHeaders);
 

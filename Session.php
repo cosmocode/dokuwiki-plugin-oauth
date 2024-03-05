@@ -8,7 +8,7 @@ namespace dokuwiki\plugin\oauth;
 class Session
 {
     /** @var Session */
-    protected static $instance = null;
+    protected static $instance;
 
     /**
      * hidden constructor
@@ -52,10 +52,7 @@ class Session
      */
     public function getLoginData()
     {
-        if (isset($_SESSION[DOKU_COOKIE]['auth']['oauth'])) {
-            return $_SESSION[DOKU_COOKIE]['auth']['oauth'];
-        }
-        return false;
+        return $_SESSION[DOKU_COOKIE]['auth']['oauth'] ?? false;
     }
 
     /**
@@ -83,10 +80,10 @@ class Session
         global $USERINFO;
 
         if (
-            !isset($userdata['user']) or
-            !isset($userdata['name']) or
-            !isset($userdata['mail']) or
-            !isset($userdata['grps']) or
+            !isset($userdata['user']) ||
+            !isset($userdata['name']) ||
+            !isset($userdata['mail']) ||
+            !isset($userdata['grps']) ||
             !is_array($userdata['grps'])
         ) {
             throw new Exception('Missing user data, cannot save to session');
@@ -111,10 +108,7 @@ class Session
      */
     public function getUser()
     {
-        if (isset($_SESSION[DOKU_COOKIE]['auth']['info'])) {
-            return $_SESSION[DOKU_COOKIE]['auth']['info'];
-        }
-        return false;
+        return $_SESSION[DOKU_COOKIE]['auth']['info'] ?? false;
     }
 
     /**
@@ -133,7 +127,17 @@ class Session
         $cookie = "$servicename|oauth|$storageId";
         $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
         $time = time() + $validityPeriodInSeconds;
-        setcookie(DOKU_COOKIE, $cookie, $time, $cookieDir, '', ($conf['securecookie'] && is_ssl()), true);
+        setcookie(
+            DOKU_COOKIE,
+            $cookie,
+            [
+                'expires' => $time,
+                'path' => $cookieDir,
+                'domain' => '',
+                'secure' => $conf['securecookie'] && is_ssl(),
+                'httponly' => true
+            ]
+        );
     }
 
     /**
@@ -144,7 +148,7 @@ class Session
     public function getCookie()
     {
         if (!isset($_COOKIE[DOKU_COOKIE])) return false;
-        list($servicename, $oauth, $storageId) = explode('|', $_COOKIE[DOKU_COOKIE]);
+        [$servicename, $oauth, $storageId] = explode('|', $_COOKIE[DOKU_COOKIE]);
         if ($oauth !== 'oauth') return false;
         return ['servicename' => $servicename, 'storageId' => $storageId];
     }
@@ -173,6 +177,5 @@ class Session
     {
         //FIXME clear cookie?
         $this->clearLoginData();
-
     }
 }

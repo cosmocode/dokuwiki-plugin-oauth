@@ -12,7 +12,6 @@ use OAuth\OAuth2\Token\StdOAuth2Token;
  */
 abstract class AbstractOAuth2Base extends AbstractService
 {
-
     /** @inheritdoc */
     protected function parseAccessTokenResponse($responseBody)
     {
@@ -55,5 +54,4 @@ abstract class AbstractOAuth2Base extends AbstractService
     {
         return true;
     }
-
 }
