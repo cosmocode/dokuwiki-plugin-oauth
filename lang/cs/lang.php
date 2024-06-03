@@ -1,18 +1,19 @@
 <?php
+
 /**
+ * @license    GPL 2 (https://www.gnu.org/licenses/gpl.html)
+ *
  * Czech language file for oauth plugin
  *
+ * @author dzwdz <dokuwiki@dzwdz.net>
  * @author David 'ilicz' Klementa <ilicz@inmail.cz>
  */
-
-$lang['emailduplicate'] = 'Tato emailová adresa je již spojená s jiným uživatelským účtem.';
-$lang['loginwith']      = 'Přihlásit se pomocí jiných služeb:';
-$lang['authnotenabled'] = 'Uživatelský účet spojený s vaší e-mailovou adresou nemá povolené přihlašování službou %s. Prosím přihlašte se jinou metodou a povolte přihlašování službou %s ve svém profilu.';
-$lang['wrongConfig'] = 'Plugin oAuth není správně nakonfigurovaný. Přihlášení je možné jen pomocí lokálního účtu. Prosím kontaktujte administrátora své wiki.';
-$lang['loginButton'] = 'Přihlášení službou ';//... i.e. Google (on SingleAuth)
-$lang['rejectedEMail'] = 'Byla použita nesprávná e-mailová adresa. V systému jsou povolené pouze emailové adresy následujících domén:: %s!';
-$lang['eMailRestricted'] = 'V systému jsou povolené pouze emailové adresy následujících domén: %s';
-$lang['noEmail'] = 'Služba %s neposkytla vaši e-mailovou adresu. Přihlášení není možné.';
-$lang['addUser not possible'] = 'Samoregistrace užívatele je momentálně zakázaná, nebo konfigurace v conf/users.auth.php není zapisovatelná. Prosím požádajte administrátora vaší wiki, aby vám vytvořil účet manuálně.';
-$lang['oauth login failed'] = 'Vaše (opakované) přihlášení selhalo.';
-$lang['generic create error'] = 'Při vytváření vašeh ouživatelského účtu nastala chyba. Zkuste to prosím znovu později.';
+$lang['emailduplicate']        = 'Ten adres email jest już powiązany z innym użytkownikiem.';
+$lang['loginwith']             = 'Logowanie innymi serwisami:';
+$lang['authnotenabled']        = 'Konto powiązane z twoim adresem email nie ma włączonego logowania poprzez %s.
+Zaloguj się inną metodą i włącz tą metodę w swoim profilu.';
+$lang['loginButton']           = 'Zaloguj się poprzez';
+$lang['eMailRestricted']       = 'Dozwolone są tylko adresy email z następujących domen: %s';
+$lang['noEmail']               = 'Serwis %s nie przekazał nam twojego adresu email. Logowanie nie powiodło się.';
+$lang['oauth login failed']    = 'Twoje (ponowne) logowanie nie powiodło się.';
+$lang['generic create error']  = 'Coś poszło nie tak podczas tworzenia twojego konta. Spróbuj ponownie później.';
