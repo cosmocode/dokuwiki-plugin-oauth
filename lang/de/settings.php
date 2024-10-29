@@ -12,3 +12,4 @@ $lang['singleService']         = 'Nur einen oAuth Service zulassen (lokale Anmel
 $lang['singleService_o_']      = 'Alle Services zulassen';
 $lang['register-on-auth']      = 'Authentifizierte Benutzer registrieren, auch wenn Selbstregistrierung in der Hauptkonfiguration nicht erlaubt ist.';
 $lang['overwrite-groups']      = 'Alle DokuWiki Nutzergruppen mit Service-Gruppen überschreiben';
+$lang['hide-refresh-token-warning'] = 'Fehlende Refresh Token Warnung ausblenden';

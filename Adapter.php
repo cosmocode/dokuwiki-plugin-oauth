@@ -223,6 +223,9 @@ abstract class Adapter extends ActionPlugin
     {
         global $INPUT;
 
+        /** @var \auth_plugin_oauth */
+        global $auth;
+
         $oauth = $this->getOAuthService();
 
         if (is_a($oauth, Abstract2Service::class)) {
@@ -242,7 +245,8 @@ abstract class Adapter extends ActionPlugin
 
         if (
             $accessToken->getEndOfLife() !== $accessToken::EOL_NEVER_EXPIRES &&
-            !$accessToken->getRefreshToken()
+            !$accessToken->getRefreshToken() &&
+            !$auth->getConf('hide-refresh-token-warning')
         ) {
             msg('Service did not provide a Refresh Token. You will be logged out when the session expires.');
         }
