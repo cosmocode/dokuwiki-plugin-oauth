@@ -28,7 +28,8 @@ class HTTPClient implements ClientInterface
             throw new HttpTokenResponseException(
                 $msg . $http->error . ' [HTTP ' . $http->status . ']',
                 $http->status,
-                $http->error
+                $http->error,
+                $http->resp_body
             );
         }
 
