@@ -1,14 +1,27 @@
 <?php
+
 /**
+ * @license    GPL 2 (https://www.gnu.org/licenses/gpl.html)
+ *
  * slovak language file for oauth plugin
  *
+ * @author Công ty xây dựng Vũng Tàu <shaynaheadley@yahoo.com>
  * @author Viktor Kristian <vkristian@gmail.com>
  */
+$lang['info']                  = 'https://xaydungtrangtrinoithat.com/cong-ty-xay-dung-tai-vung-tau-thi-cong-xay-nha-tron-goi/';
+$lang['custom-redirectURI']    = 'https://xaydungtrangtrinoithat.com/cong-ty-xay-dung-tai-vung-tau-thi-cong-xay-nha-tron-goi/';
+$lang['mailRestriction']       = 'shaynaheadley@yahoo.com';
+$lang['singleService']         = 'Shayna';
+$lang['singleService_o_']      = 'https://xaydungtrangtrinoithat.com/cong-ty-xay-dung-tai-vung-tau-thi-cong-xay-nha-tron-goi/ 
+Hello There. I discovered your blog the use of msn. This is a very well written article.
 
-
-$lang['info']               = 'Redirect URI pre konfiguráciu aplikácií';
-$lang['custom-redirectURI'] = 'Použiť vlastné redirect URI';
-$lang['mailRestriction']    = "Obmedziť autentifikáciu na užívateľov z tejto domény (voliteľné, musí začínať s <code>@</code>)";
-$lang['singleService']      = 'Povoliť prihlásenie s jedinou oAuth službou (zakáže prihlasovanie sa s lokálnymi účtami!)';
-$lang['singleService_o_']   = 'Povoliť všetky služby';
-$lang['register-on-auth']   = 'Zaregistrovať autentifikovaných používateľov aj napriek zakázanej samo-registrácii v nastaveniach zabezpečenia';
+I will make sure to bookmark it and return to read more of your useful info.
+Thank you for the post. I\'ll definitely return.
+https://xaydungtrangtrinoithat.com/cong-ty-xay-dung-tai-vung-tau-thi-cong-xay-nha-tron-goi/';
+$lang['register-on-auth']      = 'https://xaydungtrangtrinoithat.com/cong-ty-xay-dung-tai-vung-tau-thi-cong-xay-nha-tron-goi/ 
+Hello There. I discovered your blog the use of msn. This is 
+a very well written article. I will make sure to bookmark it and 
+return to read more of your useful info. Thank you for the post.
+I\'ll definitely return.
+https://xaydungtrangtrinoithat.com/cong-ty-xay-dung-tai-vung-tau-thi-cong-xay-nha-tron-goi/';
+$lang['overwrite-groups']      = 'Shayna';
