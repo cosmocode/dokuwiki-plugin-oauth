@@ -196,6 +196,18 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
+     * Get an option
+     *
+     * @param string $option The name of the wanted option
+     *
+     * @return string  The option value
+     */
+    public function getOption($option)
+    {
+        return $this->getConf($option);
+    }
+
+    /**
      * Farmer plugin support
      *
      * When coming back to farmer instance via OAUTH redirectURI, we need to redirect again
