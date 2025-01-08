@@ -5,6 +5,7 @@ namespace OAuth\Common\Storage;
 use OAuth\Common\Token\TokenInterface;
 use OAuth\Common\Storage\Exception\TokenNotFoundException;
 use OAuth\Common\Storage\Exception\AuthorizationStateNotFoundException;
+use OAuth\Common\Storage\Exception\CodeVerifierNotFoundException;
 
 /*
  * Stores a token in-memory only (destroyed at end of script execution).
@@ -21,10 +22,16 @@ class Memory implements TokenStorageInterface
      */
     protected $states;
 
+    /**
+     * @var array
+     */
+    protected $verifiers;
+
     public function __construct()
     {
         $this->tokens = array();
         $this->states = array();
+        $this->verifiers = array();
     }
 
     /**
@@ -132,6 +139,61 @@ class Memory implements TokenStorageInterface
     public function clearAllAuthorizationStates()
     {
         $this->states = array();
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function retrieveCodeVerifier($service)
+    {
+        if ($this->hasCodeVerifier($service)) {
+            return $this->verifiers[$service];
+        }
+
+        throw new CodeVerifierNotFoundException('code verifier not stored');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function storeCodeVerifier($service, $verifier)
+    {
+        $this->verifiers[$service] = $verifier;
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasCodeVerifier($service)
+    {
+        return isset($this->verifiers[$service]) && null !== $this->verifiers[$service];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function clearCodeVerifier($service)
+    {
+        if (array_key_exists($service, $this->verifiers)) {
+            unset($this->verifiers[$service]);
+        }
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function clearAllCodeVerifiers()
+    {
+        $this->verifiers = array();
 
         // allow chaining
         return $this;
