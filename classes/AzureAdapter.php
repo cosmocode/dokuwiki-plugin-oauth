@@ -1,42 +1,35 @@
 <?php
-
 namespace OAuth\Plugin;
-
 use OAuth\OAuth2\Service\Azure;
-
 /**
  * Class AzureAdapter
  *
  */
 class AzureAdapter extends AbstractAdapter
 {
-
     /**
      * Redirects to the service for requesting access
      * This is the first step of oAuth authentication
      */
     public function login()
     {
-        $url = $this->oAuth->getAuthorizationUri(['resource' => 'https://graph.windows.net/']);
+        $url = $this->oAuth->getAuthorizationUri(['resource' => 'https://graph.microsoft.com/']);
         send_redirect($url);
     }
-
+    
     protected function getGroupMap($mapping)
     {
         $result = array();
-
         if ($mapping !== '') {
             $lines = explode("\n", $mapping);
-
             foreach ($lines as $line) {
                 list($key, $val) = explode('=', $line);
                 $result[$key] = $val;
             }
         }
-
         return $result;
     }
-
+    
     /**
      * Retrieve the user's data
      *
@@ -48,36 +41,45 @@ class AzureAdapter extends AbstractAdapter
     {
         $JSON = new \JSON(JSON_LOOSE_TYPE);
         $data = array();
-
-        $result = $this->oAuth->request('https://graph.windows.net/me?api-version=1.6');
+        
+        // Updated to use Microsoft Graph API
+        $result = $this->oAuth->request('https://graph.microsoft.com/v1.0/me');
         $result = $JSON->decode($result);
-
+        
         $data['user'] = $result['userPrincipalName'];
         $data['name'] = $result['displayName'];
         $data['mail'] = $result['mail'] ? $result['mail'] : $result['userPrincipalName'];
-
+        
         $grpmap = $this->hlp->getConf('azure-groupmapping');
-
         if (trim($grpmap) != '') {
-            $body = '{ "securityEnabledOnly": true }';
             $headers = ['Content-Type' => 'application/json', 'Accept' => 'application/json'];
-            $result = $this->oAuth->request('https://graph.windows.net/me/getMemberGroups?api-version=1.6',
-                'POST', $body, $headers);
+            
+            // Using the memberOf endpoint to get group memberships instead of getMemberGroups
+            $result = $this->oAuth->request(
+                'https://graph.microsoft.com/v1.0/me/memberOf',
+                'GET', null, $headers
+            );
+            
             $result = $JSON->decode($result);
-
             $mapping = $this->getGroupMap($grpmap);
             $data['grps'] = array();
-
-            foreach ($result['value'] as $group_id) {
-                if (array_key_exists($group_id, $mapping)) {
-                    array_push($data['grps'], $mapping[$group_id]);
+            
+            // Process groups from memberOf response format
+            if (isset($result['value']) && is_array($result['value'])) {
+                foreach ($result['value'] as $group) {
+                    if (isset($group['id'])) {
+                        $group_id = $group['id'];
+                        if (array_key_exists($group_id, $mapping)) {
+                            array_push($data['grps'], $mapping[$group_id]);
+                        }
+                    }
                 }
             }
         }
-
+        
         return $data;
     }
-
+    
     /**
      * Access to user and his email addresses
      *
@@ -85,6 +87,12 @@ class AzureAdapter extends AbstractAdapter
      */
     public function getScope()
     {
-        return array(Azure::SCOPE_SIGNIN_READ_PROFILE);
+        // Updated scopes for Microsoft Graph API
+        return array(
+            'openid',
+            'profile',
+            'User.Read',
+            'GroupMember.Read.All'
+        );
     }
 }
