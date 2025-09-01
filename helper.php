@@ -81,21 +81,33 @@ class helper_plugin_oauth extends Plugin
         if ($this->getConf('mailRestriction') === '') {
             return [];
         }
-        $validDomains = explode(',', trim($this->getConf('mailRestriction'), ','));
-        return array_map('trim', $validDomains);
+        $domains = explode(',', trim($this->getConf('mailRestriction'), ','));
+        return array_map('trim', $domains);
+    }
+
+    /**
+     * @return array
+     */
+    public function getEnforcedDomains()
+    {
+        if ($this->getConf('mailEnforcement') === '') {
+            return [];
+        }
+        $domains = explode(',', trim($this->getConf('mailEnforcement'), ','));
+        return array_map('trim', $domains);
     }
 
     /**
      * @param string $mail
+     * @param array $domains List of domains to check against (from getValidDomains or getEnforcedDomains)
      *
      * @return bool
      */
-    public function checkMail($mail)
+    public function checkMail($mail, array $domains)
     {
-        $validDomains = $this->getValidDomains();
-        if (empty($validDomains)) return true;
+        if (empty($domains)) return true;
 
-        foreach ($validDomains as $validDomain) {
+        foreach ($domains as $validDomain) {
             if (str_ends_with($mail, $validDomain)) {
                 return true;
             }

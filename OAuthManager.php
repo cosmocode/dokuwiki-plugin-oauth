@@ -195,7 +195,7 @@ class OAuthManager
         /** @var \helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
 
-        if (!$hlp->checkMail($userdata['mail'])) {
+        if (!$hlp->checkMail($userdata['mail'], $hlp->getValidDomains())) {
             throw new Exception('rejectedEMail', [implode(', ', $hlp->getValidDomains())]);
         }
 

@@ -9,6 +9,7 @@
 $conf['info'] = '';
 $conf['custom-redirectURI']  = '';
 $conf['mailRestriction']     = '';
+$conf['mailEnforcement']     = '';
 $conf['singleService']       = '';
 $conf['register-on-auth']    = 0;
 $conf['overwrite-groups']    = 0;
