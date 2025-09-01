@@ -124,7 +124,6 @@ class auth_plugin_oauth extends auth_plugin_authplain
         if (isset($this->om)) {
             $this->om->logout();
         }
-        (Session::getInstance())->clear();
     }
 
     // endregion
