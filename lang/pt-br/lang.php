@@ -3,6 +3,7 @@
 /**
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  *
+ * @author Eduardo Mozart de Oliveira <eduardomozart182@gmail.com>
  * @author Gilson Caldeira <gilsoncaldeira@gmail.com>
  */
 $lang['emailduplicate']        = 'Este e-mail já está associado a outro usuário.';
@@ -12,6 +13,7 @@ $lang['wrongConfig']           = 'O plug-in oAuth foi configurado incorretamente
 $lang['loginButton']           = 'Entrar com';
 $lang['rejectedEMail']         = 'Conta de e-mail usada é inválida. Somente contas de e-mail do(s) seguinte(s) domínio(s) são permitidas: %s!';
 $lang['eMailRestricted']       = 'Somente contas de e-mail do(s) seguinte(s) domínio(s) são permitidas: %s';
+$lang['eMailEnforced']         = 'Desculpe, contas do seu domínio precisam fazer login via oAuth.';
 $lang['noEmail']               = 'O serviço %s não forneceu um endereço de e-mail. Não é possível fazer login.';
 $lang['addUser not possible']  = 'O auto-registro está atualmente desabilitado ou o arquivo conf/users.auth.php não é gravável. Por favor, peça ao administrador do DokuWiki para criar sua conta manualmente.';
 $lang['oauth login failed']    = 'O seu (re)login falhou.';
