@@ -5,6 +5,7 @@ namespace OAuth\Common\Storage;
 use OAuth\Common\Token\TokenInterface;
 use OAuth\Common\Storage\Exception\TokenNotFoundException;
 use OAuth\Common\Storage\Exception\AuthorizationStateNotFoundException;
+use OAuth\Common\Storage\Exception\CodeVerifierNotFoundException;
 
 /**
  * Stores a token in a PHP session.
@@ -27,6 +28,11 @@ class Session implements TokenStorageInterface
     protected $stateVariableName;
 
     /**
+     * @var string
+     */
+    protected $verifierVariableName;
+
+    /**
      * @param bool $startSession Whether or not to start the session upon construction.
      * @param string $sessionVariableName the variable name to use within the _SESSION superglobal
      * @param string $stateVariableName
@@ -34,7 +40,8 @@ class Session implements TokenStorageInterface
     public function __construct(
         $startSession = true,
         $sessionVariableName = 'lusitanian-oauth-token',
-        $stateVariableName = 'lusitanian-oauth-state'
+        $stateVariableName = 'lusitanian-oauth-state',
+        $verifierVariableName = 'lusitanian-oauth-verifier'
     ) {
         if ($startSession && !$this->sessionHasStarted()) {
             session_start();
@@ -43,11 +50,15 @@ class Session implements TokenStorageInterface
         $this->startSession = $startSession;
         $this->sessionVariableName = $sessionVariableName;
         $this->stateVariableName = $stateVariableName;
+        $this->verifierVariableName = $verifierVariableName;
         if (!isset($_SESSION[$sessionVariableName])) {
             $_SESSION[$sessionVariableName] = array();
         }
         if (!isset($_SESSION[$stateVariableName])) {
             $_SESSION[$stateVariableName] = array();
+        }
+        if (!isset($_SESSION[$verifierVariableName])) {
+            $_SESSION[$verifierVariableName] = array();
         }
     }
 
@@ -174,6 +185,69 @@ class Session implements TokenStorageInterface
     public function clearAllAuthorizationStates()
     {
         unset($_SESSION[$this->stateVariableName]);
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function storeCodeVerifier($service, $verifier)
+    {
+        if (isset($_SESSION[$this->verifierVariableName])
+            && is_array($_SESSION[$this->verifierVariableName])
+        ) {
+            $_SESSION[$this->verifierVariableName][$service] = $verifier;
+        } else {
+            $_SESSION[$this->verifierVariableName] = array(
+                $service => $verifier,
+            );
+        }
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasCodeVerifier($service)
+    {
+        return isset($_SESSION[$this->verifierVariableName], $_SESSION[$this->verifierVariableName][$service]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function retrieveCodeVerifier($service)
+    {
+        if ($this->hasCodeVerifier($service)) {
+            return $_SESSION[$this->verifierVariableName][$service];
+        }
+
+        throw new CodeVerifierNotFoundException('verifier not found in session, are you sure you stored it?');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function clearCodeVerifier($service)
+    {
+        if (array_key_exists($service, $_SESSION[$this->verifierVariableName])) {
+            unset($_SESSION[$this->verifierVariableName][$service]);
+        }
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function clearAllCodeVerifiers()
+    {
+        unset($_SESSION[$this->verifierVariableName]);
 
         // allow chaining
         return $this;

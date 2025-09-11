@@ -121,6 +121,9 @@ abstract class Adapter extends ActionPlugin
         if ($oldStorage->hasAuthorizationState($service)) {
             $newStorage->storeAuthorizationState($service, $oldStorage->retrieveAuthorizationState($service));
         }
+        if ($oldStorage->hasCodeVerifier($service)) {
+            $newStorage->storeCodeVerifier($service, $oldStorage->retrieveCodeVerifier($service));
+        }
 
         // fixme invalidate current oauth object? reinitialize it?
     }
