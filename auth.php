@@ -55,6 +55,28 @@ class auth_plugin_oauth extends auth_plugin_authplain
     }
 
     /**
+     * Enforce oauth login for certain email domains
+     *
+     * @inheritdoc
+     */
+    public function checkPass($user, $pass)
+    {
+        $ok = parent::checkPass($user, $pass);
+        if(!$ok) return $ok;
+        $domains = $this->hlp->getEnforcedDomains();
+        if($domains === []) return $ok;
+
+        if($this->hlp->checkMail($this->getUserData($user)['mail'], $domains)) {
+            global $lang;
+            // we overwrite the standard bad password message with our own
+            $lang['badlogin'] = $this->getLang('eMailEnforced');
+            return false;
+        }
+        return $ok;
+    }
+
+
+    /**
      * Enhance function to check against duplicate emails
      *
      * @inheritdoc
@@ -102,7 +124,6 @@ class auth_plugin_oauth extends auth_plugin_authplain
         if (isset($this->om)) {
             $this->om->logout();
         }
-        (Session::getInstance())->clear();
     }
 
     // endregion

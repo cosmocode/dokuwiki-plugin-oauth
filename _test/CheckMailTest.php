@@ -46,6 +46,6 @@ class CheckMailTest extends DokuWikiTest
 
         /** @var \helper_plugin_oauth $hlp */
         $hlp = plugin_load('helper', 'oauth');
-        $this->assertSame($expected, $hlp->checkMail($input));
+        $this->assertSame($expected, $hlp->checkMail($input, $hlp->getValidDomains()));
     }
 }
