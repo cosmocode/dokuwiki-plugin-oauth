@@ -85,6 +85,16 @@ abstract class AbstractService extends BaseAbstractService implements ServiceInt
             $this->storeAuthorizationState($parameters['state']);
         }
 
+        $code_challenge_method = $this->getCodeChallengeMethod();
+        if ($code_challenge_method) {
+            $challenge = $this->generateCodeChallenge($code_challenge_method);
+            if (!isset($parameters['code_challenge'])) {
+                $parameters['code_challenge'] = $challenge['challenge'];
+                $parameters['code_challenge_method'] = $code_challenge_method;
+            }
+            $this->storeCodeVerifier($challenge['verifier']);
+        }
+
         // Build the url
         $url = clone $this->getAuthorizationEndpoint();
         foreach ($parameters as $key => $val) {
@@ -110,6 +120,10 @@ abstract class AbstractService extends BaseAbstractService implements ServiceInt
             'redirect_uri' => $this->credentials->getCallbackUrl(),
             'grant_type' => 'authorization_code',
         ];
+
+        if ($this->getCodeChallengeMethod()) {
+            $bodyParams['code_verifier'] = $this->retrieveCodeVerifier();
+        }
 
         $responseBody = $this->httpClient->retrieveResponse(
             $this->getAccessTokenEndpoint(),
@@ -284,6 +298,59 @@ abstract class AbstractService extends BaseAbstractService implements ServiceInt
     }
 
     /**
+     * Get the method used for the code challenge
+     *
+     * @return string null|'plain'|'S256'
+     */
+    public function getCodeChallengeMethod()
+    {
+        return null;
+    }
+
+    /**
+     * Generates a random code challenge.
+     *
+     * @param string $method 'plain'|'S256'
+     *
+     * @return array
+     */
+    protected function generateCodeChallenge($method)
+    {
+        $verifier = $this->base64url(random_bytes(64));
+        if ($method === 'plain') {
+            return array(
+                'verifier' => $verifier,
+                'challenge' => $verifier,
+            );
+        } else {
+            return array(
+                'verifier' => $verifier,
+                'challenge' => $this->base64url(hash('sha256', $verifier, true)),
+            );
+        }
+    }
+
+    /**
+     * Retrieves the code verifier for the current service.
+     *
+     * @return string
+     */
+    protected function retrieveCodeVerifier()
+    {
+        return $this->storage->retrieveCodeVerifier($this->service());
+    }
+
+    /**
+     * Stores a given code verifier into the storage.
+     *
+     * @param string $verifier
+     */
+    protected function storeCodeVerifier($verifier): void
+    {
+        $this->storage->storeCodeVerifier($this->service(), $verifier);
+    }
+
+    /**
      * Return any additional headers always needed for this service implementation's OAuth calls.
      *
      * @return array
@@ -345,5 +412,17 @@ abstract class AbstractService extends BaseAbstractService implements ServiceInt
     protected function getScopesDelimiter()
     {
         return ' ';
+    }
+
+    /**
+     * URL compatible base64 encoding.
+     *
+     * @param string $bytes
+     *
+     * @return string
+     */
+    protected function base64url($bytes)
+    {
+        return rtrim(strtr(base64_encode($bytes), '+/', '-_'), '=');
     }
 }

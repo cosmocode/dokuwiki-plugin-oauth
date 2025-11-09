@@ -5,6 +5,7 @@ namespace OAuth\Common\Storage;
 use OAuth\Common\Token\TokenInterface;
 use OAuth\Common\Storage\Exception\TokenNotFoundException;
 use OAuth\Common\Storage\Exception\AuthorizationStateNotFoundException;
+use OAuth\Common\Storage\Exception\CodeVerifierNotFoundException;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class SymfonySession implements TokenStorageInterface
@@ -12,22 +13,26 @@ class SymfonySession implements TokenStorageInterface
     private $session;
     private $sessionVariableName;
     private $stateVariableName;
+    private $verifierVariableName;
 
     /**
      * @param SessionInterface $session
      * @param bool $startSession
      * @param string $sessionVariableName
      * @param string $stateVariableName
+     * @param string $verifierVariableName
      */
     public function __construct(
         SessionInterface $session,
         $startSession = true,
         $sessionVariableName = 'lusitanian_oauth_token',
-        $stateVariableName = 'lusitanian_oauth_state'
+        $stateVariableName = 'lusitanian_oauth_state',
+        $verifierVariableName = 'lusitanian_oauth_verifier'
     ) {
         $this->session = $session;
         $this->sessionVariableName = $sessionVariableName;
         $this->stateVariableName = $stateVariableName;
+        $this->verifierVariableName = $verifierVariableName;
     }
 
     /**
@@ -185,6 +190,86 @@ class SymfonySession implements TokenStorageInterface
     public function clearAllAuthorizationStates()
     {
         $this->session->remove($this->stateVariableName);
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function retrieveCodeVerifier($service)
+    {
+        if ($this->hasCodeVerifier($service)) {
+            // get from session
+            $verifiers = $this->session->get($this->verifierVariableName);
+
+            // one item
+            return $verifiers[$service];
+        }
+
+        throw new CodeVerifierNotFoundException('verifier not found in session, are you sure you stored it?');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function storeCodeVerifier($service, $verifier)
+    {
+        // get previously saved tokens
+        $verifiers = $this->session->get($this->verifierVariableName);
+
+        if (!is_array($verifiers)) {
+            $verifiers = array();
+        }
+
+        $verifiers[$service] = $verifier;
+
+        // save
+        $this->session->set($this->verifierVariableName, $verifiers);
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function hasCodeVerifier($service)
+    {
+        // get from session
+        $verifiers = $this->session->get($this->verifierVariableName);
+
+        return is_array($verifiers)
+        && isset($verifiers[$service])
+        && null !== $verifiers[$service];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function clearCodeVerifier($service)
+    {
+        // get previously saved tokens
+        $verifiers = $this->session->get($this->verifierVariableName);
+
+        if (is_array($verifiers) && array_key_exists($service, $verifiers)) {
+            unset($verifiers[$service]);
+
+            // Replace the stored tokens array
+            $this->session->set($this->verifierVariableName, $verifiers);
+        }
+
+        // allow chaining
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function clearAllCodeVerifiers()
+    {
+        $this->session->remove($this->verifierVariableName);
 
         // allow chaining
         return $this;

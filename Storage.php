@@ -149,4 +149,51 @@ class Storage implements TokenStorageInterface
 
         return $this;
     }
+
+    /** @inheritDoc */
+    public function storeCodeVerifier($service, $verifier)
+    {
+        $data = $this->loadServiceFile($service);
+        $data['verifier'] = $verifier;
+        $this->saveServiceFile($service, $data);
+        return $this;
+    }
+
+    /** @inheritDoc */
+    public function hasCodeVerifier($service)
+    {
+        $data = $this->loadServiceFile($service);
+        return isset($data['verifier']);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws TokenNotFoundException
+     */
+    public function retrieveCodeVerifier($service)
+    {
+        $data = $this->loadServiceFile($service);
+        if (!isset($data['verifier'])) {
+            throw new TokenNotFoundException('No code verifier found in storage');
+        }
+        return $data['verifier'];
+    }
+
+    /** @inheritDoc */
+    public function clearCodeVerifier($service)
+    {
+        $data = $this->loadServiceFile($service);
+        if (isset($data['verifier'])) unset($data['verifier']);
+        $this->saveServiceFile($service, $data);
+
+        return $this;
+    }
+
+    /** @inheritDoc */
+    public function clearAllCodeVerifiers()
+    {
+        // TODO: Implement clearAllCodeVerifiers() method.
+
+        return $this;
+    }
 }
