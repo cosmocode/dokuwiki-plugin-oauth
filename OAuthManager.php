@@ -253,7 +253,7 @@ class OAuthManager
                 $localUserInfo['grps'],
                 $userdata['grps'] ?? [],
                 array_keys($helper->listServices(false)),
-                $auth->getConf('overwrite-groups')
+                $auth->getOption('overwrite-groups')
             );
 
             // update user if changed
@@ -262,7 +262,7 @@ class OAuthManager
             if ($localUserInfo != $userdata && !isset($localUserInfo['protected'])) {
                 $auth->modifyUser($localUser, $userdata);
             }
-        } elseif (actionOK('register') || $auth->getConf('register-on-auth')) {
+        } elseif (actionOK('register') || $auth->getOption('register-on-auth')) {
             if (!$auth->registerOAuthUser($userdata, $servicename)) {
                 throw new Exception('generic create error');
             }
