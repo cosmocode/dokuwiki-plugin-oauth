@@ -62,11 +62,13 @@ class action_plugin_oauth_user extends ActionPlugin
     {
         global $ACT;
         global $USERINFO;
+        /** @var auth_plugin_authplain $auth */
         global $auth;
         global $INPUT;
 
         if ($event->data['type'] != 'modify') return;
         if ($ACT != 'profile') return;
+        if ($this->hlp->getConf('singleService')) return;
 
         // we want to modify the user's groups
         $groups = $USERINFO['grps']; //current groups
@@ -107,6 +109,8 @@ class action_plugin_oauth_user extends ActionPlugin
         global $USERINFO;
         /** @var auth_plugin_authplain $auth */
         global $auth;
+
+        if ($this->hlp->getConf('singleService')) return;
 
         /** @var Doku_Form $form */
         $form = $event->data;
@@ -150,6 +154,8 @@ class action_plugin_oauth_user extends ActionPlugin
         global $USERINFO;
         /** @var auth_plugin_authplain $auth */
         global $auth;
+
+        if ($this->hlp->getConf('singleService')) return;
 
         /** @var Form $form */
         $form = $event->data;
