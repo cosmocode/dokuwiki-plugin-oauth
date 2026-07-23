@@ -196,7 +196,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
         $mail = strtolower($mail);
 
         foreach ($this->users as $user => $userinfo) {
-            if (strtolower($userinfo['mail']) === $mail) return $user;
+            if (strtolower($userinfo['mail']) === $mail) return (string) $user;
         }
 
         return false;
