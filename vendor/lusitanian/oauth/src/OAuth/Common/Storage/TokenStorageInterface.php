@@ -95,4 +95,49 @@ interface TokenStorageInterface
      * @return TokenStorageInterface
      */
     public function clearAllAuthorizationStates();
+
+    /**
+     * Store the authorization verifier related to a given service
+     *
+     * @param string $service
+     * @param string $verifier
+     *
+     * @return TokenStorageInterface
+     */
+    public function storeCodeVerifier($service, $verifier);
+
+    /**
+     * Check if an authorization verifier for a given service exists
+     *
+     * @param string $service
+     *
+     * @return bool
+     */
+    public function hasCodeVerifier($service);
+
+    /**
+     * Retrieve the authorization verifier for a given service
+     *
+     * @param string $service
+     *
+     * @return string
+     */
+    public function retrieveCodeVerifier($service);
+
+    /**
+     * Clear the authorization verifier of a given service
+     *
+     * @param string $service
+     *
+     * @return TokenStorageInterface
+     */
+    public function clearCodeVerifier($service);
+
+    /**
+     * Delete *ALL* user authorization verifiers. Use with care. Most of the time you will likely
+     * want to use clearAuthorization() instead.
+     *
+     * @return TokenStorageInterface
+     */
+    public function clearAllCodeVerifiers();
 }
