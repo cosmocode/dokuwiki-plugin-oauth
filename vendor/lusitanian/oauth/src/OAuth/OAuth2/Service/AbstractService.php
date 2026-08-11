@@ -42,7 +42,7 @@ abstract class AbstractService extends BaseAbstractService implements ServiceInt
         TokenStorageInterface $storage,
         $scopes = [],
         ?UriInterface $baseApiUri = null,
-        $stateParameterInAutUrl = false,
+        $stateParameterInAutUrl = true,
         $apiVersion = ''
     ) {
         parent::__construct($credentials, $httpClient, $storage);
