@@ -26,6 +26,9 @@ class auth_plugin_oauth extends auth_plugin_authplain
     {
         parent::__construct();
         $this->cando['external'] = true;
+        if ($this->getConf('singleService')) {
+            $this->cando['modPass'] = false;
+        }
         $this->hlp = $this->loadHelper('oauth');
     }
 
