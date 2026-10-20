@@ -123,4 +123,44 @@ class CookieLoginTest extends DokuWikiTest
         $this->getManager(true, true)->logout();
         $this->addToAssertionCount(1); // expectations on the mock
     }
+
+    /**
+     * Rejected oauth cookies must not reach core's auth_login(), which would try to decrypt them
+     *
+     * @return array[]
+     */
+    public function provideInvalidCookies()
+    {
+        $victim = md5('victim@example.com');
+        return [
+            'legacy' => ["test|oauth|$victim"],
+            'wrong signature' => ["test|oauth|$victim|" . (time() + 60) . '|' . str_repeat('0', 64)],
+            'expired' => [null],
+        ];
+    }
+
+    /**
+     * @dataProvider provideInvalidCookies
+     */
+    public function testInvalidCookieIsRemoved($cookie)
+    {
+        $_COOKIE[DOKU_COOKIE] = $cookie ?? Session::getInstance()->buildCookie('test', $this->victim, time() - 1);
+        $this->assertFalse(Session::getInstance()->getCookie());
+        $this->assertSame([null, null, null], auth_getCookie());
+    }
+
+    public function testValidCookieIsKept()
+    {
+        $cookie = Session::getInstance()->buildCookie('test', $this->victim, time() + 60);
+        $_COOKIE[DOKU_COOKIE] = $cookie;
+        $this->assertNotFalse(Session::getInstance()->getCookie());
+        $this->assertSame($cookie, $_COOKIE[DOKU_COOKIE]);
+    }
+
+    public function testCoreCookieIsKept()
+    {
+        $_COOKIE[DOKU_COOKIE] = base64_encode('user') . '|1|' . base64_encode('crypted');
+        $this->assertFalse(Session::getInstance()->getCookie());
+        $this->assertSame('user', auth_getCookie()[0]);
+    }
 }

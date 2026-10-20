@@ -161,7 +161,8 @@ class Session
      * Get oAuth info from cookie
      *
      * Cookies with a missing or invalid signature (including those set by older versions) and
-     * expired cookies are ignored.
+     * expired cookies are removed, otherwise core's auth_login() would try to decrypt them as
+     * its own cookie and fail.
      *
      * @return array|false Either [servicename=>?, storageID=>?] or false if no valid oauth data in cookie
      */
@@ -170,9 +171,38 @@ class Session
         if (!isset($_COOKIE[DOKU_COOKIE])) return false;
         [$servicename, $oauth, $storageId, $expires, $mac] = sexplode('|', $_COOKIE[DOKU_COOKIE], 5, '');
         if ($oauth !== 'oauth') return false;
-        if (!ctype_digit($expires) || (int)$expires < time()) return false;
-        if (!hash_equals($this->signCookie("$servicename|oauth|$storageId|$expires"), $mac)) return false;
+        if (
+            !ctype_digit($expires) || (int)$expires < time() ||
+            !hash_equals($this->signCookie("$servicename|oauth|$storageId|$expires"), $mac)
+        ) {
+            $this->clearCookie();
+            return false;
+        }
         return ['servicename' => $servicename, 'storageId' => $storageId];
+    }
+
+    /**
+     * Remove the cookie for the current request and from the browser
+     *
+     * @return void
+     */
+    protected function clearCookie()
+    {
+        global $conf;
+        unset($_COOKIE[DOKU_COOKIE]);
+        if (headers_sent()) return;
+        $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
+        setcookie(
+            DOKU_COOKIE,
+            '',
+            [
+                'expires' => time() - 600,
+                'path' => $cookieDir,
+                'domain' => '',
+                'secure' => $conf['securecookie'] && is_ssl(),
+                'httponly' => true
+            ]
+        );
     }
 
     /**
