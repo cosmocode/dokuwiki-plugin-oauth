@@ -116,35 +116,22 @@ class Session
      *
      * We use the same cookie as standard DokuWiki, but write different info.
      *
-     * @param string $servicename
-     * @param string $storageId
+     * @param string $servicename the name of the service used
+     * @param string $storageId the ID the user's tokens are stored as
      * @return void
      */
     public function setCookie($servicename, $storageId)
     {
-        global $conf;
-        $validityPeriodInSeconds = 60 * 60 * 24 * 365;
-        $time = time() + $validityPeriodInSeconds;
-        $cookie = $this->buildCookie($servicename, $storageId, $time);
-        $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
-        setcookie(
-            DOKU_COOKIE,
-            $cookie,
-            [
-                'expires' => $time,
-                'path' => $cookieDir,
-                'domain' => '',
-                'secure' => $conf['securecookie'] && is_ssl(),
-                'httponly' => true
-            ]
-        );
+        $expires = time() + 60 * 60 * 24 * 365;
+        $this->sendCookie($this->buildCookie($servicename, $storageId, $expires), $expires);
     }
 
     /**
      * Build the cookie value
      *
      * The storageId is derived from the user's mail address, so the data is signed with
-     * the cookie salt to make sure the cookie was issued by us.
+     * the cookie salt to make sure the cookie was issued by us. The salt is prefixed to get
+     * a key that is separate from the one core uses for its own cookie.
      *
      * @param string $servicename the name of the service used
      * @param string $storageId the ID the user's tokens are stored as
@@ -154,7 +141,7 @@ class Session
     public function buildCookie($servicename, $storageId, $expires)
     {
         $data = "$servicename|oauth|$storageId|$expires";
-        return $data . '|' . $this->signCookie($data);
+        return $data . '|' . hash_hmac('sha256', $data, 'oauth' . auth_cookiesalt(false, true));
     }
 
     /**
@@ -169,11 +156,11 @@ class Session
     public function getCookie()
     {
         if (!isset($_COOKIE[DOKU_COOKIE])) return false;
-        [$servicename, $oauth, $storageId, $expires, $mac] = sexplode('|', $_COOKIE[DOKU_COOKIE], 5, '');
+        [$servicename, $oauth, $storageId, $expires] = sexplode('|', $_COOKIE[DOKU_COOKIE], 5, '');
         if ($oauth !== 'oauth') return false;
         if (
             !ctype_digit($expires) || (int)$expires < time() ||
-            !hash_equals($this->signCookie("$servicename|oauth|$storageId|$expires"), $mac)
+            !hash_equals($this->buildCookie($servicename, $storageId, $expires), $_COOKIE[DOKU_COOKIE])
         ) {
             $this->clearCookie();
             return false;
@@ -188,34 +175,32 @@ class Session
      */
     protected function clearCookie()
     {
-        global $conf;
         unset($_COOKIE[DOKU_COOKIE]);
-        if (headers_sent()) return;
+        $this->sendCookie('', time() - 600000);
+    }
+
+    /**
+     * Send the cookie to the browser
+     *
+     * @param string $value the cookie value, empty to remove the cookie
+     * @param int $expires unix timestamp after which the browser drops the cookie
+     * @return void
+     */
+    protected function sendCookie($value, $expires)
+    {
+        global $conf;
         $cookieDir = empty($conf['cookiedir']) ? DOKU_REL : $conf['cookiedir'];
         setcookie(
             DOKU_COOKIE,
-            '',
+            $value,
             [
-                'expires' => time() - 600,
+                'expires' => $expires,
                 'path' => $cookieDir,
                 'domain' => '',
                 'secure' => $conf['securecookie'] && is_ssl(),
                 'httponly' => true
             ]
         );
-    }
-
-    /**
-     * Sign cookie data with the cookie salt
-     *
-     * The salt is prefixed to get a key that is separate from the one core uses for its own cookie.
-     *
-     * @param string $data the cookie data to sign
-     * @return string the hex encoded HMAC
-     */
-    protected function signCookie($data)
-    {
-        return hash_hmac('sha256', $data, 'oauth' . auth_cookiesalt(false, true));
     }
 
     /**
@@ -236,11 +221,13 @@ class Session
 
     /**
      * Clear the session from auth related data
+     *
+     * The cookie is kept, it is needed to log the user in again once the session expired.
+     *
      * @return void
      */
     public function clear()
     {
-        //FIXME clear cookie?
         $this->clearLoginData();
     }
 }
