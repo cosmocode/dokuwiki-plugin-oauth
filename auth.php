@@ -1,5 +1,6 @@
 <?php
 
+use dokuwiki\Logger;
 use dokuwiki\plugin\oauth\HttpTokenResponseException;
 use dokuwiki\plugin\oauth\OAuthManager;
 use dokuwiki\plugin\oauth\Session;
@@ -50,7 +51,13 @@ class auth_plugin_oauth extends auth_plugin_authplain
             return null; // triggers the normal auth_login()
         } catch (OAuthException $e) {
             // an expired or revoked refresh token is expected, re-authenticate without an error message
-            if (!$this->isInvalidGrant($e)) {
+            if ($this->isInvalidGrant($e)) {
+                // informational only, goes to data/log/oauth/
+                Logger::getInstance('oauth')->log(
+                    'IdP rejected the stored refresh token (invalid_grant), logging off to re-authenticate',
+                    $e->getHttpRespBody()
+                );
+            } else {
                 $this->hlp->showException($e);
             }
             auth_logoff(); // clears all session and cookie data
