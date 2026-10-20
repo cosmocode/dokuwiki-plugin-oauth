@@ -1,5 +1,6 @@
 <?php
 
+use dokuwiki\plugin\oauth\HttpTokenResponseException;
 use dokuwiki\plugin\oauth\OAuthManager;
 use dokuwiki\plugin\oauth\Session;
 use dokuwiki\Subscriptions\RegistrationSubscriptionSender;
@@ -48,10 +49,27 @@ class auth_plugin_oauth extends auth_plugin_authplain
             }
             return null; // triggers the normal auth_login()
         } catch (OAuthException $e) {
-            $this->hlp->showException($e);
+            // an expired or revoked refresh token is expected, re-authenticate without an error message
+            if (!$this->isInvalidGrant($e)) {
+                $this->hlp->showException($e);
+            }
             auth_logoff(); // clears all session and cookie data
             return false;
         }
+    }
+
+    /**
+     * Is this the IdP rejecting a grant or refresh token (RFC 6749, section 5.2)?
+     *
+     * @param OAuthException $e
+     * @return bool
+     */
+    protected function isInvalidGrant(OAuthException $e)
+    {
+        if (!$e instanceof HttpTokenResponseException) return false;
+        if ($e->getHttpStatusCode() !== 400) return false;
+        $body = json_decode((string)$e->getHttpRespBody(), true);
+        return is_array($body) && ($body['error'] ?? '') === 'invalid_grant';
     }
 
     /**
