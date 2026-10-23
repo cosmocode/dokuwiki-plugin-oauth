@@ -74,7 +74,7 @@ class auth_plugin_oauth extends auth_plugin_authplain
     protected function isInvalidGrant(OAuthException $e)
     {
         if (!$e instanceof HttpTokenResponseException) return false;
-        if ($e->getHttpStatusCode() !== 400) return false;
+        if ((int)$e->getHttpStatusCode() !== 400) return false;
         $body = json_decode((string)$e->getHttpRespBody(), true);
         return is_array($body) && ($body['error'] ?? '') === 'invalid_grant';
     }
