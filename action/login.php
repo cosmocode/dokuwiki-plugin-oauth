@@ -40,7 +40,8 @@ class action_plugin_oauth_login extends ActionPlugin
     public function register(EventHandler $controller)
     {
         global $conf;
-        if ($conf['authtype'] != 'oauth') return;
+        if (! (($conf['authtype'] == 'oauth')
+            or ($conf['authtype'] == 'authsplit' and $conf['plugin']['authsplit']['primary_authplugin'] == 'oauth'))) return;
 
         $conf['profileconfirm'] = false; // password confirmation doesn't work with oauth only users
 
