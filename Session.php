@@ -218,16 +218,4 @@ class Session
 
         return true;
     }
-
-    /**
-     * Clear the session from auth related data
-     *
-     * The cookie is kept, it is needed to log the user in again once the session expired.
-     *
-     * @return void
-     */
-    public function clear()
-    {
-        $this->clearLoginData();
-    }
 }
