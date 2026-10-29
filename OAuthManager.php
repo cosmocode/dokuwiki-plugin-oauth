@@ -98,10 +98,7 @@ class OAuthManager
     protected function loginBySession()
     {
         $session = Session::getInstance();
-        if (!$session->isValid()) {
-            $session->clear();
-            return false;
-        }
+        if (!$session->isValid()) return false;
 
         $userdata = $session->getUser();
         if (!$userdata) return false;
